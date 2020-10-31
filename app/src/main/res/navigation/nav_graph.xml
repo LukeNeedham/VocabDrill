@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/homeFragment"
+    >
+
+    <fragment
+        android:id="@+id/homeFragment"
+        android:name="com.lukeneedham.vocabdrill.presentation.feature.home.HomeFragment"
+        android:label="HomeFragment"
+        >
+        <action
+            android:id="@+id/action_homeFragment_to_languageFragment"
+            app:destination="@id/languageFragment"
+            />
+    </fragment>
+    <fragment
+        android:id="@+id/languageFragment"
+        android:name="com.lukeneedham.vocabdrill.presentation.feature.language.LanguageFragment"
+        android:label="LanguageFragment"
+        >
+        <argument
+            android:name="languageId"
+            app:argType="long"
+            />
+        <action
+            android:id="@+id/action_languageFragment_to_vocabGroupFragment"
+            app:destination="@id/vocabGroupFragment"
+            />
+    </fragment>
+    <fragment
+        android:id="@+id/vocabGroupFragment"
+        android:name="com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.VocabGroupFragment"
+        android:label="VocabGroupFragment"
+        >
+        <argument
+            android:name="vocabGroupId"
+            app:argType="long"
+            />
+    </fragment>
+</navigation>

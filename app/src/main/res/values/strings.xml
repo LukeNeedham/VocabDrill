@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">VocabDrill</string>
+
+    <string name="vocab_group_details">%1$d entries</string>
+
+</resources>

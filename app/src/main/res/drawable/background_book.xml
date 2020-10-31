@@ -1,0 +1,17 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="90.24018dp"
+    android:height="110.84122dp"
+    android:viewportWidth="90.24018"
+    android:viewportHeight="110.84122">
+  <path
+      android:name="book_cover"
+      android:pathData="M88.74,109.341L11.489,109.341c-5.534,0 -9.989,-4.455 -9.989,-9.989L1.5,11.489c0,-5.534 4.455,-9.989 9.989,-9.989h77.251z"
+      android:strokeWidth="3"
+      android:fillColor="#00000000"
+      android:strokeColor="#000000"/>
+  <path
+      android:pathData="M88.74,109.341L11.489,109.341c-5.534,0 -9.989,-4.455 -9.989,-9.989v-0.114c0,-5.534 4.455,-9.989 9.989,-9.989h77.251z"
+      android:strokeWidth="3"
+      android:fillColor="#f0f0f0"
+      android:strokeColor="#000000"/>
+</vector>
