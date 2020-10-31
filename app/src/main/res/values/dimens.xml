@@ -5,11 +5,12 @@
     <dimen name="language_top_item_vertical_margin">10dp</dimen>
     <dimen name="language_bottom_item_vertical_margin">10dp</dimen>
 
-    <dimen name="vocab_group_item_margin">30dp</dimen>
+    <dimen name="vocab_group_between_item_margin">12dp</dimen>
+    <dimen name="vocab_group_bottom_margin">50dp</dimen>
 
     <dimen name="vocab_entry_vertical_margin">4dp</dimen>
 
     <dimen name="vocab_group_description_border_radius">6dp</dimen>
-    <dimen name="vocab_group_description_border_width">2dp</dimen>
+    <dimen name="vocab_group_description_border_width">1dp</dimen>
 
 </resources>

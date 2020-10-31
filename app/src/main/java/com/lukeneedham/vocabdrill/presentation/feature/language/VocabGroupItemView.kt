@@ -1,20 +1,15 @@
 package com.lukeneedham.vocabdrill.presentation.feature.language
 
 import android.content.Context
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
 import android.widget.FrameLayout
-import androidx.core.content.ContextCompat
 import com.lukeneedham.flowerpotrecycler.adapter.RecyclerItemView
 import com.lukeneedham.vocabdrill.R
 import com.lukeneedham.vocabdrill.domain.model.VocabGroupRelations
 import com.lukeneedham.vocabdrill.presentation.util.extension.inflateFrom
 import com.sdsmdg.harjot.vectormaster.VectorMasterDrawable
 import group.infotech.drawable.dsl.shapeDrawable
-import group.infotech.drawable.dsl.solidColor
-import group.infotech.drawable.dsl.stroke
 import kotlinx.android.synthetic.main.view_item_vocab_group.view.*
 import org.koin.core.KoinComponent
 import org.koin.core.inject
@@ -43,6 +38,7 @@ class VocabGroupItemView @JvmOverloads constructor(
         bookCoverPath.fillColor = coverColour
         backgroundView.setImageDrawable(backgroundBook)
 
+        nameView.maxLines = if (" " in name) Int.MAX_VALUE else 1
         nameView.text = name
         val textColour = viewModel.getTextColor(coverColour)
         nameView.setTextColor(textColour)

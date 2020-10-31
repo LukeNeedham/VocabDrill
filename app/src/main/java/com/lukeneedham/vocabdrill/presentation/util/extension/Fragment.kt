@@ -62,7 +62,9 @@ fun Fragment.navigateSafe(
     if (mayNavigate()) findNavController().navigate(directions, navigatorExtras)
 }
 
-fun Fragment.popBackStackSafe() { if (mayNavigate()) findNavController().popBackStack() }
+fun Fragment.popBackStackSafe() {
+    if (mayNavigate()) findNavController().popBackStack()
+}
 
 /**
  * Returns true if the navigation controller is still pointing at 'this' fragment, or false if it already navigated away.
@@ -73,14 +75,18 @@ fun Fragment.mayNavigate(): Boolean {
     val destinationIdInNavController = navController.currentDestination?.id
 
     // add tag_navigation_destination_id to your ids.xml so that it's unique:
-    val destinationIdOfThisFragment = view?.getTag(R.id.tag_navigation_destination_id) ?: destinationIdInNavController
+    val destinationIdOfThisFragment =
+        view?.getTag(R.id.tag_navigation_destination_id) ?: destinationIdInNavController
 
     // check that the navigation graph is still in 'this' fragment, if not then the app already navigated:
     if (destinationIdInNavController == destinationIdOfThisFragment) {
         view?.setTag(R.id.tag_navigation_destination_id, destinationIdOfThisFragment)
         return true
     } else {
-        Log.d("FragmentExtensions", "May not navigate: current destination is not the current fragment.")
+        Log.d(
+            "FragmentExtensions",
+            "May not navigate: current destination is not the current fragment."
+        )
         return false
     }
 }

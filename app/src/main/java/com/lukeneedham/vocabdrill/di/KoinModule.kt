@@ -6,6 +6,7 @@ import com.lukeneedham.vocabdrill.presentation.feature.home.addlanguage.AddLangu
 import com.lukeneedham.vocabdrill.presentation.feature.language.LanguageViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.language.VocabGroupItemViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.language.addgroup.AddGroupViewModel
+import com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.VocabEntryViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.VocabGroupViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.addentry.AddEntryViewModel
 import com.lukeneedham.vocabdrill.repository.LanguageRepository
@@ -13,10 +14,12 @@ import com.lukeneedham.vocabdrill.repository.VocabEntryRepository
 import com.lukeneedham.vocabdrill.repository.VocabGroupRepository
 import com.lukeneedham.vocabdrill.usecase.CalculateRelatedColours
 import com.lukeneedham.vocabdrill.usecase.ChooseTextColourForBackground
+import com.lukeneedham.vocabdrill.usecase.EstimateColourDistance
 import com.lukeneedham.vocabdrill.usecase.ExtractFlagColours
 import com.lukeneedham.vocabdrill.usecase.FindCountriesForLanguage
 import com.lukeneedham.vocabdrill.usecase.LoadFlagVectorForCountry
 import com.lukeneedham.vocabdrill.usecase.LoadVocabGroupRelations
+import com.lukeneedham.vocabdrill.usecase.ObserveAllVocabEntryRelationsForVocabGroup
 import com.lukeneedham.vocabdrill.usecase.ObserveAllVocabGroupRelationsForLanguage
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -53,11 +56,15 @@ object KoinModule {
     private val useCases = module {
         single { LoadVocabGroupRelations(get(), get(), get()) }
         single { ObserveAllVocabGroupRelationsForLanguage(get(), get(), get()) }
+        single { ObserveAllVocabEntryRelationsForVocabGroup(get(), get(), get()) }
         single { FindCountriesForLanguage() }
+
         single { ExtractFlagColours(get()) }
         single { LoadFlagVectorForCountry(get()) }
+
         single { ChooseTextColourForBackground() }
         single { CalculateRelatedColours() }
+        single { EstimateColourDistance() }
     }
 
     private val viewModels = module {
@@ -67,12 +74,13 @@ object KoinModule {
         viewModel { (languageId: Long) ->
             AddGroupViewModel(languageId, get(), get(), get(), get())
         }
-        viewModel { (vocabGroupId: Long) -> VocabGroupViewModel(vocabGroupId, get(), get()) }
+        viewModel { (vocabGroupId: Long) -> VocabGroupViewModel(vocabGroupId, get(), get(), get()) }
         viewModel { (vocabGroupId: Long) -> AddEntryViewModel(vocabGroupId) }
     }
 
     private val vanillaViewModels = module {
         factory { VocabGroupItemViewModel(get()) }
+        factory { VocabEntryViewModel(get(), get()) }
     }
 
     val modules =

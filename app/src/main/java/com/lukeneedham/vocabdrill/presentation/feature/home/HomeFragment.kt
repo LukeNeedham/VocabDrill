@@ -18,7 +18,7 @@ import com.lukeneedham.vocabdrill.presentation.feature.home.addlanguage.AddLangu
 import com.lukeneedham.vocabdrill.presentation.feature.home.addlanguage.AddLanguageDialog
 import com.lukeneedham.vocabdrill.presentation.util.extension.navigateSafe
 import com.lukeneedham.vocabdrill.presentation.util.extension.showDialog
-import com.lukeneedham.vocabdrill.presentation.util.recyclerview.MarginItemDecorationCreator
+import com.lukeneedham.vocabdrill.presentation.util.recyclerview.LinearMarginItemDecorationCreator
 import kotlinx.android.synthetic.main.fragment_home.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -54,7 +54,7 @@ class HomeFragment : Fragment(R.layout.fragment_home), AddLanguageCallback {
         recyclerView.layoutManager = LinearLayoutManager(requireContext()).apply {
             orientation = RecyclerView.VERTICAL
         }
-        val decoration = MarginItemDecorationCreator.fromVertical(
+        val decoration = LinearMarginItemDecorationCreator.fromVertical(
             resources.getDimensionPixelSize(R.dimen.language_top_item_vertical_margin),
             resources.getDimensionPixelSize(R.dimen.language_item_vertical_margin),
             resources.getDimensionPixelSize(R.dimen.language_bottom_item_vertical_margin)

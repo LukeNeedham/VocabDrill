@@ -7,8 +7,6 @@ import com.lukeneedham.vocabdrill.util.RxSchedulers
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
 import com.lukeneedham.vocabdrill.data.persistence.model.VocabEntry as VocabEntryPersistence
 import com.lukeneedham.vocabdrill.domain.model.VocabEntry as VocabEntryDomain
 

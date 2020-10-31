@@ -4,33 +4,39 @@ import android.graphics.Rect
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 
-abstract class MarginItemDecoration(
-) : RecyclerView.ItemDecoration() {
+abstract class MarginItemDecoration : RecyclerView.ItemDecoration() {
 
-    protected abstract val firstVerticalMargin: Int
-    protected abstract  val betweenVerticalMargin: Int
-    protected abstract  val lastVerticalMargin: Int
-    protected abstract  val firstHorizontalMargin: Int
-    protected abstract  val betweenHorizontalMargin: Int
-    protected abstract  val lastHorizontalMargin: Int
+    protected abstract val edgeTopMargin: Int
+    protected abstract val edgeBottomMargin: Int
+    protected abstract val edgeLeftMargin: Int
+    protected abstract val edgeRightMargin: Int
+    protected abstract val betweenTopMargin: Int
+    protected abstract val betweenBottomMargin: Int
+    protected abstract val betweenLeftMargin: Int
+    protected abstract val betweenRightMargin: Int
 
-    override fun getItemOffsets(
+    abstract fun getOffsets(
+        outRect: Rect,
+        view: View,
+        parent: RecyclerView,
+        state: RecyclerView.State,
+        position: Int,
+        itemCount: Int
+    )
+
+    final override fun getItemOffsets(
         outRect: Rect,
         view: View,
         parent: RecyclerView,
         state: RecyclerView.State
     ) {
-        val adapter = parent.adapter ?: return
+        val adapter = parent.adapter ?: error("Recycler adapter must be set")
         val position = parent.getChildAdapterPosition(view)
+        val itemCount = adapter.itemCount
+        getOffsets(outRect, view, parent, state, position, itemCount)
+    }
 
-        outRect.top =
-            if (position == 0) firstVerticalMargin else betweenVerticalMargin
-        outRect.bottom =
-            if (position == adapter.itemCount - 1) lastVerticalMargin else betweenVerticalMargin
-
-        outRect.left =
-            if (position == 0) firstHorizontalMargin else betweenHorizontalMargin
-        outRect.right =
-            if (position == adapter.itemCount - 1) lastHorizontalMargin else betweenHorizontalMargin
+    final override fun getItemOffsets(outRect: Rect, itemPosition: Int, parent: RecyclerView) {
+        super.getItemOffsets(outRect, itemPosition, parent)
     }
 }

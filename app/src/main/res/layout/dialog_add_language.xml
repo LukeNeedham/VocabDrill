@@ -45,9 +45,9 @@ otherwise the keyboard will cover the dialog when using the EditText
 
         <com.yarolegovich.discretescrollview.DiscreteScrollView
             android:id="@+id/flagsRecycler"
-            android:layout_marginTop="20dp"
             android:layout_width="0dp"
             android:layout_height="100dp"
+            android:layout_marginTop="20dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/nameInputView"
@@ -55,19 +55,19 @@ otherwise the keyboard will cover the dialog when using the EditText
 
         <TextView
             android:id="@+id/confirmButton"
-            android:enabled="false"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_margin="20dp"
             android:layout_marginStart="20dp"
             android:layout_marginTop="20dp"
             android:layout_marginEnd="20dp"
             android:background="@drawable/background_button_add_language_confirm"
+            android:enabled="false"
             android:gravity="center"
             android:padding="10dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_margin="20dp"
             android:text="Add Language"
             android:textColor="@android:color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/flagsRecycler"

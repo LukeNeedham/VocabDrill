@@ -5,7 +5,6 @@ import android.util.Log
 import android.view.View
 import androidx.core.widget.doOnTextChanged
 import com.lukeneedham.vocabdrill.R
-import com.lukeneedham.vocabdrill.presentation.feature.language.addgroup.AddGroupDialog
 import com.lukeneedham.vocabdrill.presentation.util.BaseBottomSheetDialogFragment
 import com.lukeneedham.vocabdrill.util.extension.TAG
 import kotlinx.android.synthetic.main.dialog_add_entry.*

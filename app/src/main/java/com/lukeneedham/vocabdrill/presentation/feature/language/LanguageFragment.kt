@@ -8,7 +8,6 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.SimpleItemAnimator
 import com.lukeneedham.flowerpotrecycler.SingleTypeRecyclerAdapterCreator
 import com.lukeneedham.flowerpotrecycler.adapter.config.SingleTypeAdapterConfig
 import com.lukeneedham.flowerpotrecycler.util.extensions.addItemLayoutParams
@@ -73,10 +72,17 @@ class LanguageFragment : Fragment(R.layout.fragment_language), AddGroupCallback 
         // TODO: Item animation is broken currently - probably because of measuring of image view
         //  So just disable it
         recyclerView.itemAnimator = null
+        val betweenMargin = resources.getDimensionPixelSize(R.dimen.vocab_group_between_item_margin)
         val decorator = GridMarginItemDecoration(
             NUM_COLUMNS,
-            resources.getDimensionPixelSize(R.dimen.vocab_group_item_margin),
-            false
+            0,
+            resources.getDimensionPixelSize(R.dimen.vocab_group_bottom_margin),
+            0,
+            0,
+            betweenMargin,
+            betweenMargin,
+            betweenMargin,
+            betweenMargin
         )
         recyclerView.addItemDecoration(decorator)
 

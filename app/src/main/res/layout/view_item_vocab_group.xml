@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     >
 
     <ImageView
@@ -12,6 +12,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:adjustViewBounds="true"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -21,13 +22,17 @@
     <TextView
         android:id="@+id/nameView"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:gravity="center"
+        android:layout_height="0dp"
+        android:gravity="center_horizontal|top"
         android:textColor="@android:color/black"
-        android:textSize="25sp"
         android:textStyle="bold"
+        app:autoSizeMaxTextSize="30sp"
+        app:autoSizeMinTextSize="12sp"
+        app:autoSizeStepGranularity="1sp"
+        app:autoSizeTextType="uniform"
         app:layout_constraintBottom_toBottomOf="@+id/backgroundView"
         app:layout_constraintEnd_toEndOf="@+id/backgroundView"
+        app:layout_constraintHeight_percent="0.3"
         app:layout_constraintStart_toStartOf="@+id/backgroundView"
         app:layout_constraintTop_toTopOf="@+id/backgroundView"
         app:layout_constraintVertical_bias="0.1"
@@ -35,21 +40,31 @@
         tools:text="Sample aaaaaaaaaaaaaaaaaaa"
         />
 
+    <Space
+        android:id="@+id/bottomSpace"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.3"
+        app:layout_constraintStart_toStartOf="parent"
+        />
+
+    <!-- Background is added at runtime, hence the padding -->
     <TextView
         android:id="@+id/detailsView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:paddingStart="20dp"
-        android:paddingTop="10dp"
+        android:paddingTop="5dp"
         android:paddingEnd="20dp"
-        android:paddingBottom="10dp"
-        android:textSize="12sp"
-        app:layout_constraintBottom_toBottomOf="@+id/backgroundView"
+        android:paddingBottom="5dp"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toTopOf="@+id/bottomSpace"
         app:layout_constraintEnd_toEndOf="@+id/backgroundView"
         app:layout_constraintStart_toStartOf="@+id/backgroundView"
-        app:layout_constraintTop_toBottomOf="@+id/nameView"
-        app:layout_constraintVertical_bias="0.1"
         app:layout_constraintWidth_percent="0.6"
         tools:text="3 entries"
         />

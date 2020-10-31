@@ -3,10 +3,8 @@ package com.lukeneedham.vocabdrill.presentation.util.recyclerview
 import android.graphics.Rect
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
-import com.lukeneedham.vocabdrill.util.extension.divideRoundUp
 
-class GridMarginItemDecoration(
-    private val spanCount: Int,
+class LinearMarginItemDecoration(
     override val edgeTopMargin: Int,
     override val edgeBottomMargin: Int,
     override val edgeLeftMargin: Int,
@@ -25,14 +23,9 @@ class GridMarginItemDecoration(
         position: Int,
         itemCount: Int
     ) {
-        val totalColumns = spanCount
-        val column = position % spanCount
-        val totalRows = itemCount.divideRoundUp(spanCount)
-        val row = position / spanCount
-
-        outRect.left = if (column == 0) edgeLeftMargin else betweenLeftMargin
-        outRect.right = if (column == totalColumns - 1) edgeRightMargin else betweenRightMargin
-        outRect.top = if (row == 0) edgeTopMargin else betweenTopMargin
-        outRect.bottom = if (row == totalRows - 1) edgeBottomMargin else betweenBottomMargin
+        outRect.top = if (position == 0) edgeTopMargin else betweenTopMargin
+        outRect.bottom = if (position == itemCount - 1) edgeBottomMargin else betweenBottomMargin
+        outRect.left = if (position == 0) edgeLeftMargin else betweenLeftMargin
+        outRect.right = if (position == itemCount - 1) edgeRightMargin else betweenRightMargin
     }
 }
