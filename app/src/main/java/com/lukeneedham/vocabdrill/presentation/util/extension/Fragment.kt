@@ -66,6 +66,10 @@ fun Fragment.popBackStackSafe() {
     if (mayNavigate()) findNavController().popBackStack()
 }
 
+fun Fragment.popBackStackSafe(@IdRes destinationId: Int, inclusive: Boolean) {
+    if (mayNavigate()) findNavController().popBackStack(destinationId, inclusive)
+}
+
 /**
  * Returns true if the navigation controller is still pointing at 'this' fragment, or false if it already navigated away.
  */

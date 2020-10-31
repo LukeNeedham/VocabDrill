@@ -25,6 +25,12 @@ class LanguageRepository(private val languageDao: LanguageDao) {
             .observeOn(RxSchedulers.main)
     }
 
+    fun deleteLanguage(languageId: Long): Completable {
+        return languageDao.deleteWithId(languageId)
+            .subscribeOn(RxSchedulers.database)
+            .observeOn(RxSchedulers.main)
+    }
+
     fun observeAllLanguages(): Observable<List<LanguageDomain>> = languageDao.observeAll().map {
         it.map { it.toDomainModel() }
     }
@@ -33,6 +39,11 @@ class LanguageRepository(private val languageDao: LanguageDao) {
 
     fun requireLanguageForId(id: Long): Single<LanguageDomain> =
         languageDao.getWithId(id).map { it.toDomainModel() }
+            .subscribeOn(RxSchedulers.database)
+            .observeOn(RxSchedulers.main)
+
+    fun observeLanguageForId(id: Long): Observable<LanguageDomain> =
+        languageDao.observeWithId(id).map { it.toDomainModel() }
             .subscribeOn(RxSchedulers.database)
             .observeOn(RxSchedulers.main)
 }

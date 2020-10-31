@@ -17,6 +17,7 @@ import com.lukeneedham.vocabdrill.domain.model.VocabGroupProto
 import com.lukeneedham.vocabdrill.domain.model.VocabGroupRelations
 import com.lukeneedham.vocabdrill.presentation.feature.language.addgroup.AddGroupCallback
 import com.lukeneedham.vocabdrill.presentation.feature.language.addgroup.AddGroupDialog
+import com.lukeneedham.vocabdrill.presentation.util.extension.getFlagDrawable
 import com.lukeneedham.vocabdrill.presentation.util.extension.navigateSafe
 import com.lukeneedham.vocabdrill.presentation.util.extension.popBackStackSafe
 import com.lukeneedham.vocabdrill.presentation.util.extension.showDialog
@@ -49,6 +50,9 @@ class LanguageFragment : Fragment(R.layout.fragment_language), AddGroupCallback 
         }
         viewModel.languageNameLiveData.observe(viewLifecycleOwner) {
             titleView.text = it
+        }
+        viewModel.countryLiveData.observe(viewLifecycleOwner) {
+            settingsButton.setImageDrawable(it.getFlagDrawable(requireContext()))
         }
     }
 
@@ -88,6 +92,14 @@ class LanguageFragment : Fragment(R.layout.fragment_language), AddGroupCallback 
 
         backButton.setOnClickListener {
             popBackStackSafe()
+        }
+
+        settingsButton.setOnClickListener {
+            navigateSafe(
+                LanguageFragmentDirections.actionLanguageFragmentToLanguageSettingsFragment(
+                    viewModel.languageId
+                )
+            )
         }
 
         addVocabGroupButton.setOnClickListener {

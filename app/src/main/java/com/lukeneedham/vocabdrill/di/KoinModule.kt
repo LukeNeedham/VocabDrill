@@ -6,6 +6,7 @@ import com.lukeneedham.vocabdrill.presentation.feature.home.addlanguage.AddLangu
 import com.lukeneedham.vocabdrill.presentation.feature.language.LanguageViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.language.VocabGroupItemViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.language.addgroup.AddGroupViewModel
+import com.lukeneedham.vocabdrill.presentation.feature.language.settings.LanguageSettingsViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.VocabEntryViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.VocabGroupViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.addentry.AddEntryViewModel
@@ -14,6 +15,7 @@ import com.lukeneedham.vocabdrill.repository.VocabEntryRepository
 import com.lukeneedham.vocabdrill.repository.VocabGroupRepository
 import com.lukeneedham.vocabdrill.usecase.CalculateRelatedColours
 import com.lukeneedham.vocabdrill.usecase.ChooseTextColourForBackground
+import com.lukeneedham.vocabdrill.usecase.DeleteLanguage
 import com.lukeneedham.vocabdrill.usecase.EstimateColourDistance
 import com.lukeneedham.vocabdrill.usecase.ExtractFlagColours
 import com.lukeneedham.vocabdrill.usecase.FindCountriesForLanguage
@@ -21,6 +23,7 @@ import com.lukeneedham.vocabdrill.usecase.LoadFlagVectorForCountry
 import com.lukeneedham.vocabdrill.usecase.LoadVocabGroupRelations
 import com.lukeneedham.vocabdrill.usecase.ObserveAllVocabEntryRelationsForVocabGroup
 import com.lukeneedham.vocabdrill.usecase.ObserveAllVocabGroupRelationsForLanguage
+import com.lukeneedham.vocabdrill.usecase.ObserveLanguage
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import org.koin.android.ext.koin.androidContext
@@ -57,6 +60,9 @@ object KoinModule {
         single { LoadVocabGroupRelations(get(), get(), get()) }
         single { ObserveAllVocabGroupRelationsForLanguage(get(), get(), get()) }
         single { ObserveAllVocabEntryRelationsForVocabGroup(get(), get(), get()) }
+        single { ObserveLanguage(get()) }
+        single { DeleteLanguage(get()) }
+
         single { FindCountriesForLanguage() }
 
         single { ExtractFlagColours(get()) }
@@ -71,6 +77,7 @@ object KoinModule {
         viewModel { HomeViewModel(get()) }
         viewModel { AddLanguageViewModel(get(), get()) }
         viewModel { (languageId: Long) -> LanguageViewModel(languageId, get(), get(), get()) }
+        viewModel { (languageId: Long) -> LanguageSettingsViewModel(languageId, get(), get()) }
         viewModel { (languageId: Long) ->
             AddGroupViewModel(languageId, get(), get(), get(), get())
         }
