@@ -3,6 +3,7 @@ package com.lukeneedham.vocabdrill.data.persistence.dao
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import com.lukeneedham.vocabdrill.data.persistence.model.Language
 import io.reactivex.Completable
 import io.reactivex.Observable
@@ -13,6 +14,9 @@ interface LanguageDao {
 
     @Insert
     fun add(language: Language): Completable
+
+    @Update
+    fun update(language: Language): Completable
 
     @Query("SELECT * FROM ${Language.Table.NAME}")
     fun getAll(): Single<List<Language>>

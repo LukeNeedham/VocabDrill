@@ -1,5 +1,6 @@
 package com.lukeneedham.vocabdrill.presentation.feature.home.addlanguage
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.lukeneedham.vocabdrill.domain.UnknownCountry
@@ -9,6 +10,7 @@ import com.lukeneedham.vocabdrill.presentation.util.DisposingViewModel
 import com.lukeneedham.vocabdrill.presentation.util.extension.toLiveData
 import com.lukeneedham.vocabdrill.repository.LanguageRepository
 import com.lukeneedham.vocabdrill.usecase.FindCountriesForLanguage
+import com.lukeneedham.vocabdrill.util.extension.TAG
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -37,9 +39,14 @@ class AddLanguageViewModel(
         fetchCountriesForLanguageName(name)
     }
 
-    fun createNewLanguage(country: Country): LanguageProto? {
-        val name = name ?: return null
-        return LanguageProto(name, country)
+    fun createNewLanguage(country: Country) {
+        val name = name
+        if (name == null) {
+            Log.e(TAG, "Cannot add language - name is null")
+            return
+        }
+        val language = LanguageProto(name, country)
+        languageRepository.addLanguage(language).subscribe()
     }
 
     private fun checkValidity(name: String) {

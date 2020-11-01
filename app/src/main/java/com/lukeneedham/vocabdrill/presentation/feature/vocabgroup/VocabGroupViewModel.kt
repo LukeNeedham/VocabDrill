@@ -1,6 +1,7 @@
 package com.lukeneedham.vocabdrill.presentation.feature.vocabgroup
 
 import androidx.lifecycle.MutableLiveData
+import com.lukeneedham.vocabdrill.domain.model.Country
 import com.lukeneedham.vocabdrill.domain.model.VocabEntryProto
 import com.lukeneedham.vocabdrill.domain.model.VocabEntryRelations
 import com.lukeneedham.vocabdrill.presentation.util.DisposingViewModel
@@ -23,6 +24,9 @@ class VocabGroupViewModel(
     private val languageNameMutableLiveData = MutableLiveData<String>()
     val languageNameLiveData = languageNameMutableLiveData.toLiveData()
 
+    private val countryMutableLiveData = MutableLiveData<Country>()
+    val countryLiveData = countryMutableLiveData.toLiveData()
+
     private val vocabGroupNameMutableLiveData = MutableLiveData<String>()
     val vocabGroupNameLiveData = vocabGroupNameMutableLiveData.toLiveData()
 
@@ -33,6 +37,7 @@ class VocabGroupViewModel(
 
         disposables += loadVocabGroupRelations(vocabGroupId).subscribe { vocabGroupRelations ->
             languageNameMutableLiveData.value = vocabGroupRelations.language.name
+            countryMutableLiveData.value = vocabGroupRelations.language.country
             vocabGroupNameMutableLiveData.value = vocabGroupRelations.vocabGroup.name
         }
     }

@@ -43,6 +43,10 @@
             android:name="vocabGroupId"
             app:argType="long"
             />
+        <action
+            android:id="@+id/action_vocabGroupFragment_to_vocabGroupSettingsFragment"
+            app:destination="@id/vocabGroupSettingsFragment"
+            />
     </fragment>
     <fragment
         android:id="@+id/languageSettingsFragment"
@@ -51,6 +55,16 @@
         >
         <argument
             android:name="languageId"
+            app:argType="long"
+            />
+    </fragment>
+    <fragment
+        android:id="@+id/vocabGroupSettingsFragment"
+        android:name="com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.settings.VocabGroupSettingsFragment"
+        android:label="VocabGroupSettingsFragment"
+        >
+        <argument
+            android:name="vocabGroupId"
             app:argType="long"
             />
     </fragment>

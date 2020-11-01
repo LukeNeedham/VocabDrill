@@ -9,7 +9,7 @@
     >
 
     <TextView
-        android:id="@+id/languageTitleView"
+        android:id="@+id/titleView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="70dp"
@@ -17,27 +17,11 @@
         android:layout_marginEnd="70dp"
         android:gravity="center"
         android:textColor="@android:color/black"
-        android:textSize="18sp"
+        android:textSize="30sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="French"
-        />
-
-    <TextView
-        android:id="@+id/groupTitleView"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="70dp"
-        android:layout_marginEnd="70dp"
-        android:gravity="center"
-        android:textColor="@android:color/black"
-        android:textSize="30sp"
-        android:translationY="-6dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/languageTitleView"
-        tools:text="Nouns"
         />
 
     <ImageView
@@ -47,34 +31,40 @@
         app:layout_constraintTop_toTopOf="parent"
         />
 
-    <ImageView
-        android:id="@+id/settingsButton"
-        style="@style/SettingsButton"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/entriesRecycler"
+    <com.lukeneedham.vocabdrill.presentation.view.SettingsItemView
+        android:id="@+id/editNameView"
         android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="40dp"
         android:layout_marginEnd="20dp"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/groupTitleView"
+        app:layout_constraintTop_toBottomOf="@+id/titleView"
         />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/addEntryButton"
-        android:layout_width="wrap_content"
+    <com.lukeneedham.vocabdrill.presentation.view.SettingsItemView
+        android:id="@+id/editColourView"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="30dp"
-        android:src="@drawable/ic_add"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginEnd="20dp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editNameView"
+        />
+
+    <com.lukeneedham.vocabdrill.presentation.view.SettingsItemView
+        android:id="@+id/deleteView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginEnd="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editColourView"
         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

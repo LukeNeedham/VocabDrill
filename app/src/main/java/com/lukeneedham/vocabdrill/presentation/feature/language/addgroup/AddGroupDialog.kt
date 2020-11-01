@@ -1,7 +1,6 @@
 package com.lukeneedham.vocabdrill.presentation.feature.language.addgroup
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.core.widget.doOnTextChanged
 import androidx.recyclerview.widget.RecyclerView
@@ -12,7 +11,6 @@ import com.lukeneedham.flowerpotrecycler.util.extensions.addOnItemClickListener
 import com.lukeneedham.flowerpotrecycler.util.extensions.scrollToCenter
 import com.lukeneedham.vocabdrill.R
 import com.lukeneedham.vocabdrill.presentation.util.BaseBottomSheetDialogFragment
-import com.lukeneedham.vocabdrill.util.extension.TAG
 import com.yarolegovich.discretescrollview.DSVOrientation
 import com.yarolegovich.discretescrollview.transform.Pivot
 import com.yarolegovich.discretescrollview.transform.ScaleTransformer
@@ -111,19 +109,9 @@ class AddGroupDialog : BaseBottomSheetDialogFragment() {
         }
 
         confirmButton.setOnClickListener {
-            val callback = targetFragment as? AddGroupCallback
-            if (callback == null) {
-                Log.e(TAG, "Invalid callback")
-            } else {
-                val selectedPosition = subColoursRecycler.currentItem
-                val selectedColour = subColoursAdapter.positionDelegate.getItemAt(selectedPosition)
-                val group = viewModel.createNewVocabGroup(selectedColour)
-                if (group == null) {
-                    Log.e(TAG, "Invalid name")
-                } else {
-                    callback.addGroup(group)
-                }
-            }
+            val selectedPosition = subColoursRecycler.currentItem
+            val selectedColour = subColoursAdapter.positionDelegate.getItemAt(selectedPosition)
+            viewModel.createNewVocabGroup(selectedColour)
             dismiss()
         }
 

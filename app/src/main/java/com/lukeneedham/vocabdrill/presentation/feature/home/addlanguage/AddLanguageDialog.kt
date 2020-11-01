@@ -74,20 +74,10 @@ class AddLanguageDialog : BaseBottomSheetDialogFragment() {
         }
 
         confirmButton.setOnClickListener {
-            val callback = targetFragment as? AddLanguageCallback
-            if (callback == null) {
-                Log.e(TAG, "Invalid callback")
-            } else {
-                val selectedPosition = flagsRecycler.currentItem
-                val selected = flagsAdapter.positionDelegate.getItemAt(selectedPosition)
-                val selectedCountry = selected.country
-                val language = viewModel.createNewLanguage(selectedCountry)
-                if (language == null) {
-                    Log.e(TAG, "Invalid language")
-                } else {
-                    callback.addLanguage(language)
-                }
-            }
+            val selectedPosition = flagsRecycler.currentItem
+            val selected = flagsAdapter.positionDelegate.getItemAt(selectedPosition)
+            val selectedCountry = selected.country
+            viewModel.createNewLanguage(selectedCountry)
             dismiss()
         }
 

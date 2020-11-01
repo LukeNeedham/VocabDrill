@@ -9,4 +9,18 @@
 
     <string name="language_delete_confirm_yes">Delete</string>
 
+    <string name="vocab_group_delete_confirm_message">
+        Are you sure you want to delete this group? All the vocab entries in this group will also be deleted.
+    </string>
+
+    <string name="vocab_group_delete_confirm_yes">Delete</string>
+
+    <string name="language_setting_edit_flag">Edit flag</string>
+    <string name="language_setting_edit_name">Edit name</string>
+    <string name="language_setting_delete">Delete language</string>
+
+    <string name="vocab_group_setting_edit_colour">Edit colour</string>
+    <string name="vocab_group_setting_edit_name">Edit name</string>
+    <string name="vocab_group_setting_delete">Delete</string>
+
 </resources>

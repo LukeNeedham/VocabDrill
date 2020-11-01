@@ -1,12 +1,16 @@
 package com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.addentry
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.lukeneedham.vocabdrill.domain.model.VocabEntryProto
 import com.lukeneedham.vocabdrill.presentation.util.extension.toLiveData
+import com.lukeneedham.vocabdrill.repository.VocabEntryRepository
+import com.lukeneedham.vocabdrill.util.extension.TAG
 
 class AddEntryViewModel(
-    private val vocabGroupId: Long
+    private val vocabGroupId: Long,
+    private val vocabEntryRepository: VocabEntryRepository
 ) : ViewModel() {
 
     private var wordA: String? = null
@@ -25,10 +29,19 @@ class AddEntryViewModel(
         updateValidity()
     }
 
-    fun createNewEntry(): VocabEntryProto? {
-        val wordA = wordA ?: return null
-        val wordB = wordB ?: return null
-        return VocabEntryProto(wordA, wordB, vocabGroupId)
+    fun createNewEntry() {
+        val wordA = wordA
+        if (wordA == null) {
+            Log.e(TAG, "Entry cannot be created - word A is null")
+            return
+        }
+        val wordB = wordB
+        if (wordB == null) {
+            Log.e(TAG, "Entry cannot be created - word B is null")
+            return
+        }
+        val entry = VocabEntryProto(wordA, wordB, vocabGroupId)
+        vocabEntryRepository.addVocabEntry(entry).subscribe()
     }
 
     private fun updateValidity() {

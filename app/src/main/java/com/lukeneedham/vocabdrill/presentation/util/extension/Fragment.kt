@@ -15,6 +15,9 @@ import com.lukeneedham.vocabdrill.util.extension.TAG
 
 /** Sets the target fragment to this, and shows */
 fun Fragment.showDialog(dialog: DialogFragment) {
+    if (!mayNavigate()) {
+        return
+    }
     dialog.setTargetFragment(this, 0)
     dialog.show(parentFragmentManager, dialog.TAG)
 }

@@ -42,17 +42,7 @@ class AddEntryDialog : BaseBottomSheetDialogFragment() {
         }
 
         confirmButton.setOnClickListener {
-            val callback = targetFragment as? AddEntryCallback
-            if (callback == null) {
-                Log.e(TAG, "Invalid callback")
-            } else {
-                val entry = viewModel.createNewEntry()
-                if (entry == null) {
-                    Log.e(TAG, "Entry is not valid")
-                } else {
-                    callback.addEntry(entry)
-                }
-            }
+            viewModel.createNewEntry()
             dismiss()
         }
 

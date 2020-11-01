@@ -1,5 +1,6 @@
 package com.lukeneedham.vocabdrill.presentation.feature.language.addgroup
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.lukeneedham.vocabdrill.domain.model.VocabGroup
 import com.lukeneedham.vocabdrill.domain.model.VocabGroupProto
@@ -9,6 +10,7 @@ import com.lukeneedham.vocabdrill.repository.LanguageRepository
 import com.lukeneedham.vocabdrill.repository.VocabGroupRepository
 import com.lukeneedham.vocabdrill.usecase.CalculateRelatedColours
 import com.lukeneedham.vocabdrill.usecase.ExtractFlagColours
+import com.lukeneedham.vocabdrill.util.extension.TAG
 import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.plusAssign
 
@@ -59,9 +61,14 @@ class AddGroupViewModel(
     }
 
     /** @return a new [VocabGroup], or null if [name] is invalid */
-    fun createNewVocabGroup(colour: Int): VocabGroupProto? {
-        val name = name ?: return null
-        return VocabGroupProto(name, colour, languageId)
+    fun createNewVocabGroup(colour: Int) {
+        val name = name
+        if(name == null) {
+            Log.e(TAG, "Could not create Vocab Group - name is null")
+            return
+        }
+        val group = VocabGroupProto(name, colour, languageId)
+        disposables += vocabGroupRepository.addVocabGroup(group).subscribe()
     }
 
     fun onColourSelected(colour: Int) {

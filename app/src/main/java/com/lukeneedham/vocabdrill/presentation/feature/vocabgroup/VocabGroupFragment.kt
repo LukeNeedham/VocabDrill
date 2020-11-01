@@ -12,10 +12,10 @@ import com.lukeneedham.flowerpotrecycler.SingleTypeRecyclerAdapterCreator
 import com.lukeneedham.flowerpotrecycler.adapter.config.SingleTypeAdapterConfig
 import com.lukeneedham.flowerpotrecycler.util.extensions.addItemLayoutParams
 import com.lukeneedham.vocabdrill.R
-import com.lukeneedham.vocabdrill.domain.model.VocabEntryProto
 import com.lukeneedham.vocabdrill.domain.model.VocabEntryRelations
-import com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.addentry.AddEntryCallback
 import com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.addentry.AddEntryDialog
+import com.lukeneedham.vocabdrill.presentation.util.extension.getFlagDrawable
+import com.lukeneedham.vocabdrill.presentation.util.extension.navigateSafe
 import com.lukeneedham.vocabdrill.presentation.util.extension.popBackStackSafe
 import com.lukeneedham.vocabdrill.presentation.util.extension.showDialog
 import com.lukeneedham.vocabdrill.presentation.util.recyclerview.LinearMarginItemDecorationCreator
@@ -23,7 +23,7 @@ import kotlinx.android.synthetic.main.fragment_vocab_group.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
-class VocabGroupFragment : Fragment(R.layout.fragment_vocab_group), AddEntryCallback {
+class VocabGroupFragment : Fragment(R.layout.fragment_vocab_group) {
 
     private val args: VocabGroupFragmentArgs by navArgs()
 
@@ -47,15 +47,14 @@ class VocabGroupFragment : Fragment(R.layout.fragment_vocab_group), AddEntryCall
         viewModel.vocabGroupNameLiveData.observe(viewLifecycleOwner) {
             groupTitleView.text = it
         }
+        viewModel.countryLiveData.observe(viewLifecycleOwner) {
+            settingsButton.setImageDrawable(it.getFlagDrawable(requireContext()))
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupView()
-    }
-
-    override fun addEntry(entryProto: VocabEntryProto) {
-        viewModel.addEntry(entryProto)
     }
 
     private fun setupView() {
@@ -69,6 +68,14 @@ class VocabGroupFragment : Fragment(R.layout.fragment_vocab_group), AddEntryCall
             0
         )
         entriesRecycler.addItemDecoration(decoration)
+
+        settingsButton.setOnClickListener {
+            navigateSafe(
+                VocabGroupFragmentDirections.actionVocabGroupFragmentToVocabGroupSettingsFragment(
+                    viewModel.vocabGroupId
+                )
+            )
+        }
 
         backButton.setOnClickListener {
             popBackStackSafe()

@@ -43,4 +43,12 @@ interface VocabGroupDao {
         """
     )
     fun getWithId(id: Long): Single<VocabGroup>
+
+    @Query(
+        """
+        SELECT * FROM ${VocabGroup.Table.NAME}
+        WHERE ${VocabGroup.Column.ID} = :id
+        """
+    )
+    fun observeWithId(id: Long): Observable<VocabGroup>
 }

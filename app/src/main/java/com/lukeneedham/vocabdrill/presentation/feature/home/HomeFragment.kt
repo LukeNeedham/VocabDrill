@@ -14,7 +14,6 @@ import com.lukeneedham.flowerpotrecycler.util.extensions.addOnItemClickListener
 import com.lukeneedham.vocabdrill.R
 import com.lukeneedham.vocabdrill.domain.model.Language
 import com.lukeneedham.vocabdrill.domain.model.LanguageProto
-import com.lukeneedham.vocabdrill.presentation.feature.home.addlanguage.AddLanguageCallback
 import com.lukeneedham.vocabdrill.presentation.feature.home.addlanguage.AddLanguageDialog
 import com.lukeneedham.vocabdrill.presentation.util.extension.navigateSafe
 import com.lukeneedham.vocabdrill.presentation.util.extension.showDialog
@@ -22,7 +21,7 @@ import com.lukeneedham.vocabdrill.presentation.util.recyclerview.LinearMarginIte
 import kotlinx.android.synthetic.main.fragment_home.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class HomeFragment : Fragment(R.layout.fragment_home), AddLanguageCallback {
+class HomeFragment : Fragment(R.layout.fragment_home) {
 
     private val viewModel: HomeViewModel by viewModel()
 
@@ -43,10 +42,6 @@ class HomeFragment : Fragment(R.layout.fragment_home), AddLanguageCallback {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupView()
-    }
-
-    override fun addLanguage(languageProto: LanguageProto) {
-        viewModel.addLanguage(languageProto)
     }
 
     private fun setupView() {

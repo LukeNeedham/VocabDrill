@@ -2,20 +2,17 @@ package com.lukeneedham.vocabdrill.presentation.feature.language
 
 import androidx.lifecycle.MutableLiveData
 import com.lukeneedham.vocabdrill.domain.model.Country
-import com.lukeneedham.vocabdrill.domain.model.VocabGroupProto
 import com.lukeneedham.vocabdrill.domain.model.VocabGroupRelations
 import com.lukeneedham.vocabdrill.presentation.util.DisposingViewModel
 import com.lukeneedham.vocabdrill.presentation.util.extension.toLiveData
-import com.lukeneedham.vocabdrill.repository.LanguageRepository
-import com.lukeneedham.vocabdrill.repository.VocabGroupRepository
 import com.lukeneedham.vocabdrill.usecase.ObserveAllVocabGroupRelationsForLanguage
+import com.lukeneedham.vocabdrill.usecase.ObserveLanguage
 import io.reactivex.rxkotlin.plusAssign
 
 class LanguageViewModel(
     val languageId: Long,
     private val observeAllVocabGroupRelationsForLanguage: ObserveAllVocabGroupRelationsForLanguage,
-    private val languageRepository: LanguageRepository,
-    private val vocabGroupRepository: VocabGroupRepository
+    private val observeLanguage: ObserveLanguage
 ) : DisposingViewModel() {
 
     private val languageNameMutableLiveData = MutableLiveData<String>()
@@ -28,7 +25,7 @@ class LanguageViewModel(
     val vocabGroupsLiveData = vocabGroupsMutableLiveData.toLiveData()
 
     init {
-        disposables += languageRepository.requireLanguageForId(languageId).subscribe { language ->
+        disposables += observeLanguage(languageId).subscribe { language ->
             languageNameMutableLiveData.value = language.name
             countryMutableLiveData.value = language.country
         }
@@ -36,9 +33,5 @@ class LanguageViewModel(
         disposables += observeAllVocabGroupRelationsForLanguage(languageId).subscribe {
             vocabGroupsMutableLiveData.value = it
         }
-    }
-
-    fun addGroup(groupProto: VocabGroupProto) {
-        disposables += vocabGroupRepository.addVocabGroup(groupProto).subscribe()
     }
 }

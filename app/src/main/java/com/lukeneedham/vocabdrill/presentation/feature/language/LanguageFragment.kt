@@ -15,7 +15,6 @@ import com.lukeneedham.flowerpotrecycler.util.extensions.addOnItemClickListener
 import com.lukeneedham.vocabdrill.R
 import com.lukeneedham.vocabdrill.domain.model.VocabGroupProto
 import com.lukeneedham.vocabdrill.domain.model.VocabGroupRelations
-import com.lukeneedham.vocabdrill.presentation.feature.language.addgroup.AddGroupCallback
 import com.lukeneedham.vocabdrill.presentation.feature.language.addgroup.AddGroupDialog
 import com.lukeneedham.vocabdrill.presentation.util.extension.getFlagDrawable
 import com.lukeneedham.vocabdrill.presentation.util.extension.navigateSafe
@@ -26,7 +25,7 @@ import kotlinx.android.synthetic.main.fragment_language.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
-class LanguageFragment : Fragment(R.layout.fragment_language), AddGroupCallback {
+class LanguageFragment : Fragment(R.layout.fragment_language) {
     private val navArgs: LanguageFragmentArgs by navArgs()
 
     private val viewModel: LanguageViewModel by viewModel { parametersOf(navArgs.languageId) }
@@ -54,10 +53,6 @@ class LanguageFragment : Fragment(R.layout.fragment_language), AddGroupCallback 
         viewModel.countryLiveData.observe(viewLifecycleOwner) {
             settingsButton.setImageDrawable(it.getFlagDrawable(requireContext()))
         }
-    }
-
-    override fun addGroup(groupProto: VocabGroupProto) {
-        viewModel.addGroup(groupProto)
     }
 
     private fun openVocabGroup(vocabGroupRelations: VocabGroupRelations) {

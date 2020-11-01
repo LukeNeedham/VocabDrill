@@ -26,6 +26,12 @@ class VocabGroupRepository(
             .observeOn(RxSchedulers.main)
     }
 
+    fun observeVocabGroupForId(id: Long): Observable<VocabGroupDomain> {
+        return vocabGroupDao.observeWithId(id).map { it.toDomainModel() }
+            .subscribeOn(RxSchedulers.database)
+            .observeOn(RxSchedulers.main)
+    }
+
     fun getAllVocabGroupsForLanguage(languageId: Long): Single<List<VocabGroupDomain>> {
         return vocabGroupDao.getAllForLanguage(languageId).map { it.map { it.toDomainModel() } }
             .subscribeOn(RxSchedulers.database)

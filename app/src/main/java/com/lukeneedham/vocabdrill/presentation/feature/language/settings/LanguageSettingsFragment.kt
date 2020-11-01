@@ -6,9 +6,15 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
 import com.lukeneedham.vocabdrill.R
+import com.lukeneedham.vocabdrill.presentation.feature.language.settings.changename.ChangeLanguageNameDialog
 import com.lukeneedham.vocabdrill.presentation.util.extension.getFlagDrawable
 import com.lukeneedham.vocabdrill.presentation.util.extension.popBackStackSafe
+import com.lukeneedham.vocabdrill.presentation.util.extension.showDialog
 import kotlinx.android.synthetic.main.fragment_language_settings.*
+import kotlinx.android.synthetic.main.fragment_vocab_group_settings.backButton
+import kotlinx.android.synthetic.main.fragment_vocab_group_settings.deleteView
+import kotlinx.android.synthetic.main.fragment_vocab_group_settings.editNameView
+import kotlinx.android.synthetic.main.fragment_vocab_group_settings.titleView
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
@@ -23,7 +29,7 @@ class LanguageSettingsFragment : Fragment(R.layout.fragment_language_settings) {
             titleView.text = it
         }
         viewModel.flagCountryLiveData.observe(viewLifecycleOwner) {
-            editFlagIconView.setImageDrawable(it.getFlagDrawable(requireContext()))
+            editFlagView.setIcon(it.getFlagDrawable(requireContext()))
         }
         viewModel.stateLiveData.observe(viewLifecycleOwner) {
             val buttonsEnabled = it is LanguageSettingsViewModel.State.Ready
@@ -42,12 +48,20 @@ class LanguageSettingsFragment : Fragment(R.layout.fragment_language_settings) {
         backButton.setOnClickListener {
             popBackStackSafe()
         }
+
+        editNameView.setText(R.string.language_setting_edit_name)
+        editNameView.setIcon(R.drawable.ic_edit)
         editNameView.setOnClickListener {
-            // TODO
+            showDialog(ChangeLanguageNameDialog.newInstance(viewModel.languageId))
         }
+
+        editFlagView.setText(R.string.language_setting_edit_flag)
         editFlagView.setOnClickListener {
             // TODO
         }
+
+        deleteView.setText(R.string.language_setting_delete)
+        deleteView.setIcon(R.drawable.ic_delete)
         deleteView.setOnClickListener {
             AlertDialog.Builder(requireContext())
                 .setMessage(R.string.language_delete_confirm_message)
