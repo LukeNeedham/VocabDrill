@@ -4,29 +4,32 @@ import com.lukeneedham.vocabdrill.domain.model.VocabGroupRelations
 import com.lukeneedham.vocabdrill.repository.LanguageRepository
 import com.lukeneedham.vocabdrill.repository.VocabEntryRepository
 import com.lukeneedham.vocabdrill.repository.VocabGroupRepository
-import io.reactivex.Single
+import com.lukeneedham.vocabdrill.util.RxSchedulers
+import io.reactivex.Observable
 
-class LoadVocabGroupRelations(
+class ObserveVocabGroupRelations(
     private val languageRepository: LanguageRepository,
     private val vocabGroupRepository: VocabGroupRepository,
     private val vocabEntryRepository: VocabEntryRepository
 ) {
-    operator fun invoke(vocabGroupId: Long): Single<VocabGroupRelations> {
+    operator fun invoke(vocabGroupId: Long): Observable<VocabGroupRelations> {
         val getVocabGroupAndLanguageSingle = vocabGroupRepository
-            .requireVocabGroupForId(vocabGroupId)
-            .flatMap {
-                Single.zip(
-                    Single.just(it),
-                    languageRepository.requireLanguageForId(it.languageId)
+            .observeVocabGroupForId(vocabGroupId)
+            .switchMap {
+                Observable.combineLatest(
+                    Observable.just(it),
+                    languageRepository.observeLanguageForId(it.languageId)
                 ) { vocabGroup, language ->
                     vocabGroup to language
                 }
             }
-        return Single.zip(
+        return Observable.combineLatest(
             getVocabGroupAndLanguageSingle,
-            vocabEntryRepository.getAllVocabEntriesForVocabGroup(vocabGroupId)
+            vocabEntryRepository.observeAllVocabEntriesForVocabGroup(vocabGroupId)
         ) { (vocabGroup, language), entries ->
             VocabGroupRelations(vocabGroup, language, entries)
         }
+            .subscribeOn(RxSchedulers.database)
+            .observeOn(RxSchedulers.main)
     }
 }

@@ -7,7 +7,9 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
 import com.lukeneedham.vocabdrill.R
+import com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.settings.changename.ChangeVocabGroupNameDialog
 import com.lukeneedham.vocabdrill.presentation.util.extension.popBackStackSafe
+import com.lukeneedham.vocabdrill.presentation.util.extension.showDialog
 import group.infotech.drawable.dsl.shapeDrawable
 import group.infotech.drawable.dsl.solidColor
 import kotlinx.android.synthetic.main.fragment_vocab_group_settings.*
@@ -53,7 +55,7 @@ class VocabGroupSettingsFragment : Fragment(R.layout.fragment_vocab_group_settin
         editNameView.setText(R.string.vocab_group_setting_edit_name)
         editNameView.setIcon(R.drawable.ic_edit)
         editNameView.setOnClickListener {
-            // TODO
+            showDialog(ChangeVocabGroupNameDialog.newInstance(viewModel.vocabGroupId))
         }
 
         editColourView.setText(R.string.vocab_group_setting_edit_colour)

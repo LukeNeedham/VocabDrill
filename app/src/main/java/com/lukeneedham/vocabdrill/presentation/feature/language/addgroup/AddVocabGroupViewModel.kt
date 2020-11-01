@@ -9,17 +9,20 @@ import com.lukeneedham.vocabdrill.presentation.util.extension.toLiveData
 import com.lukeneedham.vocabdrill.repository.LanguageRepository
 import com.lukeneedham.vocabdrill.repository.VocabGroupRepository
 import com.lukeneedham.vocabdrill.usecase.CalculateRelatedColours
+import com.lukeneedham.vocabdrill.usecase.CheckValidVocabGroupName
 import com.lukeneedham.vocabdrill.usecase.ExtractFlagColours
+import com.lukeneedham.vocabdrill.util.RxSchedulers
 import com.lukeneedham.vocabdrill.util.extension.TAG
 import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.plusAssign
 
-class AddGroupViewModel(
+class AddVocabGroupViewModel(
     val languageId: Long,
     private val languageRepository: LanguageRepository,
     private val vocabGroupRepository: VocabGroupRepository,
     private val extractFlagColours: ExtractFlagColours,
-    private val calculateRelatedColours: CalculateRelatedColours
+    private val calculateRelatedColours: CalculateRelatedColours,
+    private val checkValidVocabGroupName: CheckValidVocabGroupName
 ) : DisposingViewModel() {
 
     private var name: String? = null
@@ -36,11 +39,15 @@ class AddGroupViewModel(
     val subColoursLiveData = subColoursMutableLiveData.toLiveData()
 
     init {
-        disposables += languageRepository.requireLanguageForId(languageId).map { language ->
-            extractFlagColours(language.country)
-        }.subscribe { colours ->
-            flagColoursMutableLiveData.value = colours
-        }
+        disposables += languageRepository.requireLanguageForId(languageId)
+            .map { language ->
+                extractFlagColours(language.country)
+            }
+            .subscribeOn(RxSchedulers.database)
+            .observeOn(RxSchedulers.main)
+            .subscribe { colours ->
+                flagColoursMutableLiveData.value = colours
+            }
     }
 
     fun onNameChange(name: String) {
@@ -50,11 +57,9 @@ class AddGroupViewModel(
         if (name.isBlank()) {
             isValidNameMutableLiveData.value = false
         } else {
-            val disposable =
-                vocabGroupRepository.getAllVocabGroupsForLanguage(languageId).subscribe { groups ->
-                    val isDuplicate = groups.any { it.name == name }
-                    isValidNameMutableLiveData.value = !isDuplicate
-                }
+            val disposable = checkValidVocabGroupName(languageId, name).subscribe { isValid ->
+                isValidNameMutableLiveData.value = isValid
+            }
             checkValidityDisposable = disposable
             disposables += disposable
         }
@@ -63,12 +68,15 @@ class AddGroupViewModel(
     /** @return a new [VocabGroup], or null if [name] is invalid */
     fun createNewVocabGroup(colour: Int) {
         val name = name
-        if(name == null) {
+        if (name == null) {
             Log.e(TAG, "Could not create Vocab Group - name is null")
             return
         }
         val group = VocabGroupProto(name, colour, languageId)
-        disposables += vocabGroupRepository.addVocabGroup(group).subscribe()
+        disposables += vocabGroupRepository.addVocabGroup(group)
+            .subscribeOn(RxSchedulers.database)
+            .observeOn(RxSchedulers.main)
+            .subscribe()
     }
 
     fun onColourSelected(colour: Int) {

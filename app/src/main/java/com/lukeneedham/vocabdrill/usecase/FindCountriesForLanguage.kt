@@ -5,6 +5,9 @@ import com.lukeneedham.languagecountries.LanguageProvider
 import com.lukeneedham.vocabdrill.domain.UnknownCountry
 import com.lukeneedham.vocabdrill.domain.model.Country
 import com.lukeneedham.vocabdrill.util.extension.TAG
+import io.reactivex.Single
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import me.xdrop.fuzzywuzzy.FuzzySearch
 
 class FindCountriesForLanguage {
@@ -19,7 +22,15 @@ class FindCountriesForLanguage {
     private val languageNames = languageNameToCountries.keys.toList()
 
     /** This performs heavy work, so don't do this on the main thread */
-    operator fun invoke(languageName: String): List<Country> {
+    operator fun invoke(languageName: String): Single<List<Country>> {
+        return Single.fromCallable {
+            search(languageName)
+        }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+    }
+
+    private fun search(languageName: String): List<Country> {
         val matches = FuzzySearch
             .extractAll(languageName, languageNames, ACCEPTED_SIMILARITY)
             .sortedDescending()

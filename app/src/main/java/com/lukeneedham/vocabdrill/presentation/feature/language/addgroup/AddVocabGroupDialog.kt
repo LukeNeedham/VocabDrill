@@ -21,8 +21,8 @@ import kotlinx.android.synthetic.main.dialog_add_language.nameInputView
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
-class AddGroupDialog : BaseBottomSheetDialogFragment() {
-    private val viewModel: AddGroupViewModel by viewModel {
+class AddVocabGroupDialog : BaseBottomSheetDialogFragment() {
+    private val viewModel: AddVocabGroupViewModel by viewModel {
         val languageId = requireArguments().getLong(ARG_LANGUAGE)
         parametersOf(languageId)
     }
@@ -123,7 +123,7 @@ class AddGroupDialog : BaseBottomSheetDialogFragment() {
     companion object {
         private const val ARG_LANGUAGE = "ARG_LANGUAGE"
 
-        fun newInstance(languageId: Long) = AddGroupDialog().apply {
+        fun newInstance(languageId: Long) = AddVocabGroupDialog().apply {
             arguments = Bundle().apply {
                 putLong(ARG_LANGUAGE, languageId)
             }

@@ -1,7 +1,6 @@
 package com.lukeneedham.vocabdrill.presentation.feature.home.addlanguage
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.core.widget.doOnTextChanged
 import androidx.recyclerview.widget.RecyclerView
@@ -12,7 +11,6 @@ import com.lukeneedham.vocabdrill.R
 import com.lukeneedham.vocabdrill.domain.model.Flag
 import com.lukeneedham.vocabdrill.presentation.util.BaseBottomSheetDialogFragment
 import com.lukeneedham.vocabdrill.presentation.util.extension.getFlagDrawable
-import com.lukeneedham.vocabdrill.util.extension.TAG
 import com.yarolegovich.discretescrollview.DSVOrientation
 import com.yarolegovich.discretescrollview.transform.Pivot
 import com.yarolegovich.discretescrollview.transform.ScaleTransformer

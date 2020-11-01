@@ -18,14 +18,14 @@ interface LanguageDao {
     @Update
     fun update(language: Language): Completable
 
+    @Query("DELETE FROM ${Language.Table.NAME} WHERE ${Language.Column.ID} = :id")
+    fun deleteWithId(id: Long): Completable
+
     @Query("SELECT * FROM ${Language.Table.NAME}")
     fun getAll(): Single<List<Language>>
 
     @Query("SELECT * FROM ${Language.Table.NAME}")
     fun observeAll(): Observable<List<Language>>
-
-    @Query("DELETE FROM ${Language.Table.NAME} WHERE ${Language.Column.ID} = :id")
-    fun deleteWithId(id: Long): Completable
 
     @Query(
         """

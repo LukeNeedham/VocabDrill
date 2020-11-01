@@ -1,11 +1,15 @@
 package com.lukeneedham.vocabdrill.usecase
 
+import com.lukeneedham.vocabdrill.domain.model.VocabEntry
+import com.lukeneedham.vocabdrill.domain.model.VocabGroup
 import com.lukeneedham.vocabdrill.domain.model.VocabGroupRelations
 import com.lukeneedham.vocabdrill.repository.LanguageRepository
 import com.lukeneedham.vocabdrill.repository.VocabEntryRepository
 import com.lukeneedham.vocabdrill.repository.VocabGroupRepository
+import com.lukeneedham.vocabdrill.util.Optional
+import com.lukeneedham.vocabdrill.util.RxSchedulers
 import io.reactivex.Observable
-import io.reactivex.rxkotlin.zip
+import io.reactivex.rxkotlin.combineLatest
 
 class ObserveAllVocabGroupRelationsForLanguage(
     private val languageRepository: LanguageRepository,
@@ -13,24 +17,37 @@ class ObserveAllVocabGroupRelationsForLanguage(
     private val vocabEntryRepository: VocabEntryRepository
 ) {
     operator fun invoke(languageId: Long): Observable<List<VocabGroupRelations>> {
-        val groupAndEntriesObservable =
-            vocabGroupRepository.observeAllVocabGroupsForLanguage(languageId).flatMap { groups ->
+        // Uses Optionals as combineLatest will not fire on empty lists
+        // A null value represents empty list
+
+        val groupAndEntriesObservable: Observable<Optional<List<Pair<VocabGroup, List<VocabEntry>>>>> =
+            vocabGroupRepository.observeAllVocabGroupsForLanguage(languageId).switchMap { groups ->
+                if (groups.isEmpty()) {
+                    return@switchMap Observable.just(Optional(null))
+                }
+
                 groups.map { group ->
                     vocabEntryRepository.observeAllVocabEntriesForVocabGroup(group.id)
                         .map { group to it }
-                }.zip { it }
+                }.combineLatest { it }.map { Optional(it) }
             }
 
-        val languageObservable =
-            languageRepository.requireLanguageForId(languageId).repeat().toObservable()
+        val languageObservable = languageRepository.observeLanguageForId(languageId).map {
+            return@map it
+        }
 
-        return Observable.zip(
+        return Observable.combineLatest(
             languageObservable,
             groupAndEntriesObservable
-        ) { language, groupAndEntriesList ->
-            groupAndEntriesList.map { (group, entries) ->
+        ) { language, groupAndEntriesListOptional ->
+            val groupAndEntriesList = groupAndEntriesListOptional.value
+                ?: return@combineLatest Optional(null)
+            val relations = groupAndEntriesList.map { (group, entries) ->
                 VocabGroupRelations(group, language, entries)
             }
-        }
+            Optional(relations)
+        }.map { it.value ?: emptyList() }
+            .subscribeOn(RxSchedulers.database)
+            .observeOn(RxSchedulers.main)
     }
 }

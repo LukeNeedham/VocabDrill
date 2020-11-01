@@ -1,5 +1,6 @@
 package com.lukeneedham.vocabdrill.presentation.feature.language.settings
 
+import android.annotation.SuppressLint
 import androidx.lifecycle.MutableLiveData
 import com.lukeneedham.vocabdrill.domain.model.Country
 import com.lukeneedham.vocabdrill.presentation.util.DisposingViewModel
@@ -35,9 +36,10 @@ class LanguageSettingsViewModel(
         )
     }
 
+    @SuppressLint("CheckResult")
     fun onDelete() {
         stateMutableLiveData.value = State.Working
-        disposables += deleteLanguage(languageId).subscribe {
+        deleteLanguage(languageId).subscribe {
             stateMutableLiveData.value = State.Invalid
         }
     }

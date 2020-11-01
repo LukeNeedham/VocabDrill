@@ -7,16 +7,21 @@ import com.lukeneedham.vocabdrill.domain.model.Language
 import com.lukeneedham.vocabdrill.presentation.util.DisposingViewModel
 import com.lukeneedham.vocabdrill.presentation.util.extension.toLiveData
 import com.lukeneedham.vocabdrill.repository.LanguageRepository
+import com.lukeneedham.vocabdrill.usecase.CheckValidLanguageName
+import com.lukeneedham.vocabdrill.util.RxSchedulers
 import com.lukeneedham.vocabdrill.util.extension.TAG
 import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.plusAssign
 
 class ChangeLanguageNameViewModel(
     val languageId: Long,
-    private val languageRepository: LanguageRepository
+    private val languageRepository: LanguageRepository,
+    private val checkValidLanguageName: CheckValidLanguageName
 ) : DisposingViewModel() {
 
     private val loadLanguageSingle = languageRepository.requireLanguageForId(languageId)
+        .subscribeOn(RxSchedulers.database)
+        .observeOn(RxSchedulers.main)
 
     private var name: String? = null
 
@@ -49,7 +54,10 @@ class ChangeLanguageNameViewModel(
 
         fun update(language: Language) {
             val newLanguage = language.copy(name = name)
-            languageRepository.updateLanguage(newLanguage).subscribe()
+            languageRepository.updateLanguage(newLanguage)
+                .subscribeOn(RxSchedulers.database)
+                .observeOn(RxSchedulers.main)
+                .subscribe()
         }
 
         val loadedLanguage = languageLiveData.value
@@ -68,11 +76,9 @@ class ChangeLanguageNameViewModel(
         if (name.isBlank()) {
             isValidNameMutableLiveData.value = false
         } else {
-            val disposable =
-                languageRepository.getAllLanguages().subscribe { languages ->
-                    val isDuplicate = languages.any { it.name == name }
-                    isValidNameMutableLiveData.value = !isDuplicate
-                }
+            val disposable = checkValidLanguageName(name).subscribe { isValid ->
+                isValidNameMutableLiveData.value = isValid
+            }
             checkValidityDisposable = disposable
             disposables += disposable
         }

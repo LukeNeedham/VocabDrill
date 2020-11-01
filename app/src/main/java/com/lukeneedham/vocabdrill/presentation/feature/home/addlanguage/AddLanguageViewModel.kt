@@ -9,17 +9,17 @@ import com.lukeneedham.vocabdrill.domain.model.LanguageProto
 import com.lukeneedham.vocabdrill.presentation.util.DisposingViewModel
 import com.lukeneedham.vocabdrill.presentation.util.extension.toLiveData
 import com.lukeneedham.vocabdrill.repository.LanguageRepository
+import com.lukeneedham.vocabdrill.usecase.CheckValidLanguageName
 import com.lukeneedham.vocabdrill.usecase.FindCountriesForLanguage
+import com.lukeneedham.vocabdrill.util.RxSchedulers
 import com.lukeneedham.vocabdrill.util.extension.TAG
-import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.plusAssign
-import io.reactivex.schedulers.Schedulers
 
 class AddLanguageViewModel(
     private val languageRepository: LanguageRepository,
-    private val findCountriesForLanguage: FindCountriesForLanguage
+    private val findCountriesForLanguage: FindCountriesForLanguage,
+    private val checkValidLanguageName: CheckValidLanguageName
 ) : DisposingViewModel() {
 
     private var name: String? = null
@@ -46,7 +46,10 @@ class AddLanguageViewModel(
             return
         }
         val language = LanguageProto(name, country)
-        languageRepository.addLanguage(language).subscribe()
+        languageRepository.addLanguage(language)
+            .subscribeOn(RxSchedulers.database)
+            .observeOn(RxSchedulers.main)
+            .subscribe()
     }
 
     private fun checkValidity(name: String) {
@@ -55,11 +58,9 @@ class AddLanguageViewModel(
         if (name.isBlank()) {
             isValidNameMutableLiveData.value = false
         } else {
-            val disposable =
-                languageRepository.getAllLanguages().subscribe { languages ->
-                    val isDuplicate = languages.any { it.name == name }
-                    isValidNameMutableLiveData.value = !isDuplicate
-                }
+            val disposable = checkValidLanguageName(name).subscribe { isValid ->
+                isValidNameMutableLiveData.value = isValid
+            }
             checkValidityDisposable = disposable
             disposables += disposable
         }
@@ -67,11 +68,7 @@ class AddLanguageViewModel(
 
     private fun fetchCountriesForLanguageName(languageName: String) {
         countriesDisposable?.dispose()
-        val disposable = Single.fromCallable {
-            findCountriesForLanguage(languageName)
-        }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
+        val disposable = findCountriesForLanguage(languageName)
             .subscribe { countries ->
                 countriesObservableMutable.value = countries
             }

@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import com.lukeneedham.vocabdrill.domain.model.VocabEntryProto
 import com.lukeneedham.vocabdrill.presentation.util.extension.toLiveData
 import com.lukeneedham.vocabdrill.repository.VocabEntryRepository
+import com.lukeneedham.vocabdrill.util.RxSchedulers
 import com.lukeneedham.vocabdrill.util.extension.TAG
 
 class AddEntryViewModel(
@@ -41,7 +42,10 @@ class AddEntryViewModel(
             return
         }
         val entry = VocabEntryProto(wordA, wordB, vocabGroupId)
-        vocabEntryRepository.addVocabEntry(entry).subscribe()
+        vocabEntryRepository.addVocabEntry(entry)
+            .subscribeOn(RxSchedulers.database)
+            .observeOn(RxSchedulers.main)
+            .subscribe()
     }
 
     private fun updateValidity() {

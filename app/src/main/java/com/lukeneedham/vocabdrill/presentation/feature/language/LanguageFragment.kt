@@ -13,9 +13,8 @@ import com.lukeneedham.flowerpotrecycler.adapter.config.SingleTypeAdapterConfig
 import com.lukeneedham.flowerpotrecycler.util.extensions.addItemLayoutParams
 import com.lukeneedham.flowerpotrecycler.util.extensions.addOnItemClickListener
 import com.lukeneedham.vocabdrill.R
-import com.lukeneedham.vocabdrill.domain.model.VocabGroupProto
 import com.lukeneedham.vocabdrill.domain.model.VocabGroupRelations
-import com.lukeneedham.vocabdrill.presentation.feature.language.addgroup.AddGroupDialog
+import com.lukeneedham.vocabdrill.presentation.feature.language.addgroup.AddVocabGroupDialog
 import com.lukeneedham.vocabdrill.presentation.util.extension.getFlagDrawable
 import com.lukeneedham.vocabdrill.presentation.util.extension.navigateSafe
 import com.lukeneedham.vocabdrill.presentation.util.extension.popBackStackSafe
@@ -98,7 +97,7 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
         }
 
         addVocabGroupButton.setOnClickListener {
-            val dialog = AddGroupDialog.newInstance(viewModel.languageId)
+            val dialog = AddVocabGroupDialog.newInstance(viewModel.languageId)
             showDialog(dialog)
         }
     }

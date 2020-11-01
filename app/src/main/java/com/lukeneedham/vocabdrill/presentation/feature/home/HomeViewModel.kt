@@ -6,6 +6,7 @@ import com.lukeneedham.vocabdrill.domain.model.LanguageProto
 import com.lukeneedham.vocabdrill.presentation.util.DisposingViewModel
 import com.lukeneedham.vocabdrill.presentation.util.extension.toLiveData
 import com.lukeneedham.vocabdrill.repository.LanguageRepository
+import com.lukeneedham.vocabdrill.util.RxSchedulers
 import io.reactivex.rxkotlin.plusAssign
 
 class HomeViewModel(private val languageRepository: LanguageRepository) : DisposingViewModel() {
@@ -13,12 +14,18 @@ class HomeViewModel(private val languageRepository: LanguageRepository) : Dispos
     val languagesLiveData = languagesMutableLiveData.toLiveData()
 
     init {
-        disposables += languageRepository.observeAllLanguages().subscribe {
-            languagesMutableLiveData.value = it
-        }
+        disposables += languageRepository.observeAllLanguages()
+            .subscribeOn(RxSchedulers.database)
+            .observeOn(RxSchedulers.main)
+            .subscribe {
+                languagesMutableLiveData.value = it
+            }
     }
 
     fun addLanguage(languageProto: LanguageProto) {
-        disposables += languageRepository.addLanguage(languageProto).subscribe()
+        disposables += languageRepository.addLanguage(languageProto)
+            .subscribeOn(RxSchedulers.database)
+            .observeOn(RxSchedulers.main)
+            .subscribe()
     }
 }

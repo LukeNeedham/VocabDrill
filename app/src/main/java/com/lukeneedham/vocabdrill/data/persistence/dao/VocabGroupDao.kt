@@ -3,6 +3,7 @@ package com.lukeneedham.vocabdrill.data.persistence.dao
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import com.lukeneedham.vocabdrill.data.persistence.model.VocabGroup
 import io.reactivex.Completable
 import io.reactivex.Observable
@@ -13,6 +14,12 @@ interface VocabGroupDao {
 
     @Insert
     fun add(vocabGroup: VocabGroup): Completable
+
+    @Update
+    fun update(vocabGroup: VocabGroup): Completable
+
+    @Query("DELETE FROM ${VocabGroup.Table.NAME} WHERE ${VocabGroup.Column.ID} = :id")
+    fun deleteWithId(id: Long): Completable
 
     @Query("SELECT * FROM ${VocabGroup.Table.NAME}")
     fun getAll(): Single<List<VocabGroup>>

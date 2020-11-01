@@ -1,12 +1,10 @@
 package com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.settings
 
+import android.annotation.SuppressLint
 import androidx.lifecycle.MutableLiveData
-import com.lukeneedham.vocabdrill.domain.model.Country
 import com.lukeneedham.vocabdrill.presentation.util.DisposingViewModel
 import com.lukeneedham.vocabdrill.presentation.util.extension.toLiveData
-import com.lukeneedham.vocabdrill.usecase.DeleteLanguage
 import com.lukeneedham.vocabdrill.usecase.DeleteVocabGroup
-import com.lukeneedham.vocabdrill.usecase.ObserveLanguage
 import com.lukeneedham.vocabdrill.usecase.ObserveVocabGroup
 import io.reactivex.rxkotlin.plusAssign
 
@@ -37,9 +35,10 @@ class VocabGroupSettingsViewModel(
         )
     }
 
+    @SuppressLint("CheckResult")
     fun onDelete() {
         stateMutableLiveData.value = State.Working
-        disposables += deleteVocabGroup(vocabGroupId).subscribe {
+        deleteVocabGroup(vocabGroupId).subscribe {
             stateMutableLiveData.value = State.Invalid
         }
     }

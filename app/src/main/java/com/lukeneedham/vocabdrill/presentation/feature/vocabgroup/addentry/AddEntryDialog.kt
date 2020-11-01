@@ -1,12 +1,10 @@
 package com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.addentry
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.core.widget.doOnTextChanged
 import com.lukeneedham.vocabdrill.R
 import com.lukeneedham.vocabdrill.presentation.util.BaseBottomSheetDialogFragment
-import com.lukeneedham.vocabdrill.util.extension.TAG
 import kotlinx.android.synthetic.main.dialog_add_entry.*
 import kotlinx.android.synthetic.main.dialog_add_language.closeButton
 import kotlinx.android.synthetic.main.dialog_add_language.confirmButton
