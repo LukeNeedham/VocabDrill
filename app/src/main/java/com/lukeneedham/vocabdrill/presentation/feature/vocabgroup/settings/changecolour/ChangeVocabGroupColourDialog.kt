@@ -7,16 +7,14 @@ import com.lukeneedham.flowerpotrecycler.SingleTypeRecyclerAdapterCreator
 import com.lukeneedham.flowerpotrecycler.adapter.config.SingleTypeAdapterConfig
 import com.lukeneedham.flowerpotrecycler.util.extensions.addItemLayoutParamsLazy
 import com.lukeneedham.flowerpotrecycler.util.extensions.addOnItemClickListener
+import com.lukeneedham.flowerpotrecycler.util.extensions.scrollToCenter
 import com.lukeneedham.vocabdrill.R
 import com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.create.ColourItemView
 import com.lukeneedham.vocabdrill.presentation.util.BaseBottomSheetDialogFragment
 import com.yarolegovich.discretescrollview.DSVOrientation
 import com.yarolegovich.discretescrollview.transform.Pivot
 import com.yarolegovich.discretescrollview.transform.ScaleTransformer
-import kotlinx.android.synthetic.main.dialog_add_vocab_group.coloursRecycler
-import kotlinx.android.synthetic.main.dialog_add_vocab_group.subColoursRecycler
-import kotlinx.android.synthetic.main.dialog_change_language_name.closeButton
-import kotlinx.android.synthetic.main.dialog_change_language_name.confirmButton
+import kotlinx.android.synthetic.main.dialog_change_vocab_group_colour.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
@@ -56,19 +54,33 @@ class ChangeVocabGroupColourDialog : BaseBottomSheetDialogFragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel.flagColoursLiveData.observe(viewLifecycleOwner) {
-            coloursAdapter.submitList(it)
+        viewModel.vocabGroupColorsLiveData.observe(viewLifecycleOwner) {
+            coloursAdapter.submitList(it.colors) {
+                val selected = it.selectedColour
+                if (selected != null) {
+                    val position = coloursAdapter.positionDelegate.getPositionOfItem(selected)
+                    if (position != RecyclerView.NO_POSITION) {
+                        coloursRecycler.post {
+                            coloursRecycler.scrollToPosition(position)
+                        }
+                    }
+                }
+            }
         }
         viewModel.subColoursLiveData.observe(viewLifecycleOwner) {
-            subColoursAdapter.submitList(it)
-        }
-        viewModel.vocabGroupColorsLiveData.observe(viewLifecycleOwner) {
-            // TODO: This isnt working right now
-            val primaryPosition =
-                coloursAdapter.positionDelegate.getPositionOfItem(it.primaryColour)
-            coloursRecycler.smoothScrollToPosition(primaryPosition)
-            val subPosition = subColoursAdapter.positionDelegate.getPositionOfItem(it.subColour)
-            subColoursRecycler.smoothScrollToPosition(subPosition)
+            subColoursAdapter.submitList(it.colors) {
+                val selected = it.selectedColour
+                if (selected != null) {
+                    val position = subColoursAdapter.positionDelegate.getPositionOfItem(selected)
+                    subColoursRecycler.post {
+                        if (position != RecyclerView.NO_POSITION) {
+                            subColoursRecycler.scrollToPosition(position)
+                        } else {
+                            subColoursRecycler.scrollToCenter()
+                        }
+                    }
+                }
+            }
         }
     }
 

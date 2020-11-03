@@ -22,14 +22,11 @@ class ChangeVocabGroupColourViewModel(
         .subscribeOn(RxSchedulers.database)
         .observeOn(RxSchedulers.main)
 
-    private val flagColoursMutableLiveData = MutableLiveData<List<Int>>()
-    val flagColoursLiveData = flagColoursMutableLiveData.toLiveData()
-
-    private val subColoursMutableLiveData = MutableLiveData<List<Int>>()
+    private val subColoursMutableLiveData = MutableLiveData<VocabGroupColours>()
     val subColoursLiveData = subColoursMutableLiveData.toLiveData()
 
-    private val vocabGroupColorsMutableLiveData = MutableLiveData<VocabGroupColours>()
-    val vocabGroupColorsLiveData = vocabGroupColorsMutableLiveData.toLiveData()
+    private val primaryColorsMutableLiveData = MutableLiveData<VocabGroupColours>()
+    val vocabGroupColorsLiveData = primaryColorsMutableLiveData.toLiveData()
 
     private var loadedVocabGroup: VocabGroup? = null
     private var colourToSubColours: Map<Int, List<Int>>? = null
@@ -39,18 +36,15 @@ class ChangeVocabGroupColourViewModel(
             loadedVocabGroup = group
 
             disposables += extractFlagColoursFromLanguageId(group.languageId).subscribe { colours ->
-                flagColoursMutableLiveData.value = colours
 
                 val coloursToSubColours = colours.map {
                     it to calculateRelatedColours(it)
                 }.toMap()
                 colourToSubColours = coloursToSubColours
 
-                val subColour = group.colour
-                val primaryColour = findColourForSubColour(subColour, coloursToSubColours)
+                val primaryColour = findColourForSubColour(group.colour, coloursToSubColours)
                 if (primaryColour != null) {
-                    vocabGroupColorsMutableLiveData.value =
-                        VocabGroupColours(primaryColour, subColour)
+                    primaryColorsMutableLiveData.value = VocabGroupColours(colours, primaryColour)
                 }
             }
         }
@@ -59,7 +53,7 @@ class ChangeVocabGroupColourViewModel(
     fun onColourSelected(colour: Int) {
         val subColours = colourToSubColours?.get(colour)
             ?: calculateRelatedColours(colour)
-        subColoursMutableLiveData.value = subColours
+        subColoursMutableLiveData.value = VocabGroupColours(subColours, loadedVocabGroup?.colour)
     }
 
     @SuppressLint("CheckResult")
@@ -82,7 +76,10 @@ class ChangeVocabGroupColourViewModel(
         }
     }
 
-    private fun findColourForSubColour(target: Int, coloursToSubColours: Map<Int, List<Int>>): Int? {
+    private fun findColourForSubColour(
+        target: Int,
+        coloursToSubColours: Map<Int, List<Int>>
+    ): Int? {
         coloursToSubColours.forEach { (colour, subcolours) ->
             if (target in subcolours) {
                 return colour
