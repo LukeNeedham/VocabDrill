@@ -31,13 +31,10 @@ class VocabGroupItemView @JvmOverloads constructor(
     }
 
     override fun setItem(position: Int, item: VocabGroupRelations) {
-        val name = item.vocabGroup.name
-        val backgroundBook = VectorMasterDrawable(context, R.drawable.background_book)
-        val bookCoverPath = backgroundBook.getPathModelByName("book_cover")
         val coverColour = item.vocabGroup.colour
-        bookCoverPath.fillColor = coverColour
-        backgroundView.setImageDrawable(backgroundBook)
+        recolourBook(coverColour)
 
+        val name = item.vocabGroup.name
         nameView.maxLines = if (" " in name) Int.MAX_VALUE else 1
         nameView.text = name
         val textColour = viewModel.getTextColor(coverColour)
@@ -50,5 +47,19 @@ class VocabGroupItemView @JvmOverloads constructor(
             textColour
         )
         detailsView.background = detailsBorderDrawable
+    }
+
+    private fun recolourBook(coverColour: Int) {
+        val backgroundBook = VectorMasterDrawable(context, R.drawable.background_book)
+
+        val lineColour = viewModel.getOutlineColour(coverColour)
+        val bookCoverPath = backgroundBook.getPathModelByName("book_cover")
+        bookCoverPath.fillColor = coverColour
+        bookCoverPath.strokeColor = lineColour
+
+        val bookPagesPath = backgroundBook.getPathModelByName("book_pages")
+        bookPagesPath.strokeColor = lineColour
+
+        backgroundView.setImageDrawable(backgroundBook)
     }
 }
