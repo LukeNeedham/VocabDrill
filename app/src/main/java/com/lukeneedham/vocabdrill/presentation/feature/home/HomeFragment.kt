@@ -13,7 +13,7 @@ import com.lukeneedham.flowerpotrecycler.util.extensions.addItemLayoutParams
 import com.lukeneedham.flowerpotrecycler.util.extensions.addOnItemClickListener
 import com.lukeneedham.vocabdrill.R
 import com.lukeneedham.vocabdrill.domain.model.Language
-import com.lukeneedham.vocabdrill.presentation.feature.home.addlanguage.AddLanguageDialog
+import com.lukeneedham.vocabdrill.presentation.feature.language.create.AddLanguageDialog
 import com.lukeneedham.vocabdrill.presentation.util.extension.navigateSafe
 import com.lukeneedham.vocabdrill.presentation.util.extension.showDialog
 import com.lukeneedham.vocabdrill.presentation.util.recyclerview.LinearMarginItemDecorationCreator

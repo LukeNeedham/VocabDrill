@@ -13,7 +13,7 @@ import com.lukeneedham.flowerpotrecycler.adapter.config.SingleTypeAdapterConfig
 import com.lukeneedham.flowerpotrecycler.util.extensions.addItemLayoutParams
 import com.lukeneedham.vocabdrill.R
 import com.lukeneedham.vocabdrill.domain.model.VocabEntryRelations
-import com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.addentry.AddEntryDialog
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.create.AddVocabEntryDialog
 import com.lukeneedham.vocabdrill.presentation.util.extension.getFlagDrawable
 import com.lukeneedham.vocabdrill.presentation.util.extension.navigateSafe
 import com.lukeneedham.vocabdrill.presentation.util.extension.popBackStackSafe
@@ -82,7 +82,7 @@ class VocabGroupFragment : Fragment(R.layout.fragment_vocab_group) {
         }
 
         addEntryButton.setOnClickListener {
-            showDialog(AddEntryDialog.newInstance(viewModel.vocabGroupId))
+            showDialog(AddVocabEntryDialog.newInstance(viewModel.vocabGroupId))
         }
     }
 }

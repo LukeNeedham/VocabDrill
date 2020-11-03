@@ -6,6 +6,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
 import com.lukeneedham.vocabdrill.R
+import com.lukeneedham.vocabdrill.presentation.feature.language.settings.changeflag.ChangeLanguageFlagDialog
 import com.lukeneedham.vocabdrill.presentation.feature.language.settings.changename.ChangeLanguageNameDialog
 import com.lukeneedham.vocabdrill.presentation.util.extension.getFlagDrawable
 import com.lukeneedham.vocabdrill.presentation.util.extension.popBackStackSafe
@@ -57,7 +58,7 @@ class LanguageSettingsFragment : Fragment(R.layout.fragment_language_settings) {
 
         editFlagView.setText(R.string.language_setting_edit_flag)
         editFlagView.setOnClickListener {
-            // TODO
+            showDialog(ChangeLanguageFlagDialog.newInstance(viewModel.languageId))
         }
 
         deleteView.setText(R.string.language_setting_delete)

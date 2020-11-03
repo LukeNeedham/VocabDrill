@@ -2,7 +2,7 @@ package com.lukeneedham.vocabdrill.usecase
 
 import com.lukeneedham.vocabdrill.domain.model.Country
 
-class ExtractFlagColours(
+class ExtractFlagColoursFromCountry(
     private val loadFlagVectorForCountry: LoadFlagVectorForCountry
 ) {
     operator fun invoke(country: Country): List<Int> {

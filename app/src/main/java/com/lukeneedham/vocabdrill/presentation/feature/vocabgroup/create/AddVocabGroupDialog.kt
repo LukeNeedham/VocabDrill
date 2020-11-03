@@ -1,4 +1,4 @@
-package com.lukeneedham.vocabdrill.presentation.feature.language.addgroup
+package com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.create
 
 import android.os.Bundle
 import android.view.View
@@ -14,7 +14,7 @@ import com.lukeneedham.vocabdrill.presentation.util.BaseBottomSheetDialogFragmen
 import com.yarolegovich.discretescrollview.DSVOrientation
 import com.yarolegovich.discretescrollview.transform.Pivot
 import com.yarolegovich.discretescrollview.transform.ScaleTransformer
-import kotlinx.android.synthetic.main.dialog_add_group.*
+import kotlinx.android.synthetic.main.dialog_add_vocab_group.*
 import kotlinx.android.synthetic.main.dialog_add_language.closeButton
 import kotlinx.android.synthetic.main.dialog_add_language.confirmButton
 import kotlinx.android.synthetic.main.dialog_add_language.nameInputView
@@ -53,7 +53,7 @@ class AddVocabGroupDialog : BaseBottomSheetDialogFragment() {
         }
     )
 
-    override val layoutResId = R.layout.dialog_add_group
+    override val layoutResId = R.layout.dialog_add_vocab_group
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)

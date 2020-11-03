@@ -1,4 +1,4 @@
-package com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.addentry
+package com.lukeneedham.vocabdrill.presentation.feature.vocabentry.create
 
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
@@ -9,7 +9,7 @@ import com.lukeneedham.vocabdrill.repository.VocabEntryRepository
 import com.lukeneedham.vocabdrill.util.RxSchedulers
 import com.lukeneedham.vocabdrill.util.extension.TAG
 
-class AddEntryViewModel(
+class AddVocabEntryViewModel(
     private val vocabGroupId: Long,
     private val vocabEntryRepository: VocabEntryRepository
 ) : ViewModel() {

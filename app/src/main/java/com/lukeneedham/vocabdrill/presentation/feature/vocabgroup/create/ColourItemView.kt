@@ -1,4 +1,4 @@
-package com.lukeneedham.vocabdrill.presentation.feature.language.addgroup
+package com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.create
 
 import android.content.Context
 import android.graphics.drawable.GradientDrawable

@@ -1,4 +1,4 @@
-package com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.addentry
+package com.lukeneedham.vocabdrill.presentation.feature.vocabentry.create
 
 import android.os.Bundle
 import android.view.View
@@ -11,10 +11,10 @@ import kotlinx.android.synthetic.main.dialog_add_language.confirmButton
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
-class AddEntryDialog : BaseBottomSheetDialogFragment() {
+class AddVocabEntryDialog : BaseBottomSheetDialogFragment() {
     override val layoutResId = R.layout.dialog_add_entry
 
-    private val viewModel: AddEntryViewModel by viewModel {
+    private val viewModel: AddVocabEntryViewModel by viewModel {
         val vocabGroupId = requireArguments().getLong(ARG_VOCAB_GROUP)
         parametersOf(vocabGroupId)
     }
@@ -52,7 +52,7 @@ class AddEntryDialog : BaseBottomSheetDialogFragment() {
     companion object {
         private const val ARG_VOCAB_GROUP = "ARG_VOCAB_GROUP"
 
-        fun newInstance(vocabGroupId: Long) = AddEntryDialog().apply {
+        fun newInstance(vocabGroupId: Long) = AddVocabEntryDialog().apply {
             arguments = Bundle().apply {
                 putLong(ARG_VOCAB_GROUP, vocabGroupId)
             }

@@ -21,7 +21,6 @@ class FindCountriesForLanguage {
 
     private val languageNames = languageNameToCountries.keys.toList()
 
-    /** This performs heavy work, so don't do this on the main thread */
     operator fun invoke(languageName: String): Single<List<Country>> {
         return Single.fromCallable {
             search(languageName)
@@ -31,6 +30,10 @@ class FindCountriesForLanguage {
     }
 
     private fun search(languageName: String): List<Country> {
+        if (languageName.isBlank()) {
+            return emptyResult
+        }
+
         val matches = FuzzySearch
             .extractAll(languageName, languageNames, ACCEPTED_SIMILARITY)
             .sortedDescending()
@@ -40,14 +43,11 @@ class FindCountriesForLanguage {
             languageNameToCountries.getValue(name).map { Country(it) }
         }.distinct()
 
-        return if (countries.isEmpty()) {
-            listOf(UnknownCountry.country)
-        } else {
-            countries
-        }
+        return if (countries.isEmpty()) emptyResult else countries
     }
 
     companion object {
         private const val ACCEPTED_SIMILARITY = 90
+        val emptyResult = listOf(UnknownCountry.country)
     }
 }

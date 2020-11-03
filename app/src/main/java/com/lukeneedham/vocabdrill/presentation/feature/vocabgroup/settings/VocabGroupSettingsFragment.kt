@@ -7,6 +7,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
 import com.lukeneedham.vocabdrill.R
+import com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.settings.changecolour.ChangeVocabGroupColourDialog
 import com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.settings.changename.ChangeVocabGroupNameDialog
 import com.lukeneedham.vocabdrill.presentation.util.extension.popBackStackSafe
 import com.lukeneedham.vocabdrill.presentation.util.extension.showDialog
@@ -60,7 +61,7 @@ class VocabGroupSettingsFragment : Fragment(R.layout.fragment_vocab_group_settin
 
         editColourView.setText(R.string.vocab_group_setting_edit_colour)
         editColourView.setOnClickListener {
-            // TODO
+            showDialog(ChangeVocabGroupColourDialog.newInstance(viewModel.vocabGroupId))
         }
 
         deleteView.setText(R.string.vocab_group_setting_delete)

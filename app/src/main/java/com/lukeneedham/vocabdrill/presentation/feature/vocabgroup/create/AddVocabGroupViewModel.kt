@@ -1,4 +1,4 @@
-package com.lukeneedham.vocabdrill.presentation.feature.language.addgroup
+package com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.create
 
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
@@ -6,11 +6,10 @@ import com.lukeneedham.vocabdrill.domain.model.VocabGroup
 import com.lukeneedham.vocabdrill.domain.model.VocabGroupProto
 import com.lukeneedham.vocabdrill.presentation.util.DisposingViewModel
 import com.lukeneedham.vocabdrill.presentation.util.extension.toLiveData
-import com.lukeneedham.vocabdrill.repository.LanguageRepository
 import com.lukeneedham.vocabdrill.repository.VocabGroupRepository
 import com.lukeneedham.vocabdrill.usecase.CalculateRelatedColours
 import com.lukeneedham.vocabdrill.usecase.CheckValidVocabGroupName
-import com.lukeneedham.vocabdrill.usecase.ExtractFlagColours
+import com.lukeneedham.vocabdrill.usecase.ExtractFlagColoursFromLanguageId
 import com.lukeneedham.vocabdrill.util.RxSchedulers
 import com.lukeneedham.vocabdrill.util.extension.TAG
 import io.reactivex.disposables.Disposable
@@ -18,9 +17,8 @@ import io.reactivex.rxkotlin.plusAssign
 
 class AddVocabGroupViewModel(
     val languageId: Long,
-    private val languageRepository: LanguageRepository,
     private val vocabGroupRepository: VocabGroupRepository,
-    private val extractFlagColours: ExtractFlagColours,
+    private val extractFlagColoursFromLanguageId: ExtractFlagColoursFromLanguageId,
     private val calculateRelatedColours: CalculateRelatedColours,
     private val checkValidVocabGroupName: CheckValidVocabGroupName
 ) : DisposingViewModel() {
@@ -39,12 +37,7 @@ class AddVocabGroupViewModel(
     val subColoursLiveData = subColoursMutableLiveData.toLiveData()
 
     init {
-        disposables += languageRepository.requireLanguageForId(languageId)
-            .map { language ->
-                extractFlagColours(language.country)
-            }
-            .subscribeOn(RxSchedulers.database)
-            .observeOn(RxSchedulers.main)
+        disposables += extractFlagColoursFromLanguageId(languageId)
             .subscribe { colours ->
                 flagColoursMutableLiveData.value = colours
             }

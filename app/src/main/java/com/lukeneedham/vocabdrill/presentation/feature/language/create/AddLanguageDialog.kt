@@ -1,4 +1,4 @@
-package com.lukeneedham.vocabdrill.presentation.feature.home.addlanguage
+package com.lukeneedham.vocabdrill.presentation.feature.language.create
 
 import android.os.Bundle
 import android.view.View
@@ -8,6 +8,7 @@ import com.lukeneedham.flowerpotrecycler.SingleTypeRecyclerAdapterCreator
 import com.lukeneedham.flowerpotrecycler.adapter.config.SingleTypeAdapterConfig
 import com.lukeneedham.flowerpotrecycler.util.extensions.addItemLayoutParamsLazy
 import com.lukeneedham.vocabdrill.R
+import com.lukeneedham.vocabdrill.domain.model.CountryMatches
 import com.lukeneedham.vocabdrill.domain.model.Flag
 import com.lukeneedham.vocabdrill.presentation.util.BaseBottomSheetDialogFragment
 import com.lukeneedham.vocabdrill.presentation.util.extension.getFlagDrawable
@@ -34,14 +35,25 @@ class AddLanguageDialog : BaseBottomSheetDialogFragment() {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel.countriesObservable.observe(viewLifecycleOwner) {
-            val flags = it.mapNotNull {
-                val flag = it.getFlagDrawable(requireContext()) ?: return@mapNotNull null
-                Flag(flag, it)
-            }
-            flagsAdapter.submitList(flags) {
-                flagsRecycler.post {
-                    flagsRecycler.scrollToPosition(flagsAdapter.itemCount)
+        viewModel.countriesLiveData.observe(viewLifecycleOwner) {
+            val exhaustive = when(it) {
+                is CountryMatches.Searching -> {
+                    flagsRecycler.visibility = View.INVISIBLE
+                    loadingFlagsIcon.visibility = View.VISIBLE
+                    flagsAdapter.submitList(emptyList())
+                }
+                is CountryMatches.Found -> {
+                    val flags = it.countries.mapNotNull {
+                        val flag = it.getFlagDrawable(requireContext()) ?: return@mapNotNull null
+                        Flag(flag, it)
+                    }
+                    flagsAdapter.submitList(flags) {
+                        flagsRecycler.post {
+                            flagsRecycler.visibility = View.VISIBLE
+                            loadingFlagsIcon.visibility = View.GONE
+                            flagsRecycler.scrollToPosition(flagsAdapter.itemCount)
+                        }
+                    }
                 }
             }
         }
