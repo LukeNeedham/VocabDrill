@@ -22,11 +22,11 @@ class ChangeVocabGroupColourViewModel(
         .subscribeOn(RxSchedulers.database)
         .observeOn(RxSchedulers.main)
 
-    private val subColoursMutableLiveData = MutableLiveData<VocabGroupColours>()
-    val subColoursLiveData = subColoursMutableLiveData.toLiveData()
-
     private val primaryColorsMutableLiveData = MutableLiveData<VocabGroupColours>()
     val vocabGroupColorsLiveData = primaryColorsMutableLiveData.toLiveData()
+
+    private val subColoursMutableLiveData = MutableLiveData<VocabGroupColours>()
+    val subColoursLiveData = subColoursMutableLiveData.toLiveData()
 
     private var loadedVocabGroup: VocabGroup? = null
     private var colourToSubColours: Map<Int, List<Int>>? = null
@@ -43,9 +43,7 @@ class ChangeVocabGroupColourViewModel(
                 colourToSubColours = coloursToSubColours
 
                 val primaryColour = findColourForSubColour(group.colour, coloursToSubColours)
-                if (primaryColour != null) {
-                    primaryColorsMutableLiveData.value = VocabGroupColours(colours, primaryColour)
-                }
+                primaryColorsMutableLiveData.value = VocabGroupColours(colours, primaryColour)
             }
         }
     }
