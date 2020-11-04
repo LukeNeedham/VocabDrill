@@ -18,7 +18,7 @@ import com.lukeneedham.vocabdrill.presentation.util.extension.getFlagDrawable
 import com.lukeneedham.vocabdrill.presentation.util.extension.navigateSafe
 import com.lukeneedham.vocabdrill.presentation.util.extension.popBackStackSafe
 import com.lukeneedham.vocabdrill.presentation.util.extension.showDialog
-import com.lukeneedham.vocabdrill.presentation.util.recyclerview.LinearMarginItemDecorationCreator
+import com.lukeneedham.vocabdrill.presentation.util.recyclerview.decoration.LinearMarginItemDecorationCreator
 import kotlinx.android.synthetic.main.fragment_vocab_group.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf

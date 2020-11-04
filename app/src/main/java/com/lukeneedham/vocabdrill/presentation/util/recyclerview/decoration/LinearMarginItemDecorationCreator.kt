@@ -1,4 +1,6 @@
-package com.lukeneedham.vocabdrill.presentation.util.recyclerview
+package com.lukeneedham.vocabdrill.presentation.util.recyclerview.decoration
+
+import com.lukeneedham.vocabdrill.presentation.util.recyclerview.decoration.LinearMarginItemDecoration
 
 object LinearMarginItemDecorationCreator {
     fun fromHorizontal(

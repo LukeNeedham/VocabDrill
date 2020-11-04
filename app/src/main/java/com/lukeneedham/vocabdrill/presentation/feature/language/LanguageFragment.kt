@@ -15,11 +15,12 @@ import com.lukeneedham.flowerpotrecycler.util.extensions.addOnItemClickListener
 import com.lukeneedham.vocabdrill.R
 import com.lukeneedham.vocabdrill.domain.model.VocabGroupRelations
 import com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.create.AddVocabGroupDialog
+import com.lukeneedham.vocabdrill.presentation.util.extension.addOnItemLongClickListener
 import com.lukeneedham.vocabdrill.presentation.util.extension.getFlagDrawable
 import com.lukeneedham.vocabdrill.presentation.util.extension.navigateSafe
 import com.lukeneedham.vocabdrill.presentation.util.extension.popBackStackSafe
 import com.lukeneedham.vocabdrill.presentation.util.extension.showDialog
-import com.lukeneedham.vocabdrill.presentation.util.recyclerview.GridMarginItemDecoration
+import com.lukeneedham.vocabdrill.presentation.util.recyclerview.decoration.GridMarginItemDecoration
 import kotlinx.android.synthetic.main.fragment_language.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -33,6 +34,13 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
         SingleTypeAdapterConfig<VocabGroupRelations, VocabGroupItemView>().apply {
             addItemLayoutParams(RecyclerView.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
             addOnItemClickListener { item, _, _ -> openVocabGroup(item) }
+            addOnItemLongClickListener {
+                navigateSafe(
+                    LanguageFragmentDirections.actionLanguageFragmentToVocabGroupSettingsFragment(
+                        it.vocabGroup.id
+                    )
+                )
+            }
         }
     )
 

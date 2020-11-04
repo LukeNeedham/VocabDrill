@@ -1,4 +1,4 @@
-package com.lukeneedham.vocabdrill.presentation.util.recyclerview
+package com.lukeneedham.vocabdrill.presentation.util.recyclerview.decoration
 
 import android.graphics.Rect
 import android.view.View

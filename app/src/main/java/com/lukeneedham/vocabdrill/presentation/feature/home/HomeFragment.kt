@@ -8,15 +8,20 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.lukeneedham.flowerpotrecycler.SingleTypeRecyclerAdapterCreator
+import com.lukeneedham.flowerpotrecycler.adapter.ViewHolder
 import com.lukeneedham.flowerpotrecycler.adapter.config.SingleTypeAdapterConfig
+import com.lukeneedham.flowerpotrecycler.adapter.delegates.feature.BaseAdapterFeatureDelegate
+import com.lukeneedham.flowerpotrecycler.util.extensions.addDelegate
 import com.lukeneedham.flowerpotrecycler.util.extensions.addItemLayoutParams
 import com.lukeneedham.flowerpotrecycler.util.extensions.addOnItemClickListener
 import com.lukeneedham.vocabdrill.R
 import com.lukeneedham.vocabdrill.domain.model.Language
 import com.lukeneedham.vocabdrill.presentation.feature.language.create.AddLanguageDialog
+import com.lukeneedham.vocabdrill.presentation.util.extension.addOnItemLongClickListener
 import com.lukeneedham.vocabdrill.presentation.util.extension.navigateSafe
 import com.lukeneedham.vocabdrill.presentation.util.extension.showDialog
-import com.lukeneedham.vocabdrill.presentation.util.recyclerview.LinearMarginItemDecorationCreator
+import com.lukeneedham.vocabdrill.presentation.util.recyclerview.decoration.LinearMarginItemDecorationCreator
+import com.lukeneedham.vocabdrill.presentation.util.recyclerview.delegate.OnItemLongClickDelegate
 import kotlinx.android.synthetic.main.fragment_home.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -28,6 +33,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         SingleTypeAdapterConfig<Language, LanguageItemView>().apply {
             addItemLayoutParams(RecyclerView.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
             addOnItemClickListener { item, _, _ -> openLanguage(item) }
+            addOnItemLongClickListener {
+                navigateSafe(HomeFragmentDirections.actionHomeFragmentToLanguageSettingsFragment(it.id))
+            }
         }
     )
 
