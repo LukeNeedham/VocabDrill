@@ -4,9 +4,7 @@ import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-data class VocabEntry(
-    val id: Long,
-    val wordA: String,
-    val wordB: String,
-    val vocabGroupId: Long
+data class LearnBook(
+    val entries: List<VocabEntry>,
+    val colourScheme: VocabGroupColourScheme
 ) : Parcelable

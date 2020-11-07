@@ -55,6 +55,10 @@
             android:id="@+id/action_vocabGroupFragment_to_vocabGroupSettingsFragment"
             app:destination="@id/vocabGroupSettingsFragment"
             />
+        <action
+            android:id="@+id/action_vocabGroupFragment_to_learnFragment"
+            app:destination="@id/learnFragment"
+            />
     </fragment>
     <fragment
         android:id="@+id/languageSettingsFragment"
@@ -74,6 +78,16 @@
         <argument
             android:name="vocabGroupId"
             app:argType="long"
+            />
+    </fragment>
+    <fragment
+        android:id="@+id/learnFragment"
+        android:name="com.lukeneedham.vocabdrill.presentation.feature.learn.LearnFragment"
+        android:label="LearnFragment"
+        >
+        <argument
+            android:name="learnBook"
+            app:argType="com.lukeneedham.vocabdrill.domain.model.LearnBook"
             />
     </fragment>
 </navigation>

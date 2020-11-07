@@ -1,6 +1,7 @@
 package com.lukeneedham.vocabdrill.presentation.feature.vocabgroup
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
@@ -19,6 +20,7 @@ import com.lukeneedham.vocabdrill.presentation.util.extension.navigateSafe
 import com.lukeneedham.vocabdrill.presentation.util.extension.popBackStackSafe
 import com.lukeneedham.vocabdrill.presentation.util.extension.showDialog
 import com.lukeneedham.vocabdrill.presentation.util.recyclerview.decoration.LinearMarginItemDecorationCreator
+import com.lukeneedham.vocabdrill.util.extension.TAG
 import kotlinx.android.synthetic.main.fragment_vocab_group.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -40,6 +42,9 @@ class VocabGroupFragment : Fragment(R.layout.fragment_vocab_group) {
         super.onActivityCreated(savedInstanceState)
         viewModel.entriesLiveData.observe(viewLifecycleOwner) {
             adapter.submitList(it)
+        }
+        viewModel.learnEntriesLiveData.observe(viewLifecycleOwner) {
+            learnButton.isEnabled = true
         }
         viewModel.languageNameLiveData.observe(viewLifecycleOwner) {
             languageTitleView.text = it
@@ -83,6 +88,17 @@ class VocabGroupFragment : Fragment(R.layout.fragment_vocab_group) {
 
         addEntryButton.setOnClickListener {
             showDialog(AddVocabEntryDialog.newInstance(viewModel.vocabGroupId))
+        }
+
+        learnButton.setOnClickListener {
+            val entries = viewModel.learnEntriesLiveData.value
+            if (entries == null) {
+                Log.e(TAG, "Entries is null - should not be here")
+                return@setOnClickListener
+            }
+            navigateSafe(
+                VocabGroupFragmentDirections.actionVocabGroupFragmentToLearnFragment(entries)
+            )
         }
     }
 }

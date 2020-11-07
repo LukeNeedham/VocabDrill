@@ -1,15 +1,12 @@
 package com.lukeneedham.vocabdrill.presentation.feature.language
 
-import android.graphics.Color
-import androidx.core.graphics.ColorUtils
-import com.lukeneedham.vocabdrill.usecase.ChooseTextColourForBackground
+import com.lukeneedham.vocabdrill.domain.model.VocabGroup
+import com.lukeneedham.vocabdrill.domain.model.VocabGroupColourScheme
+import com.lukeneedham.vocabdrill.usecase.CalculateVocabGroupColourScheme
 
 class VocabGroupItemViewModel(
-    private val chooseTextColourForBackground: ChooseTextColourForBackground
+    private val calculateVocabGroupColourScheme: CalculateVocabGroupColourScheme
 ) {
-    fun getTextColor(backgroundColor: Int) = chooseTextColourForBackground(backgroundColor)
-
-    fun getOutlineColour(backgroundColor: Int): Int {
-        return ColorUtils.blendARGB(backgroundColor, Color.BLACK, 0.3f)
-    }
+    fun getColourScheme(vocabGroup: VocabGroup): VocabGroupColourScheme =
+        calculateVocabGroupColourScheme(vocabGroup)
 }

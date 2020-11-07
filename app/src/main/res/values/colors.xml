@@ -11,4 +11,7 @@
 
     <color name="background">#eeeeee</color>
 
+    <color name="learn_book_page_background">#eeeeee</color>
+    <color name="learn_book_page_stroke">#cccccc</color>
+
 </resources>

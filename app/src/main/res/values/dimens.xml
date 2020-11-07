@@ -13,4 +13,7 @@
     <dimen name="vocab_group_description_border_radius">6dp</dimen>
     <dimen name="vocab_group_description_border_width">1dp</dimen>
 
+    <dimen name="learn_book_corner_radius">30dp</dimen>
+    <dimen name="learn_book_border_width">1dp</dimen>
+
 </resources>

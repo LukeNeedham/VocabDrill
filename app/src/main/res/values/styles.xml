@@ -22,13 +22,22 @@
         <item name="android:background">@android:color/transparent</item>
     </style>
 
-    <style name="BackButton">
+    <style name="Button">
         <item name="android:layout_width">48dp</item>
         <item name="android:layout_height">48dp</item>
+        <item name="android:padding">12dp</item>
+    </style>
+
+    <style name="Button.Back">
         <item name="android:layout_marginStart">20dp</item>
         <item name="android:layout_marginTop">10dp</item>
-        <item name="android:padding">12dp</item>
         <item name="srcCompat">@drawable/ic_back</item>
+    </style>
+
+    <style name="Button.Close">
+        <item name="android:layout_marginStart">10dp</item>
+        <item name="android:layout_marginTop">10dp</item>
+        <item name="srcCompat">@drawable/ic_close</item>
     </style>
 
     <style name="SettingsButton">

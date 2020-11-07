@@ -1,6 +1,7 @@
 package com.lukeneedham.vocabdrill.di
 
 import com.lukeneedham.vocabdrill.data.persistence.AppDatabase
+import com.lukeneedham.vocabdrill.domain.model.LearnBook
 import com.lukeneedham.vocabdrill.presentation.feature.home.HomeViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.language.create.AddLanguageViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.language.LanguageViewModel
@@ -9,6 +10,7 @@ import com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.create.AddVoca
 import com.lukeneedham.vocabdrill.presentation.feature.language.settings.LanguageSettingsViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.language.settings.changeflag.ChangeLanguageFlagViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.language.settings.changename.ChangeLanguageNameViewModel
+import com.lukeneedham.vocabdrill.presentation.feature.learn.LearnViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.VocabEntryViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.VocabGroupViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.create.AddVocabEntryViewModel
@@ -19,6 +21,7 @@ import com.lukeneedham.vocabdrill.repository.LanguageRepository
 import com.lukeneedham.vocabdrill.repository.VocabEntryRepository
 import com.lukeneedham.vocabdrill.repository.VocabGroupRepository
 import com.lukeneedham.vocabdrill.usecase.CalculateRelatedColours
+import com.lukeneedham.vocabdrill.usecase.CalculateVocabGroupColourScheme
 import com.lukeneedham.vocabdrill.usecase.CheckValidLanguageName
 import com.lukeneedham.vocabdrill.usecase.CheckValidVocabGroupName
 import com.lukeneedham.vocabdrill.usecase.ChooseTextColourForBackground
@@ -67,25 +70,30 @@ object KoinModule {
     }
 
     private val useCases = module {
+        /* Language */
+        single { ObserveLanguage(get()) }
+        single { DeleteLanguage(get()) }
+        single { CheckValidLanguageName(get()) }
+
+        /* Vocab Group */
         single { ObserveVocabGroupRelations(get(), get(), get()) }
         single { ObserveAllVocabGroupRelationsForLanguage(get(), get(), get()) }
         single { ObserveAllVocabEntryRelationsForVocabGroup(get(), get(), get()) }
-        single { ObserveLanguage(get()) }
-        single { DeleteLanguage(get()) }
         single { ObserveVocabGroup(get()) }
         single { DeleteVocabGroup(get()) }
-        single { CheckValidLanguageName(get()) }
         single { CheckValidVocabGroupName(get()) }
 
-        single { FindCountriesForLanguage() }
-
+        /* Countries */
         single { ExtractFlagColoursFromLanguageId(get(), get()) }
         single { ExtractFlagColoursFromCountry(get()) }
         single { LoadFlagVectorForCountry(get()) }
+        single { FindCountriesForLanguage() }
 
+        /* Colour */
         single { ChooseTextColourForBackground() }
         single { CalculateRelatedColours() }
         single { EstimateColourDistance() }
+        single { CalculateVocabGroupColourScheme(get()) }
     }
 
     private val viewModels = module {
@@ -111,6 +119,9 @@ object KoinModule {
 
         /* Vocab Entry */
         viewModel { (vocabGroupId: Long) -> AddVocabEntryViewModel(vocabGroupId, get()) }
+
+        /* Learn */
+        viewModel { (learnBook: LearnBook) -> LearnViewModel(learnBook) }
     }
 
     private val vanillaViewModels = module {

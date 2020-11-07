@@ -6,6 +6,7 @@ import android.util.AttributeSet
 import android.widget.FrameLayout
 import com.lukeneedham.flowerpotrecycler.adapter.RecyclerItemView
 import com.lukeneedham.vocabdrill.R
+import com.lukeneedham.vocabdrill.domain.model.VocabGroupColourScheme
 import com.lukeneedham.vocabdrill.domain.model.VocabGroupRelations
 import com.lukeneedham.vocabdrill.presentation.util.extension.inflateFrom
 import com.sdsmdg.harjot.vectormaster.VectorMasterDrawable
@@ -31,13 +32,13 @@ class VocabGroupItemView @JvmOverloads constructor(
     }
 
     override fun setItem(position: Int, item: VocabGroupRelations) {
-        val coverColour = item.vocabGroup.colour
-        recolourBook(coverColour)
+        val colourScheme = viewModel.getColourScheme(item.vocabGroup)
+        recolourBook(colourScheme)
 
         val name = item.vocabGroup.name
         nameView.maxLines = if (" " in name) Int.MAX_VALUE else 1
         nameView.text = name
-        val textColour = viewModel.getTextColor(coverColour)
+        val textColour = colourScheme.textColour
         nameView.setTextColor(textColour)
         detailsView.text = context.getString(R.string.vocab_group_details, item.entries.size)
         detailsView.setTextColor(textColour)
@@ -49,12 +50,12 @@ class VocabGroupItemView @JvmOverloads constructor(
         detailsView.background = detailsBorderDrawable
     }
 
-    private fun recolourBook(coverColour: Int) {
+    private fun recolourBook(colourScheme: VocabGroupColourScheme) {
         val backgroundBook = VectorMasterDrawable(context, R.drawable.background_book)
 
-        val lineColour = viewModel.getOutlineColour(coverColour)
+        val lineColour = colourScheme.borderColour
         val bookCoverPath = backgroundBook.getPathModelByName("book_cover")
-        bookCoverPath.fillColor = coverColour
+        bookCoverPath.fillColor = colourScheme.mainColour
         bookCoverPath.strokeColor = lineColour
 
         val bookPagesPath = backgroundBook.getPathModelByName("book_pages")

@@ -8,7 +8,7 @@ class VocabEntryViewModel(
     private val chooseTextColourForBackground: ChooseTextColourForBackground,
     private val estimateColourDistance: EstimateColourDistance
 ) {
-    fun getColourScheme(tintColour: Int, backgroundColor: Int): ColourScheme {
+    fun getColourScheme(tintColour: Int, backgroundColor: Int): EntryColourScheme {
         val sideAColour = tintColour
 
         val sideColourDistance = estimateColourDistance(sideAColour, DEFAULT_SIDE_B_COLOUR)
@@ -34,7 +34,7 @@ class VocabEntryViewModel(
         val sideATextColour = chooseTextColourForBackground(sideAColour)
         val sideBTextColor = chooseTextColourForBackground(sideBColour)
 
-        return ColourScheme(
+        return EntryColourScheme(
             tintColour,
             sideBColour,
             borderColour,
@@ -42,14 +42,6 @@ class VocabEntryViewModel(
             sideBTextColor
         )
     }
-
-    data class ColourScheme(
-        val sideAColor: Int,
-        val sideBColor: Int,
-        val borderColor: Int,
-        val sideATextColor: Int,
-        val sideBTextColor: Int,
-    )
 
     companion object {
         const val DEFAULT_SIDE_B_COLOUR = Color.WHITE
