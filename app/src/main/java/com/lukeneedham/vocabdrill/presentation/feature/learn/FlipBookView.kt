@@ -10,6 +10,7 @@ import android.view.animation.Animation
 import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
 import com.lukeneedham.vocabdrill.R
+import com.lukeneedham.vocabdrill.presentation.util.DefaultAnimationListener
 import com.lukeneedham.vocabdrill.presentation.util.extension.inflateFrom
 import group.infotech.drawable.dsl.corners
 import group.infotech.drawable.dsl.shapeDrawable
@@ -37,6 +38,8 @@ class FlipBookView @JvmOverloads constructor(
 
     private var turnFirstPageAnimation: Animation? = null
     private var turnSecondPageAnimation: Animation? = null
+
+    private var pageTurnAnimationListener: Animation.AnimationListener? = null
 
     private val pageCornerRadius = resources.getDimension(R.dimen.learn_book_corner_radius)
     private val pageBorderWidth = resources.getDimensionPixelSize(R.dimen.learn_book_border_width)
@@ -80,6 +83,10 @@ class FlipBookView @JvmOverloads constructor(
      */
     fun setAnimationDuration(halfDuration: Long) {
         animationDuration = halfDuration
+    }
+
+    fun setPageTurnAnimationListener(listener: Animation.AnimationListener) {
+        pageTurnAnimationListener = listener
     }
 
     fun setPaperColour(colour: Int) {
@@ -130,9 +137,7 @@ class FlipBookView @JvmOverloads constructor(
             RotateZAnimation(90f, 0f, firstPageMoving.width.toFloat(), centerY).apply {
                 duration = DEFAULT_ANIMATION_DURATION
                 interpolator = DecelerateInterpolator()
-                setAnimationListener(object : Animation.AnimationListener {
-                    override fun onAnimationRepeat(animation: Animation?) {}
-
+                setAnimationListener(object : DefaultAnimationListener {
                     override fun onAnimationStart(animation: Animation?) {
                         firstPageMoving.visibility = View.VISIBLE
                         secondPageMoving.visibility = View.INVISIBLE
@@ -142,6 +147,7 @@ class FlipBookView @JvmOverloads constructor(
                         firstPage.text = nextPage.firstPageText
                         firstPage.visibility = View.VISIBLE
                         firstPageMoving.visibility = View.INVISIBLE
+                        pageTurnAnimationListener?.onAnimationEnd(animation)
                     }
                 })
             }
@@ -151,11 +157,10 @@ class FlipBookView @JvmOverloads constructor(
         val turnSecondPageAnimation = RotateZAnimation(0f, -90f, 0f, centerY).apply {
             duration = DEFAULT_ANIMATION_DURATION
             interpolator = AccelerateInterpolator()
-            setAnimationListener(object : Animation.AnimationListener {
-                override fun onAnimationRepeat(animation: Animation?) {}
-
+            setAnimationListener(object : DefaultAnimationListener {
                 override fun onAnimationStart(animation: Animation?) {
                     secondPageMoving.visibility = View.VISIBLE
+                    pageTurnAnimationListener?.onAnimationStart(animation)
                 }
 
                 override fun onAnimationEnd(animation: Animation?) {

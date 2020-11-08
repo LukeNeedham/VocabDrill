@@ -37,6 +37,7 @@ import com.lukeneedham.vocabdrill.usecase.ObserveAllVocabGroupRelationsForLangua
 import com.lukeneedham.vocabdrill.usecase.ObserveLanguage
 import com.lukeneedham.vocabdrill.usecase.ObserveVocabGroup
 import com.lukeneedham.vocabdrill.usecase.ObserveVocabGroupRelations
+import com.lukeneedham.vocabdrill.usecase.PlaySoundEffect
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import org.koin.android.ext.koin.androidContext
@@ -94,6 +95,9 @@ object KoinModule {
         single { CalculateRelatedColours() }
         single { EstimateColourDistance() }
         single { CalculateVocabGroupColourScheme(get()) }
+
+        /* Learn */
+        single { PlaySoundEffect(androidContext()) }
     }
 
     private val viewModels = module {
@@ -121,7 +125,7 @@ object KoinModule {
         viewModel { (vocabGroupId: Long) -> AddVocabEntryViewModel(vocabGroupId, get()) }
 
         /* Learn */
-        viewModel { (learnBook: LearnBook) -> LearnViewModel(learnBook) }
+        viewModel { (learnBook: LearnBook) -> LearnViewModel(learnBook, get()) }
     }
 
     private val vanillaViewModels = module {

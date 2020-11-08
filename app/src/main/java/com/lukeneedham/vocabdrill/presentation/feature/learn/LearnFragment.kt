@@ -2,9 +2,14 @@ package com.lukeneedham.vocabdrill.presentation.feature.learn
 
 import android.os.Bundle
 import android.view.View
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
+import androidx.core.content.ContextCompat
+import androidx.core.view.postDelayed
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
 import com.lukeneedham.vocabdrill.R
+import com.lukeneedham.vocabdrill.presentation.util.DefaultAnimationListener
 import com.lukeneedham.vocabdrill.presentation.util.extension.hideKeyboard
 import com.lukeneedham.vocabdrill.presentation.util.extension.popBackStackSafe
 import com.lukeneedham.vocabdrill.presentation.util.extension.setOnDoneListener
@@ -34,6 +39,17 @@ class LearnFragment : Fragment(R.layout.fragment_learn) {
                 }
             }
         }
+        viewModel.feedbackStateLiveData.observe(viewLifecycleOwner) {
+            textInputViewLayout.endIconDrawable =
+                ContextCompat.getDrawable(requireContext(), it.inputIconRes)
+
+            when (it) {
+                FeedbackState.Incorrect -> {
+                    textInputView.setText("")
+                    giveIncorrectFeedback()
+                }
+            }
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -56,6 +72,11 @@ class LearnFragment : Fragment(R.layout.fragment_learn) {
         flipBookView.setPaperColour(colourScheme.mainColour)
         flipBookView.setTextColour(colourScheme.textColour)
         flipBookView.setBorderColour(colourScheme.borderColour)
+        flipBookView.setPageTurnAnimationListener(object : DefaultAnimationListener {
+            override fun onAnimationEnd(animation: Animation?) {
+                onPageTurnAnimationCompleted()
+            }
+        })
     }
 
     override fun onDestroyView() {
@@ -64,6 +85,32 @@ class LearnFragment : Fragment(R.layout.fragment_learn) {
     }
 
     private fun submitInput() {
-        viewModel.onInput(textInputView.text.toString())
+        val feedbackState = viewModel.feedbackStateLiveData.value
+        if (feedbackState != FeedbackState.Ready) {
+            return
+        }
+
+        val input = textInputView.text.toString()
+        viewModel.onInput(input)
+    }
+
+    private fun giveIncorrectFeedback() {
+        val animation = AnimationUtils.loadAnimation(context, R.anim.shake)
+        animation.setAnimationListener(object : DefaultAnimationListener {
+            override fun onAnimationEnd(animation: Animation?) {
+                requireView().postDelayed(INCORRECT_FEEDBACK_END_WAIT) {
+                    viewModel.onFeedbackGiven()
+                }
+            }
+        })
+        textInputViewLayout.startAnimation(animation)
+    }
+
+    private fun onPageTurnAnimationCompleted() {
+        viewModel.onFeedbackGiven()
+    }
+
+    companion object {
+        const val INCORRECT_FEEDBACK_END_WAIT = 200L
     }
 }
