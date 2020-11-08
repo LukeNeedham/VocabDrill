@@ -1,6 +1,7 @@
 package com.lukeneedham.vocabdrill.presentation.feature.learn
 
 import android.os.Bundle
+import android.text.InputType
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
@@ -12,7 +13,9 @@ import com.lukeneedham.vocabdrill.R
 import com.lukeneedham.vocabdrill.presentation.util.DefaultAnimationListener
 import com.lukeneedham.vocabdrill.presentation.util.extension.hideKeyboard
 import com.lukeneedham.vocabdrill.presentation.util.extension.popBackStackSafe
+import com.lukeneedham.vocabdrill.presentation.util.extension.setEditable
 import com.lukeneedham.vocabdrill.presentation.util.extension.setOnDoneListener
+import com.lukeneedham.vocabdrill.presentation.util.extension.showKeyboard
 import kotlinx.android.synthetic.main.fragment_learn.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -25,8 +28,6 @@ class LearnFragment : Fragment(R.layout.fragment_learn) {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         viewModel.bookStateLiveData.observe(viewLifecycleOwner) {
-            textInputView.setText("")
-
             val exhaustive: Any = when (it) {
                 is BookState.Finished -> {
                     // TODO: Handle finished state
@@ -44,8 +45,10 @@ class LearnFragment : Fragment(R.layout.fragment_learn) {
                 ContextCompat.getDrawable(requireContext(), it.inputIconRes)
 
             when (it) {
+                FeedbackState.Correct -> {
+                    giveCorrectFeedback()
+                }
                 FeedbackState.Incorrect -> {
-                    textInputView.setText("")
                     giveIncorrectFeedback()
                 }
             }
@@ -62,7 +65,8 @@ class LearnFragment : Fragment(R.layout.fragment_learn) {
         textInputView.setOnDoneListener {
             submitInput()
         }
-        textInputView.requestFocus()
+        textInputViewLayout.requestFocus()
+        showKeyboard()
 
         textInputViewLayout.setEndIconOnClickListener {
             submitInput()
@@ -94,6 +98,20 @@ class LearnFragment : Fragment(R.layout.fragment_learn) {
         viewModel.onInput(input)
     }
 
+    private fun giveCorrectFeedback() {
+        textInputView.setEditable(false)
+        val animation = AnimationUtils.loadAnimation(context, R.anim.pulse)
+        animation.setAnimationListener(object : DefaultAnimationListener {
+            override fun onAnimationEnd(animation: Animation?) {
+                requireView().postDelayed(CORRECT_FEEDBACK_END_WAIT) {
+                    textInputView.setText("")
+                    textInputView.setEditable(true)
+                }
+            }
+        })
+        textInputViewLayout.startAnimation(animation)
+    }
+
     private fun giveIncorrectFeedback() {
         val animation = AnimationUtils.loadAnimation(context, R.anim.shake)
         animation.setAnimationListener(object : DefaultAnimationListener {
@@ -111,6 +129,7 @@ class LearnFragment : Fragment(R.layout.fragment_learn) {
     }
 
     companion object {
+        const val CORRECT_FEEDBACK_END_WAIT = 100L
         const val INCORRECT_FEEDBACK_END_WAIT = 200L
     }
 }

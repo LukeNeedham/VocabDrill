@@ -21,6 +21,11 @@ fun Fragment.hideKeyboard() {
     imm.hideSoftInputFromWindow(windowToken, 0)
 }
 
+fun Fragment.showKeyboard() {
+    val imm = context?.getSystemService<InputMethodManager>() ?: return
+    imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
+}
+
 /** Sets the target fragment to this, and shows */
 fun Fragment.showDialog(dialog: DialogFragment) {
     if (!mayNavigate()) {

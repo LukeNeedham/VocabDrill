@@ -16,3 +16,14 @@ fun EditText.setOnDoneListener(listener: () -> Unit) {
         return@setOnEditorActionListener false
     }
 }
+
+fun EditText.setEditable(isEditable: Boolean) {
+    if(!isEditable) {
+        clearFocus()
+    }
+    isFocusable = isEditable
+    isFocusableInTouchMode = isEditable
+    if(isEditable) {
+        requestFocus()
+    }
+}
