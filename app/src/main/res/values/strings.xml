@@ -1,7 +1,10 @@
 <resources>
     <string name="app_name">VocabDrill</string>
 
-    <string name="vocab_group_details">%1$d entries</string>
+    <plurals name="vocab_group_details">
+        <item quantity="one">%1$d entry</item>
+        <item quantity="other">%1$d entries</item>
+    </plurals>
 
     <string name="language_delete_confirm_message">
         Are you sure you want to delete this language? All the vocab in this language will also be deleted.
@@ -10,7 +13,7 @@
     <string name="language_delete_confirm_yes">Delete</string>
 
     <string name="vocab_group_delete_confirm_message">
-        Are you sure you want to delete this group? All the vocab entries in this group will also be deleted.
+        Are you sure you want to delete this vocab book? All the vocab entries in this book will also be deleted.
     </string>
 
     <string name="vocab_group_delete_confirm_yes">Delete</string>
@@ -22,5 +25,23 @@
     <string name="vocab_group_setting_edit_colour">Edit colour</string>
     <string name="vocab_group_setting_edit_name">Edit name</string>
     <string name="vocab_group_setting_delete">Delete</string>
+
+    <string name="add_language_name_hint">Language Name</string>
+    <string name="add_language_button">Add Language</string>
+
+    <string name="change_language_name_hint">Language Name</string>
+    <string name="change_language_name_button">Confirm</string>
+    <string name="change_language_flag_button">Confirm</string>
+
+    <string name="add_entry_word_1_hint">Word 1</string>
+    <string name="add_entry_word_2_hint">Word 2</string>
+    <string name="add_entry_button">Add Entry</string>
+
+    <string name="add_vocab_group_name_hint">Vocab Book Name</string>
+    <string name="add_vocab_group_button">Add Vocab Book</string>
+
+    <string name="change_vocab_group_colour_button">Update colour</string>
+
+    <string name="learn_button">Learn!</string>
 
 </resources>

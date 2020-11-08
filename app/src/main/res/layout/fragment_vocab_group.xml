@@ -89,7 +89,7 @@
         android:background="@drawable/background_button_learn"
         android:enabled="false"
         android:gravity="center"
-        android:text="Learn"
+        android:text="@string/learn_button"
         android:textColor="@android:color/white"
         app:layout_constraintBottom_toBottomOf="@+id/addEntryButton"
         app:layout_constraintEnd_toStartOf="@+id/addEntryButton"

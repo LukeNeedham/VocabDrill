@@ -40,7 +40,9 @@ class VocabGroupItemView @JvmOverloads constructor(
         nameView.text = name
         val textColour = colourScheme.textColour
         nameView.setTextColor(textColour)
-        detailsView.text = context.getString(R.string.vocab_group_details, item.entries.size)
+        val entriesCount =  item.entries.size
+        detailsView.text =
+            resources.getQuantityString(R.plurals.vocab_group_details, entriesCount, entriesCount)
         detailsView.setTextColor(textColour)
 
         detailsBorderDrawable.setStroke(

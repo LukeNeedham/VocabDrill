@@ -19,7 +19,7 @@ class LearnFragment : Fragment(R.layout.fragment_learn) {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         viewModel.bookStateLiveData.observe(viewLifecycleOwner) {
-            inputView.setText("")
+            textInputView.setText("")
 
             val exhaustive: Any = when (it) {
                 is BookState.Finished -> {
@@ -42,7 +42,7 @@ class LearnFragment : Fragment(R.layout.fragment_learn) {
             popBackStackSafe()
         }
 
-        inputView.setOnDoneListener {
+        textInputView.setOnDoneListener {
             submitInput()
         }
 
@@ -57,6 +57,6 @@ class LearnFragment : Fragment(R.layout.fragment_learn) {
     }
 
     private fun submitInput() {
-        viewModel.onInput(inputView.text.toString())
+        viewModel.onInput(textInputView.text.toString())
     }
 }

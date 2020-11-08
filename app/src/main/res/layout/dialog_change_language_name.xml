@@ -28,20 +28,31 @@ otherwise the keyboard will cover the dialog when using the EditText
             app:srcCompat="@drawable/ic_close"
             />
 
-        <EditText
-            android:id="@+id/textInputView"
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:id="@+id/textInputViewLayout"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="40dp"
             android:layout_marginEnd="40dp"
             android:gravity="center"
-            android:hint="Name"
             android:importantForAutofill="no"
             android:inputType="text"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/closeButton"
-            />
+            >
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/textInputView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/change_language_name_hint"
+                android:importantForAutofill="no"
+                android:inputType="text"
+                />
+
+        </com.google.android.material.textfield.TextInputLayout>
 
         <TextView
             android:id="@+id/confirmButton"
@@ -55,12 +66,12 @@ otherwise the keyboard will cover the dialog when using the EditText
             android:enabled="false"
             android:gravity="center"
             android:padding="10dp"
-            android:text="Confirm"
+            android:text="@string/change_language_name_button"
             android:textColor="@android:color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textInputView"
+            app:layout_constraintTop_toBottomOf="@+id/textInputViewLayout"
             />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

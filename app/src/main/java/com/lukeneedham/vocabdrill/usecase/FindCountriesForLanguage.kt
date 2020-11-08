@@ -1,7 +1,6 @@
 package com.lukeneedham.vocabdrill.usecase
 
 import android.util.Log
-import com.lukeneedham.languagecountries.LanguageProvider
 import com.lukeneedham.vocabdrill.domain.UnknownCountry
 import com.lukeneedham.vocabdrill.domain.model.Country
 import com.lukeneedham.vocabdrill.util.extension.TAG
@@ -11,15 +10,6 @@ import io.reactivex.schedulers.Schedulers
 import me.xdrop.fuzzywuzzy.FuzzySearch
 
 class FindCountriesForLanguage {
-
-    private val languages = LanguageProvider.allLanguages?.languages ?: emptyList()
-
-    private val languageNameToCountries: Map<String, List<String>> =
-        languages.flatMap { language ->
-            language.names.map { name -> name to language.countryCodes }
-        }.toMap()
-
-    private val languageNames = languageNameToCountries.keys.toList()
 
     operator fun invoke(languageName: String): Single<List<Country>> {
         return Single.fromCallable {
@@ -33,6 +23,9 @@ class FindCountriesForLanguage {
         if (languageName.isBlank()) {
             return emptyResult
         }
+
+        val languageNames = Languages.languageNames
+        val languageNameToCountries = Languages.languageNameToCountries
 
         val matches = FuzzySearch
             .extractAll(languageName, languageNames, ACCEPTED_SIMILARITY)

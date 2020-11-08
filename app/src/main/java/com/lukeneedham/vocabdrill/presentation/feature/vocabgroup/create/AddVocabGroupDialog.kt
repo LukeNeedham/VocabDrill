@@ -15,9 +15,6 @@ import com.yarolegovich.discretescrollview.DSVOrientation
 import com.yarolegovich.discretescrollview.transform.Pivot
 import com.yarolegovich.discretescrollview.transform.ScaleTransformer
 import kotlinx.android.synthetic.main.dialog_add_vocab_group.*
-import kotlinx.android.synthetic.main.dialog_add_language.closeButton
-import kotlinx.android.synthetic.main.dialog_add_language.confirmButton
-import kotlinx.android.synthetic.main.dialog_add_language.nameInputView
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 

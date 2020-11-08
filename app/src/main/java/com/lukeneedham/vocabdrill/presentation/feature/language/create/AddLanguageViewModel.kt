@@ -1,11 +1,13 @@
 package com.lukeneedham.vocabdrill.presentation.feature.language.create
 
 import android.util.Log
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.lukeneedham.vocabdrill.domain.model.Country
 import com.lukeneedham.vocabdrill.domain.model.CountryMatches
 import com.lukeneedham.vocabdrill.domain.model.LanguageProto
 import com.lukeneedham.vocabdrill.presentation.util.DisposingViewModel
+import com.lukeneedham.vocabdrill.presentation.util.LiveDataZipper
 import com.lukeneedham.vocabdrill.presentation.util.extension.toLiveData
 import com.lukeneedham.vocabdrill.repository.LanguageRepository
 import com.lukeneedham.vocabdrill.usecase.CheckValidLanguageName
@@ -26,13 +28,19 @@ class AddLanguageViewModel(
     private var countriesDisposable: Disposable? = null
     private var checkValidityDisposable: Disposable? = null
 
+    private val isValidNameMutableLiveData = MutableLiveData<Boolean>(false)
+
     private val countriesMutableLiveData = MutableLiveData<CountryMatches>(
         CountryMatches.Found(FindCountriesForLanguage.emptyResult)
     )
     val countriesLiveData = countriesMutableLiveData.toLiveData()
 
-    private val isValidNameMutableLiveData = MutableLiveData<Boolean>(false)
-    val isValidNameLiveData = isValidNameMutableLiveData.toLiveData()
+    val isConfirmEnabledLiveData: LiveData<Boolean> = LiveDataZipper.biZip(
+        countriesLiveData,
+        isValidNameMutableLiveData
+    ) { countries, validName ->
+        countries is CountryMatches.Found && validName
+    }
 
     fun onNameChange(name: String) {
         this.name = name

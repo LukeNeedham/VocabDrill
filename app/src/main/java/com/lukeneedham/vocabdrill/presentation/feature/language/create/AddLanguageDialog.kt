@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.lukeneedham.flowerpotrecycler.SingleTypeRecyclerAdapterCreator
 import com.lukeneedham.flowerpotrecycler.adapter.config.SingleTypeAdapterConfig
 import com.lukeneedham.flowerpotrecycler.util.extensions.addItemLayoutParamsLazy
+import com.lukeneedham.flowerpotrecycler.util.extensions.addOnItemClickListener
 import com.lukeneedham.vocabdrill.R
 import com.lukeneedham.vocabdrill.domain.model.CountryMatches
 import com.lukeneedham.vocabdrill.domain.model.Flag
@@ -28,6 +29,9 @@ class AddLanguageDialog : BaseBottomSheetDialogFragment() {
                 val width = height
                 RecyclerView.LayoutParams(width, height)
             }
+            addOnItemClickListener { _, position, _ ->
+                flagsRecycler.smoothScrollToPosition(position)
+            }
         }
     )
 
@@ -36,7 +40,7 @@ class AddLanguageDialog : BaseBottomSheetDialogFragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         viewModel.countriesLiveData.observe(viewLifecycleOwner) {
-            val exhaustive = when(it) {
+            val exhaustive = when (it) {
                 is CountryMatches.Searching -> {
                     flagsRecycler.visibility = View.INVISIBLE
                     loadingFlagsIcon.visibility = View.VISIBLE
@@ -57,7 +61,7 @@ class AddLanguageDialog : BaseBottomSheetDialogFragment() {
                 }
             }
         }
-        viewModel.isValidNameLiveData.observe(viewLifecycleOwner) {
+        viewModel.isConfirmEnabledLiveData.observe(viewLifecycleOwner) {
             confirmButton.isEnabled = it
         }
     }

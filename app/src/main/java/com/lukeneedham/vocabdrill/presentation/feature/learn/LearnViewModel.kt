@@ -40,7 +40,9 @@ class LearnViewModel(
             BookState.Finished
         } else {
             val pageNumber = (currentEntryIndex + 1).toString()
-            val newContents = PageContents(pageNumber, newEntry.wordA)
+            val totalPages = entryList.size
+            val progressText = "# $pageNumber / $totalPages"
+            val newContents = PageContents(progressText, newEntry.wordA)
             BookState.Page(newContents)
         }
     }
