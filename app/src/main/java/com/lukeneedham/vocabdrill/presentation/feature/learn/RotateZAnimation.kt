@@ -12,7 +12,7 @@ class RotateZAnimation(
 ) : Animation() {
 
     private val camera = Camera().apply {
-        setLocation(0f, 0f, -20f)
+        setLocation(0f, 0f, -25f)
     }
 
     override fun applyTransformation(interpolatedTime: Float, t: Transformation) {

@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#eeeeee</color>
-    <color name="primary_dark">#bbbbbb</color>
-    <color name="accent">#666666</color>
+    <color name="light_grey">#eeeeee</color>
+    <color name="medium_grey">#bbbbbb</color>
+    <color name="dark_grey">#666666</color>
 
-    <color name="secondary_text">#666666</color>
-
-    <color name="button_add_language_confirm_enabled">@color/accent</color>
+    <color name="button_add_language_confirm_enabled">@color/dark_grey</color>
     <color name="button_add_language_confirm_disabled">#dddddd</color>
 
     <color name="background">#eeeeee</color>

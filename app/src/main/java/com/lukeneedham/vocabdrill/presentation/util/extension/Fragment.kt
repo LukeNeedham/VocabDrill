@@ -3,7 +3,9 @@ package com.lukeneedham.vocabdrill.presentation.util.extension
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.view.inputmethod.InputMethodManager
 import androidx.annotation.IdRes
+import androidx.core.content.getSystemService
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.navigation.NavDirections
@@ -12,6 +14,12 @@ import androidx.navigation.Navigator
 import androidx.navigation.fragment.findNavController
 import com.lukeneedham.vocabdrill.R
 import com.lukeneedham.vocabdrill.util.extension.TAG
+
+fun Fragment.hideKeyboard() {
+    val windowToken = activity?.currentFocus?.windowToken ?: return
+    val imm = context?.getSystemService<InputMethodManager>() ?: return
+    imm.hideSoftInputFromWindow(windowToken, 0)
+}
 
 /** Sets the target fragment to this, and shows */
 fun Fragment.showDialog(dialog: DialogFragment) {

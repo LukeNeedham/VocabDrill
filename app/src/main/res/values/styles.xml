@@ -1,10 +1,16 @@
 <resources>
     <!-- Base application theme. -->
     <style name="AppTheme"
-        parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="colorPrimary">@color/primary</item>
-        <item name="colorPrimaryDark">@color/primary_dark</item>
-        <item name="colorAccent">@color/accent</item>
+        parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/dark_grey</item>
+        <item name="colorPrimaryVariant">@color/dark_grey</item>
+        <item name="colorOnPrimary">@android:color/white</item>
+
+        <item name="colorSecondary">@color/dark_grey</item>
+        <item name="colorSecondaryVariant">@color/dark_grey</item>
+        <item name="colorOnSecondary">@android:color/white</item>
+
+        <item name="android:statusBarColor">@color/medium_grey</item>
 
         <item name="bottomSheetDialogTheme">@style/TransparentBottomSheetTheme</item>
     </style>
@@ -22,19 +28,19 @@
         <item name="android:background">@android:color/transparent</item>
     </style>
 
-    <style name="Button">
+    <style name="NavButton">
         <item name="android:layout_width">48dp</item>
         <item name="android:layout_height">48dp</item>
         <item name="android:padding">12dp</item>
     </style>
 
-    <style name="Button.Back">
+    <style name="NavButton.Back">
         <item name="android:layout_marginStart">20dp</item>
         <item name="android:layout_marginTop">10dp</item>
         <item name="srcCompat">@drawable/ic_back</item>
     </style>
 
-    <style name="Button.Close">
+    <style name="NavButton.Close">
         <item name="android:layout_marginStart">10dp</item>
         <item name="android:layout_marginTop">10dp</item>
         <item name="srcCompat">@drawable/ic_close</item>
@@ -46,6 +52,11 @@
         <item name="android:layout_marginEnd">10dp</item>
         <item name="android:layout_marginTop">8dp</item>
         <item name="android:padding">4dp</item>
+    </style>
+
+    <style name="TextInput" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="hintTextColor">@color/dark_grey</item>
+        <item name="boxStrokeColor">@color/dark_grey</item>
     </style>
 
 </resources>

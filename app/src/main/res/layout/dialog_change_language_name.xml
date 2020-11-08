@@ -29,8 +29,8 @@ otherwise the keyboard will cover the dialog when using the EditText
             />
 
         <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:id="@+id/textInputViewLayout"
+            style="@style/TextInput"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="40dp"

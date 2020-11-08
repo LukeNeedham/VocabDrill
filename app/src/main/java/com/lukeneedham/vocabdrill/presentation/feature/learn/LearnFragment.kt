@@ -5,6 +5,7 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
 import com.lukeneedham.vocabdrill.R
+import com.lukeneedham.vocabdrill.presentation.util.extension.hideKeyboard
 import com.lukeneedham.vocabdrill.presentation.util.extension.popBackStackSafe
 import com.lukeneedham.vocabdrill.presentation.util.extension.setOnDoneListener
 import kotlinx.android.synthetic.main.fragment_learn.*
@@ -45,8 +46,9 @@ class LearnFragment : Fragment(R.layout.fragment_learn) {
         textInputView.setOnDoneListener {
             submitInput()
         }
+        textInputView.requestFocus()
 
-        submitButton.setOnClickListener {
+        textInputViewLayout.setEndIconOnClickListener {
             submitInput()
         }
 
@@ -54,6 +56,11 @@ class LearnFragment : Fragment(R.layout.fragment_learn) {
         flipBookView.setPaperColour(colourScheme.mainColour)
         flipBookView.setTextColour(colourScheme.textColour)
         flipBookView.setBorderColour(colourScheme.borderColour)
+    }
+
+    override fun onDestroyView() {
+        hideKeyboard()
+        super.onDestroyView()
     }
 
     private fun submitInput() {

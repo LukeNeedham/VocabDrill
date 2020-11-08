@@ -42,7 +42,7 @@
 
     <ImageView
         android:id="@+id/backButton"
-        style="@style/Button.Back"
+        style="@style/NavButton.Back"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         />
