@@ -7,6 +7,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
 import com.lukeneedham.vocabdrill.R
+import com.lukeneedham.vocabdrill.presentation.SettingsState
 import com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.settings.changecolour.ChangeVocabGroupColourDialog
 import com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.settings.changename.ChangeVocabGroupNameDialog
 import com.lukeneedham.vocabdrill.presentation.util.extension.popBackStackSafe
@@ -28,20 +29,23 @@ class VocabGroupSettingsFragment : Fragment(R.layout.fragment_vocab_group_settin
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel.nameLiveData.observe(viewLifecycleOwner) {
-            titleView.text = it
+        viewModel.languageNameLiveData.observe(viewLifecycleOwner) {
+            languageTitleView.text = it
+        }
+        viewModel.vocabGroupNameLiveData.observe(viewLifecycleOwner) {
+            groupTitleView.text = it
         }
         viewModel.colourLiveData.observe(viewLifecycleOwner) {
             colourIconShape.solidColor = it
             editColourView.setIcon(colourIconShape)
         }
         viewModel.stateLiveData.observe(viewLifecycleOwner) {
-            val buttonsEnabled = it is VocabGroupSettingsViewModel.State.Ready
+            val buttonsEnabled = it is SettingsState.Ready
             editNameView.isEnabled = buttonsEnabled
             editColourView.isEnabled = buttonsEnabled
             deleteView.isEnabled = buttonsEnabled
 
-            if (it is VocabGroupSettingsViewModel.State.Invalid) {
+            if (it is SettingsState.Invalid) {
                 popBackStackSafe(R.id.languageFragment, false)
             }
         }

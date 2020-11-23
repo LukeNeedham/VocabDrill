@@ -47,28 +47,36 @@
         app:layout_constraintTop_toTopOf="parent"
         />
 
-    <com.lukeneedham.vocabdrill.presentation.view.SettingsItemView
-        android:id="@+id/editNameView"
+    <com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryEditWordView
+        android:id="@+id/editWordAView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
         android:layout_marginTop="40dp"
-        android:layout_marginEnd="20dp"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginEnd="10dp"
+        app:layout_constraintEnd_toStartOf="@+id/editWordBView"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/groupTitleView"
         />
 
-    <com.lukeneedham.vocabdrill.presentation.view.SettingsItemView
-        android:id="@+id/editColourView"
+    <com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryEditWordView
+        android:id="@+id/editWordBView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="15dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="40dp"
         android:layout_marginEnd="20dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editNameView"
+        app:layout_constraintStart_toEndOf="@+id/editWordAView"
+        app:layout_constraintTop_toBottomOf="@+id/groupTitleView"
+        />
+    
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/bottomOfEditWords"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="editWordAView,editWordBView"
         />
 
     <com.lukeneedham.vocabdrill.presentation.view.SettingsItemView
@@ -76,11 +84,11 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="30dp"
         android:layout_marginEnd="20dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editColourView"
+        app:layout_constraintTop_toBottomOf="@+id/bottomOfEditWords"
         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

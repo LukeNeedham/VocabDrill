@@ -13,13 +13,13 @@ import kotlinx.android.synthetic.main.view_item_vocab_entry.view.*
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 
-class VocabEntryView @JvmOverloads constructor(
+class VocabEntryItemView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr),
     RecyclerItemView<VocabEntryRelations>,
     KoinComponent {
 
-    private val viewModel: VocabEntryViewModel by inject()
+    private val viewModel: VocabEntryItemViewModel by inject()
 
     init {
         inflateFrom(R.layout.view_item_vocab_entry)

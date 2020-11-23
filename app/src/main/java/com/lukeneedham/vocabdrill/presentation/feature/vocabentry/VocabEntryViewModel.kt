@@ -1,18 +1,18 @@
-package com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.settings
+package com.lukeneedham.vocabdrill.presentation.feature.vocabentry
 
 import android.annotation.SuppressLint
 import androidx.lifecycle.MutableLiveData
 import com.lukeneedham.vocabdrill.presentation.SettingsState
 import com.lukeneedham.vocabdrill.presentation.util.DisposingViewModel
 import com.lukeneedham.vocabdrill.presentation.util.extension.toLiveData
-import com.lukeneedham.vocabdrill.usecase.DeleteVocabGroup
-import com.lukeneedham.vocabdrill.usecase.ObserveVocabGroupRelations
+import com.lukeneedham.vocabdrill.usecase.DeleteVocabEntry
+import com.lukeneedham.vocabdrill.usecase.ObserveVocabEntryRelations
 import io.reactivex.rxkotlin.plusAssign
 
-class VocabGroupSettingsViewModel(
-    val vocabGroupId: Long,
-    private val observeVocabGroupRelations: ObserveVocabGroupRelations,
-    private val deleteVocabGroup: DeleteVocabGroup
+class VocabEntryViewModel(
+    val vocabEntryId: Long,
+    private val observeVocabEntryRelations: ObserveVocabEntryRelations,
+    private val deleteVocabEntry: DeleteVocabEntry
 ) : DisposingViewModel() {
 
     private val languageNameMutableLiveData = MutableLiveData<String>()
@@ -21,18 +21,23 @@ class VocabGroupSettingsViewModel(
     private val vocabGroupNameMutableLiveData = MutableLiveData<String>()
     val vocabGroupNameLiveData = vocabGroupNameMutableLiveData.toLiveData()
 
-    private val colourMutableLiveData = MutableLiveData<Int>()
-    val colourLiveData = colourMutableLiveData.toLiveData()
+    private val wordAMutableLiveData = MutableLiveData<String>()
+    val wordALiveData = wordAMutableLiveData.toLiveData()
+
+    private val wordBMutableLiveData = MutableLiveData<String>()
+    val wordBLiveData = wordBMutableLiveData.toLiveData()
 
     private val stateMutableLiveData = MutableLiveData<SettingsState>(SettingsState.Ready)
     val stateLiveData = stateMutableLiveData.toLiveData()
 
     init {
-        disposables += observeVocabGroupRelations(vocabGroupId).subscribe(
-            { vocabGroupRelations ->
-                languageNameMutableLiveData.value = vocabGroupRelations.language.name
-                vocabGroupNameMutableLiveData.value = vocabGroupRelations.vocabGroup.name
-                colourMutableLiveData.value = vocabGroupRelations.vocabGroup.colour
+        disposables += observeVocabEntryRelations(vocabEntryId).subscribe(
+            { entryRelations ->
+                val entry = entryRelations.vocabEntry
+                wordAMutableLiveData.value = entry.wordA
+                wordBMutableLiveData.value = entry.wordB
+                languageNameMutableLiveData.value = entryRelations.language.name
+                vocabGroupNameMutableLiveData.value = entryRelations.vocabGroup.name
             },
             {
                 stateMutableLiveData.value = SettingsState.Invalid
@@ -43,7 +48,7 @@ class VocabGroupSettingsViewModel(
     @SuppressLint("CheckResult")
     fun onDelete() {
         stateMutableLiveData.value = SettingsState.Working
-        deleteVocabGroup(vocabGroupId).subscribe {
+        deleteVocabEntry(vocabEntryId).subscribe {
             stateMutableLiveData.value = SettingsState.Invalid
         }
     }

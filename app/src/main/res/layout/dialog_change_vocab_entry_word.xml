@@ -47,7 +47,7 @@ otherwise the keyboard will cover the dialog when using the EditText
                 android:id="@+id/textInputView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/change_language_name_hint"
+                android:hint="@string/change_vocab_entry_word_hint"
                 android:importantForAutofill="no"
                 android:inputType="text"
                 />

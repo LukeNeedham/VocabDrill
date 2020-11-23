@@ -42,6 +42,14 @@
 
     <string name="change_vocab_group_colour_button">Update colour</string>
 
+    <string name="change_vocab_entry_word_hint">Word</string>
+    <string name="vocab_entry_delete">Delete entry</string>
+
+    <string name="vocab_entry_delete_confirm_message">
+        Are you sure you want to delete this vocab entry? All related statistics will also be deleted.
+    </string>
+    <string name="vocab_entry_delete_confirm_yes">Delete</string>
+
     <string name="learn_button">Learn!</string>
 
 </resources>

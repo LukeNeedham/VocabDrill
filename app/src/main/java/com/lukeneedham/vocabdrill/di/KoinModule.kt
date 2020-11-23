@@ -3,17 +3,20 @@ package com.lukeneedham.vocabdrill.di
 import com.lukeneedham.vocabdrill.data.persistence.AppDatabase
 import com.lukeneedham.vocabdrill.domain.model.LearnBook
 import com.lukeneedham.vocabdrill.presentation.feature.home.HomeViewModel
-import com.lukeneedham.vocabdrill.presentation.feature.language.create.AddLanguageViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.language.LanguageViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.language.VocabGroupItemViewModel
-import com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.create.AddVocabGroupViewModel
+import com.lukeneedham.vocabdrill.presentation.feature.language.create.AddLanguageViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.language.settings.LanguageSettingsViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.language.settings.changeflag.ChangeLanguageFlagViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.language.settings.changename.ChangeLanguageNameViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.learn.LearnViewModel
-import com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.VocabEntryViewModel
-import com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.VocabGroupViewModel
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryViewModel
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.changeword.ChangeVocabEntryWordViewModel
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.changeword.WordType
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.create.AddVocabEntryViewModel
+import com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.VocabEntryItemViewModel
+import com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.VocabGroupViewModel
+import com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.create.AddVocabGroupViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.settings.VocabGroupSettingsViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.settings.changecolour.ChangeVocabGroupColourViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.settings.changename.ChangeVocabGroupNameViewModel
@@ -26,6 +29,7 @@ import com.lukeneedham.vocabdrill.usecase.CheckValidLanguageName
 import com.lukeneedham.vocabdrill.usecase.CheckValidVocabGroupName
 import com.lukeneedham.vocabdrill.usecase.ChooseTextColourForBackground
 import com.lukeneedham.vocabdrill.usecase.DeleteLanguage
+import com.lukeneedham.vocabdrill.usecase.DeleteVocabEntry
 import com.lukeneedham.vocabdrill.usecase.DeleteVocabGroup
 import com.lukeneedham.vocabdrill.usecase.EstimateColourDistance
 import com.lukeneedham.vocabdrill.usecase.ExtractFlagColoursFromCountry
@@ -35,6 +39,7 @@ import com.lukeneedham.vocabdrill.usecase.LoadFlagVectorForCountry
 import com.lukeneedham.vocabdrill.usecase.ObserveAllVocabEntryRelationsForVocabGroup
 import com.lukeneedham.vocabdrill.usecase.ObserveAllVocabGroupRelationsForLanguage
 import com.lukeneedham.vocabdrill.usecase.ObserveLanguage
+import com.lukeneedham.vocabdrill.usecase.ObserveVocabEntryRelations
 import com.lukeneedham.vocabdrill.usecase.ObserveVocabGroup
 import com.lukeneedham.vocabdrill.usecase.ObserveVocabGroupRelations
 import com.lukeneedham.vocabdrill.usecase.PlaySoundEffect
@@ -84,6 +89,10 @@ object KoinModule {
         single { DeleteVocabGroup(get()) }
         single { CheckValidVocabGroupName(get()) }
 
+        /* Entries */
+        single { ObserveVocabEntryRelations(get(), get(), get()) }
+        single { DeleteVocabEntry(get()) }
+
         /* Countries */
         single { ExtractFlagColoursFromLanguageId(get(), get()) }
         single { ExtractFlagColoursFromCountry(get()) }
@@ -118,11 +127,19 @@ object KoinModule {
         viewModel { (vocabGroupId: Long) ->
             VocabGroupSettingsViewModel(vocabGroupId, get(), get())
         }
-        viewModel { (vocabGroupId: Long) -> ChangeVocabGroupNameViewModel(vocabGroupId, get(), get()) }
-        viewModel { (vocabGroupId: Long) -> ChangeVocabGroupColourViewModel(vocabGroupId, get(), get(), get()) }
+        viewModel { (vocabGroupId: Long) ->
+            ChangeVocabGroupNameViewModel(vocabGroupId, get(), get())
+        }
+        viewModel { (vocabGroupId: Long) ->
+            ChangeVocabGroupColourViewModel(vocabGroupId, get(), get(), get())
+        }
 
         /* Vocab Entry */
         viewModel { (vocabGroupId: Long) -> AddVocabEntryViewModel(vocabGroupId, get()) }
+        viewModel { (vocabEntryId: Long) -> VocabEntryViewModel(vocabEntryId, get(), get()) }
+        viewModel { (vocabEntryId: Long, wordType: WordType) ->
+            ChangeVocabEntryWordViewModel(vocabEntryId, wordType, get())
+        }
 
         /* Learn */
         viewModel { (learnBook: LearnBook) -> LearnViewModel(learnBook, get()) }
@@ -130,7 +147,7 @@ object KoinModule {
 
     private val vanillaViewModels = module {
         factory { VocabGroupItemViewModel(get()) }
-        factory { VocabEntryViewModel(get(), get()) }
+        factory { VocabEntryItemViewModel(get(), get()) }
     }
 
     val modules =

@@ -4,7 +4,7 @@ import android.graphics.Color
 import com.lukeneedham.vocabdrill.usecase.ChooseTextColourForBackground
 import com.lukeneedham.vocabdrill.usecase.EstimateColourDistance
 
-class VocabEntryViewModel(
+class VocabEntryItemViewModel(
     private val chooseTextColourForBackground: ChooseTextColourForBackground,
     private val estimateColourDistance: EstimateColourDistance
 ) {

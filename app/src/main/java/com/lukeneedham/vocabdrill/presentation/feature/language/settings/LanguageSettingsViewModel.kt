@@ -3,6 +3,7 @@ package com.lukeneedham.vocabdrill.presentation.feature.language.settings
 import android.annotation.SuppressLint
 import androidx.lifecycle.MutableLiveData
 import com.lukeneedham.vocabdrill.domain.model.Country
+import com.lukeneedham.vocabdrill.presentation.SettingsState
 import com.lukeneedham.vocabdrill.presentation.util.DisposingViewModel
 import com.lukeneedham.vocabdrill.presentation.util.extension.toLiveData
 import com.lukeneedham.vocabdrill.usecase.DeleteLanguage
@@ -21,7 +22,7 @@ class LanguageSettingsViewModel(
     private val flagCountryMutableLiveData = MutableLiveData<Country>()
     val flagCountryLiveData = flagCountryMutableLiveData.toLiveData()
 
-    private val stateMutableLiveData = MutableLiveData<State>(State.Ready)
+    private val stateMutableLiveData = MutableLiveData<SettingsState>(SettingsState.Ready)
     val stateLiveData = stateMutableLiveData.toLiveData()
 
     init {
@@ -31,27 +32,16 @@ class LanguageSettingsViewModel(
                 flagCountryMutableLiveData.value = it.country
             },
             {
-                stateMutableLiveData.value = State.Invalid
+                stateMutableLiveData.value = SettingsState.Invalid
             }
         )
     }
 
     @SuppressLint("CheckResult")
     fun onDelete() {
-        stateMutableLiveData.value = State.Working
+        stateMutableLiveData.value = SettingsState.Working
         deleteLanguage(languageId).subscribe {
-            stateMutableLiveData.value = State.Invalid
+            stateMutableLiveData.value = SettingsState.Invalid
         }
-    }
-
-    sealed class State {
-        /** No work is happening, ready for user input */
-        object Ready : State()
-
-        /** Working is in progress, disable user input */
-        object Working : State()
-
-        /** This language no longer exists. Quit */
-        object Invalid : State()
     }
 }

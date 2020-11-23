@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.lukeneedham.flowerpotrecycler.SingleTypeRecyclerAdapterCreator
 import com.lukeneedham.flowerpotrecycler.adapter.config.SingleTypeAdapterConfig
 import com.lukeneedham.flowerpotrecycler.util.extensions.addItemLayoutParams
+import com.lukeneedham.flowerpotrecycler.util.extensions.addOnItemClickListener
 import com.lukeneedham.vocabdrill.R
 import com.lukeneedham.vocabdrill.domain.model.VocabEntryRelations
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.create.AddVocabEntryDialog
@@ -32,9 +33,16 @@ class VocabGroupFragment : Fragment(R.layout.fragment_vocab_group) {
     private val viewModel: VocabGroupViewModel by viewModel { parametersOf(args.vocabGroupId) }
 
     private val adapter =
-        SingleTypeRecyclerAdapterCreator.fromRecyclerItemView<VocabEntryRelations, VocabEntryView>(
-            SingleTypeAdapterConfig<VocabEntryRelations, VocabEntryView>().apply {
+        SingleTypeRecyclerAdapterCreator.fromRecyclerItemView<VocabEntryRelations, VocabEntryItemView>(
+            SingleTypeAdapterConfig<VocabEntryRelations, VocabEntryItemView>().apply {
                 addItemLayoutParams(RecyclerView.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
+                addOnItemClickListener { item, _, _ ->
+                    navigateSafe(
+                        VocabGroupFragmentDirections.actionVocabGroupFragmentToVocabEntryFragment(
+                            item.vocabEntry.id
+                        )
+                    )
+                }
             }
         )
 
