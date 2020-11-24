@@ -9,8 +9,8 @@ import androidx.room.PrimaryKey
     tableName = VocabEntry.Table.NAME,
     foreignKeys = [
         ForeignKey(
-            entity = VocabGroup::class,
-            parentColumns = [VocabGroup.Column.ID],
+            entity = Language::class,
+            parentColumns = [Language.Column.ID],
             childColumns = [VocabEntry.Column.VOCAB_GROUP_ID],
             onDelete = ForeignKey.CASCADE
         )

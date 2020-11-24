@@ -1,6 +1,5 @@
 package com.lukeneedham.vocabdrill.usecase
 
-import com.lukeneedham.vocabdrill.domain.model.VocabGroupRelations
 import com.lukeneedham.vocabdrill.repository.LanguageRepository
 import com.lukeneedham.vocabdrill.repository.VocabEntryRepository
 import com.lukeneedham.vocabdrill.repository.VocabGroupRepository

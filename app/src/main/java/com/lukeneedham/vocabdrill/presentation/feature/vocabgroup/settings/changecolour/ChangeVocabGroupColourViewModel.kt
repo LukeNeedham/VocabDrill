@@ -2,7 +2,6 @@ package com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.settings.chan
 
 import android.annotation.SuppressLint
 import androidx.lifecycle.MutableLiveData
-import com.lukeneedham.vocabdrill.domain.model.VocabGroup
 import com.lukeneedham.vocabdrill.presentation.util.DisposingViewModel
 import com.lukeneedham.vocabdrill.presentation.util.extension.toLiveData
 import com.lukeneedham.vocabdrill.repository.VocabGroupRepository

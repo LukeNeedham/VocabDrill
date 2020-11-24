@@ -1,14 +1,9 @@
 package com.lukeneedham.vocabdrill.repository
 
 import com.lukeneedham.vocabdrill.data.persistence.dao.VocabGroupDao
-import com.lukeneedham.vocabdrill.domain.model.VocabGroupProto
-import com.lukeneedham.vocabdrill.repository.conversion.toDomainModel
-import com.lukeneedham.vocabdrill.repository.conversion.toPersistenceModel
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
-import com.lukeneedham.vocabdrill.data.persistence.model.VocabGroup as VocabGroupPersistence
-import com.lukeneedham.vocabdrill.domain.model.VocabGroup as VocabGroupDomain
 
 class VocabGroupRepository(
     private val vocabGroupDao: VocabGroupDao

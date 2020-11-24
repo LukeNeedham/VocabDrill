@@ -5,7 +5,6 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.lukeneedham.vocabdrill.data.persistence.model.VocabEntry
-import com.lukeneedham.vocabdrill.data.persistence.model.VocabGroup
 import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single

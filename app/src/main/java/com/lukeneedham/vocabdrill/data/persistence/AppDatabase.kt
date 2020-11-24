@@ -10,7 +10,6 @@ import com.lukeneedham.vocabdrill.data.persistence.dao.VocabEntryDao
 import com.lukeneedham.vocabdrill.data.persistence.dao.VocabGroupDao
 import com.lukeneedham.vocabdrill.data.persistence.model.Language
 import com.lukeneedham.vocabdrill.data.persistence.model.VocabEntry
-import com.lukeneedham.vocabdrill.data.persistence.model.VocabGroup
 
 @Database(
     entities = [

@@ -2,7 +2,6 @@ package com.lukeneedham.vocabdrill.repository
 
 import com.lukeneedham.vocabdrill.data.persistence.dao.VocabEntryDao
 import com.lukeneedham.vocabdrill.domain.model.VocabEntryProto
-import com.lukeneedham.vocabdrill.domain.model.VocabGroup
 import com.lukeneedham.vocabdrill.repository.conversion.toDomainModel
 import com.lukeneedham.vocabdrill.repository.conversion.toPersistenceModel
 import io.reactivex.Completable

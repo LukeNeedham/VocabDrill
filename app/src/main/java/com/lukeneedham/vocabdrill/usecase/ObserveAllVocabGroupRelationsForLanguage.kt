@@ -1,15 +1,12 @@
 package com.lukeneedham.vocabdrill.usecase
 
 import com.lukeneedham.vocabdrill.domain.model.VocabEntry
-import com.lukeneedham.vocabdrill.domain.model.VocabGroup
-import com.lukeneedham.vocabdrill.domain.model.VocabGroupRelations
 import com.lukeneedham.vocabdrill.repository.LanguageRepository
 import com.lukeneedham.vocabdrill.repository.VocabEntryRepository
 import com.lukeneedham.vocabdrill.repository.VocabGroupRepository
 import com.lukeneedham.vocabdrill.util.Optional
 import com.lukeneedham.vocabdrill.util.RxSchedulers
 import io.reactivex.Observable
-import io.reactivex.rxkotlin.combineLatest
 
 class ObserveAllVocabGroupRelationsForLanguage(
     private val languageRepository: LanguageRepository,

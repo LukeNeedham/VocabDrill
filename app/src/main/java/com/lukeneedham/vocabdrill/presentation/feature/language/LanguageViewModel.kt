@@ -2,7 +2,6 @@ package com.lukeneedham.vocabdrill.presentation.feature.language
 
 import androidx.lifecycle.MutableLiveData
 import com.lukeneedham.vocabdrill.domain.model.Country
-import com.lukeneedham.vocabdrill.domain.model.VocabGroupRelations
 import com.lukeneedham.vocabdrill.presentation.util.DisposingViewModel
 import com.lukeneedham.vocabdrill.presentation.util.extension.toLiveData
 import com.lukeneedham.vocabdrill.usecase.ObserveAllVocabGroupRelationsForLanguage

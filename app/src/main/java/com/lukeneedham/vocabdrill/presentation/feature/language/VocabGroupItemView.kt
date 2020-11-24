@@ -6,8 +6,7 @@ import android.util.AttributeSet
 import android.widget.FrameLayout
 import com.lukeneedham.flowerpotrecycler.adapter.RecyclerItemView
 import com.lukeneedham.vocabdrill.R
-import com.lukeneedham.vocabdrill.domain.model.VocabGroupColourScheme
-import com.lukeneedham.vocabdrill.domain.model.VocabGroupRelations
+import com.lukeneedham.vocabdrill.domain.model.TagColourScheme
 import com.lukeneedham.vocabdrill.presentation.util.extension.inflateFrom
 import com.sdsmdg.harjot.vectormaster.VectorMasterDrawable
 import group.infotech.drawable.dsl.shapeDrawable
@@ -52,7 +51,7 @@ class VocabGroupItemView @JvmOverloads constructor(
         detailsView.background = detailsBorderDrawable
     }
 
-    private fun recolourBook(colourScheme: VocabGroupColourScheme) {
+    private fun recolourBook(colourScheme: TagColourScheme) {
         val backgroundBook = VectorMasterDrawable(context, R.drawable.background_book)
 
         val lineColour = colourScheme.borderColour
