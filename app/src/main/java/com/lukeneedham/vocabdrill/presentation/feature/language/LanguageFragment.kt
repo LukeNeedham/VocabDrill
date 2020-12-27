@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
-import androidx.core.view.postDelayed
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DiffUtil
@@ -22,6 +21,7 @@ import com.lukeneedham.vocabdrill.domain.model.VocabEntryProto
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryItem
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.create.VocabEntryCreateCallback
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.create.VocabEntryCreateItemView
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.existing.VocabEntryExistingCallback
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.existing.VocabEntryExistingItemView
 import com.lukeneedham.vocabdrill.presentation.util.extension.*
 import com.lukeneedham.vocabdrill.presentation.util.recyclerview.decoration.LinearMarginItemDecorationCreator
@@ -36,9 +36,20 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
 
     private val adapter = RecyclerAdapterCreator.fromItemTypeConfigs<VocabEntryItem, View>(
         listOf(
-            ItemTypeConfigCreator.fromRecyclerItemView<VocabEntryItem.Existing, VocabEntryExistingItemView> {
-                addItemLayoutParams(RecyclerView.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
-            },
+            ItemTypeConfigCreator.fromBuilderBinder(
+                RecyclerItemViewBuilderBinder.newInstance {
+                    VocabEntryExistingItemView(requireContext()).apply {
+                        callback = object : VocabEntryExistingCallback {
+                            override fun onDelete(item: VocabEntryItem.Existing) {
+                                viewModel.deleteEntry(item)
+                            }
+                        }
+                    }
+                },
+                FeatureConfig<VocabEntryItem.Existing, VocabEntryExistingItemView>().apply {
+                    addItemLayoutParams(RecyclerView.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
+                }
+            ),
             ItemTypeConfigCreator.fromBuilderBinder(
                 RecyclerItemViewBuilderBinder.newInstance {
                     VocabEntryCreateItemView(requireContext()).apply {

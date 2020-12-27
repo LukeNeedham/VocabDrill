@@ -28,9 +28,9 @@
                 android:id="@+id/wordAInputView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/vocab_entry_word"
                 android:importantForAutofill="no"
-                android:inputType="text" />
+                android:inputType="text"
+                android:textColor="@color/vocab_entry_word" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -50,34 +50,56 @@
                 android:id="@+id/wordBInputView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/vocab_entry_word"
                 android:importantForAutofill="no"
-                android:inputType="text" />
+                android:inputType="text"
+                android:textColor="@color/vocab_entry_word" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/tagsRecycler"
             android:layout_width="0dp"
-            android:layout_height="30dp"
+            android:layout_height="20dp"
             android:layout_marginStart="10dp"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="5dp"
             android:layout_marginEnd="10dp"
-            android:layout_marginBottom="10dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/chevronDown"
+            app:layout_constraintEnd_toStartOf="@+id/chevronIconView"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/wordAInputViewLayout" />
 
         <ImageView
-            android:id="@+id/chevronDown"
+            android:id="@+id/deleteButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tagsRecycler"
+            app:srcCompat="@drawable/ic_delete" />
+
+        <ImageView
+            android:id="@+id/chevronIconView"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@+id/wordBInputViewLayout"
+            app:layout_constraintTop_toBottomOf="@+id/wordBInputViewLayout"
+            app:layout_constraintVertical_bias="1"
             app:srcCompat="@drawable/ic_chevron_down" />
+
+        <View
+            android:id="@+id/topLayer"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_width="0dp"
+            android:layout_height="0dp" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

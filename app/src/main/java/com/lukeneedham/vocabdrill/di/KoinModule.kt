@@ -81,7 +81,7 @@ object KoinModule {
 
         /* Language */
         viewModel { AddLanguageViewModel(get(), get(), get()) }
-        viewModel { (languageId: Long) -> LanguageViewModel(languageId, get(), get(), get()) }
+        viewModel { (languageId: Long) -> LanguageViewModel(languageId, get(), get(), get(), get()) }
         viewModel { (languageId: Long) -> LanguageSettingsViewModel(languageId, get(), get()) }
         viewModel { (languageId: Long) -> ChangeLanguageNameViewModel(languageId, get(), get()) }
         viewModel { (languageId: Long) -> ChangeLanguageFlagViewModel(languageId, get(), get()) }

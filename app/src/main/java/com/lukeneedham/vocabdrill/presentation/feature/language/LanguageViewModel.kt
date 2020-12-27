@@ -7,6 +7,7 @@ import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryItem
 import com.lukeneedham.vocabdrill.presentation.util.DisposingViewModel
 import com.lukeneedham.vocabdrill.presentation.util.extension.toLiveData
 import com.lukeneedham.vocabdrill.usecase.AddVocabEntry
+import com.lukeneedham.vocabdrill.usecase.DeleteVocabEntry
 import com.lukeneedham.vocabdrill.usecase.ObserveAllVocabEntryRelationsForLanguage
 import com.lukeneedham.vocabdrill.usecase.ObserveLanguage
 import io.reactivex.rxkotlin.plusAssign
@@ -15,7 +16,8 @@ class LanguageViewModel(
     val languageId: Long,
     private val observeAllVocabEntryRelationsForLanguage: ObserveAllVocabEntryRelationsForLanguage,
     private val observeLanguage: ObserveLanguage,
-    private val addVocabEntry: AddVocabEntry
+    private val addVocabEntry: AddVocabEntry,
+    private val deleteVocabEntry: DeleteVocabEntry
 ) : DisposingViewModel() {
 
     private val itemStateHandler = VocabEntryItemsHandler(languageId) {
@@ -60,8 +62,12 @@ class LanguageViewModel(
 
     fun save(proto: VocabEntryProto) {
         itemStateHandler.onCreateItemSaving()
-        disposables += addVocabEntry(proto).subscribe {
+        val ignored = addVocabEntry(proto).subscribe {
             itemStateHandler.onCreateItemSaved()
         }
+    }
+
+    fun deleteEntry(item: VocabEntryItem.Existing) {
+        val ignored = deleteVocabEntry(item.data.vocabEntry.id).subscribe()
     }
 }
