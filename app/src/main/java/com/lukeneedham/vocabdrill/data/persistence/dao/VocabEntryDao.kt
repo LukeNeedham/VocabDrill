@@ -27,18 +27,18 @@ interface VocabEntryDao {
     @Query(
         """
         SELECT * FROM ${VocabEntry.Table.NAME}
-        WHERE ${VocabEntry.Column.VOCAB_GROUP_ID} = :vocabGroupId
+        WHERE ${VocabEntry.Column.LANGUAGE_ID} = :languageId
         """
     )
-    fun getAllForVocabGroup(vocabGroupId: Long): Single<List<VocabEntry>>
+    fun getAllForLanguage(languageId: Long): Single<List<VocabEntry>>
 
     @Query(
         """
         SELECT * FROM ${VocabEntry.Table.NAME}
-        WHERE ${VocabEntry.Column.VOCAB_GROUP_ID} = :vocabGroupId
+        WHERE ${VocabEntry.Column.LANGUAGE_ID} = :languageId
         """
     )
-    fun observeAllForVocabGroup(vocabGroupId: Long): Observable<List<VocabEntry>>
+    fun observeAllForLanguage(languageId: Long): Observable<List<VocabEntry>>
 
     @Query(
         """

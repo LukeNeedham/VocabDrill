@@ -11,13 +11,13 @@ import androidx.room.PrimaryKey
         ForeignKey(
             entity = Language::class,
             parentColumns = [Language.Column.ID],
-            childColumns = [VocabEntry.Column.VOCAB_GROUP_ID],
+            childColumns = [VocabEntry.Column.LANGUAGE_ID],
             onDelete = ForeignKey.CASCADE
         )
     ]
 )
 data class VocabEntry(
-    @ColumnInfo(name = Column.VOCAB_GROUP_ID) val vocabGroupId: Long,
+    @ColumnInfo(name = Column.LANGUAGE_ID) val languageId: Long,
     @ColumnInfo(name = Column.WORD_A) val wordA: String,
     @ColumnInfo(name = Column.WORD_B) val wordB: String
 ) {
@@ -31,7 +31,7 @@ data class VocabEntry(
 
     object Column {
         const val ID = "id"
-        const val VOCAB_GROUP_ID = "vocab_group_id"
+        const val LANGUAGE_ID = "language_id"
         const val WORD_A = "word_a"
         const val WORD_B = "word_b"
     }

@@ -2,17 +2,25 @@ package com.lukeneedham.vocabdrill.presentation.feature.language
 
 import androidx.lifecycle.MutableLiveData
 import com.lukeneedham.vocabdrill.domain.model.Country
+import com.lukeneedham.vocabdrill.domain.model.VocabEntryProto
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryItem
 import com.lukeneedham.vocabdrill.presentation.util.DisposingViewModel
 import com.lukeneedham.vocabdrill.presentation.util.extension.toLiveData
-import com.lukeneedham.vocabdrill.usecase.ObserveAllVocabGroupRelationsForLanguage
+import com.lukeneedham.vocabdrill.usecase.AddVocabEntry
+import com.lukeneedham.vocabdrill.usecase.ObserveAllVocabEntryRelationsForLanguage
 import com.lukeneedham.vocabdrill.usecase.ObserveLanguage
 import io.reactivex.rxkotlin.plusAssign
 
 class LanguageViewModel(
     val languageId: Long,
-    private val observeAllVocabGroupRelationsForLanguage: ObserveAllVocabGroupRelationsForLanguage,
-    private val observeLanguage: ObserveLanguage
+    private val observeAllVocabEntryRelationsForLanguage: ObserveAllVocabEntryRelationsForLanguage,
+    private val observeLanguage: ObserveLanguage,
+    private val addVocabEntry: AddVocabEntry
 ) : DisposingViewModel() {
+
+    private val itemStateHandler = VocabEntryItemsHandler(languageId) {
+        vocabEntriesMutableLiveData.value = it
+    }
 
     private val languageNameMutableLiveData = MutableLiveData<String>()
     val languageNameLiveData = languageNameMutableLiveData.toLiveData()
@@ -20,17 +28,40 @@ class LanguageViewModel(
     private val countryMutableLiveData = MutableLiveData<Country>()
     val countryLiveData = countryMutableLiveData.toLiveData()
 
-    private val vocabGroupsMutableLiveData = MutableLiveData<List<VocabGroupRelations>>()
-    val vocabGroupsLiveData = vocabGroupsMutableLiveData.toLiveData()
+    private val vocabEntriesMutableLiveData = MutableLiveData<List<VocabEntryItem>>()
+    val vocabEntriesLiveData = vocabEntriesMutableLiveData.toLiveData()
 
     init {
+        vocabEntriesMutableLiveData.value = itemStateHandler.getItems()
+
         disposables += observeLanguage(languageId).subscribe { language ->
             languageNameMutableLiveData.value = language.name
             countryMutableLiveData.value = language.country
         }
 
-        disposables += observeAllVocabGroupRelationsForLanguage(languageId).subscribe {
-            vocabGroupsMutableLiveData.value = it
+        disposables += observeAllVocabEntryRelationsForLanguage(languageId).subscribe {
+            itemStateHandler.submitExistingItems(it)
+        }
+    }
+
+    fun onCreateItemWordAChanged(
+        item: VocabEntryItem.Create,
+        newWordA: String
+    ) {
+        itemStateHandler.onCreateItemWordAChanged(item, newWordA)
+    }
+
+    fun onCreateItemWordBChanged(
+        item: VocabEntryItem.Create,
+        newWordB: String
+    ) {
+        itemStateHandler.onCreateItemWordBChanged(item, newWordB)
+    }
+
+    fun save(proto: VocabEntryProto) {
+        itemStateHandler.onCreateItemSaving()
+        disposables += addVocabEntry(proto).subscribe {
+            itemStateHandler.onCreateItemSaved()
         }
     }
 }

@@ -12,17 +12,12 @@ import com.lukeneedham.vocabdrill.domain.model.VocabEntry as VocabEntryDomain
 
 class VocabEntryRepository(private val vocabEntryDao: VocabEntryDao) {
     fun addVocabEntry(proto: VocabEntryProto): Completable {
-        val entry = VocabEntryPersistence(proto.vocabGroupId, proto.wordA, proto.wordB)
+        val entry = VocabEntryPersistence(proto.languageId, proto.wordA, proto.wordB)
         return vocabEntryDao.add(entry)
     }
 
     fun deleteVocabEntry(vocabEntryId: Long): Completable {
         return vocabEntryDao.deleteWithId(vocabEntryId)
-    }
-
-    fun getAllVocabEntriesForVocabGroup(vocabGroupId: Long): Single<List<VocabEntryDomain>> {
-        return vocabEntryDao.getAllForVocabGroup(vocabGroupId)
-            .map { it.map { it.toDomainModel() } }
     }
 
     fun observeVocabEntryForId(vocabEntryId: Long): Observable<VocabEntryDomain> {
@@ -33,8 +28,8 @@ class VocabEntryRepository(private val vocabEntryDao: VocabEntryDao) {
         return vocabEntryDao.getWithId(vocabEntryId).map { it.toDomainModel() }
     }
 
-    fun observeAllVocabEntriesForVocabGroup(vocabGroupId: Long): Observable<List<VocabEntryDomain>> {
-        return vocabEntryDao.observeAllForVocabGroup(vocabGroupId)
+    fun observeAllVocabEntriesForLanguage(languageId: Long): Observable<List<VocabEntryDomain>> {
+        return vocabEntryDao.observeAllForLanguage(languageId)
             .map { it.map { it.toDomainModel() } }
     }
 

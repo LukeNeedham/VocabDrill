@@ -30,39 +30,12 @@
             app:argType="long"
             />
         <action
-            android:id="@+id/action_languageFragment_to_vocabGroupFragment"
-            app:destination="@id/vocabGroupFragment"
-            />
-        <action
             android:id="@+id/action_languageFragment_to_languageSettingsFragment"
             app:destination="@id/languageSettingsFragment"
             />
         <action
-            android:id="@+id/action_languageFragment_to_vocabGroupSettingsFragment"
-            app:destination="@id/vocabGroupSettingsFragment"
-            />
-    </fragment>
-    <fragment
-        android:id="@+id/vocabGroupFragment"
-        android:name="com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.VocabGroupFragment"
-        android:label="VocabGroupFragment"
-        >
-        <argument
-            android:name="vocabGroupId"
-            app:argType="long"
-            />
-        <action
-            android:id="@+id/action_vocabGroupFragment_to_vocabGroupSettingsFragment"
-            app:destination="@id/vocabGroupSettingsFragment"
-            />
-        <action
-            android:id="@+id/action_vocabGroupFragment_to_learnFragment"
-            app:destination="@id/learnFragment"
-            />
-        <action
-            android:id="@+id/action_vocabGroupFragment_to_vocabEntryFragment"
-            app:destination="@id/vocabEntryFragment"
-            />
+            android:id="@+id/action_languageFragment_to_learnFragment"
+            app:destination="@id/learnFragment" />
     </fragment>
     <fragment
         android:id="@+id/languageSettingsFragment"
@@ -75,16 +48,6 @@
             />
     </fragment>
     <fragment
-        android:id="@+id/vocabGroupSettingsFragment"
-        android:name="com.lukeneedham.vocabdrill.presentation.feature.vocabgroup.settings.VocabGroupSettingsFragment"
-        android:label="VocabGroupSettingsFragment"
-        >
-        <argument
-            android:name="vocabGroupId"
-            app:argType="long"
-            />
-    </fragment>
-    <fragment
         android:id="@+id/learnFragment"
         android:name="com.lukeneedham.vocabdrill.presentation.feature.learn.LearnFragment"
         android:label="LearnFragment"
@@ -92,16 +55,6 @@
         <argument
             android:name="learnBook"
             app:argType="com.lukeneedham.vocabdrill.domain.model.LearnBook"
-            />
-    </fragment>
-    <fragment
-        android:id="@+id/vocabEntryFragment"
-        android:name="com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryFragment"
-        android:label="VocabEntryFragment"
-        >
-        <argument
-            android:name="vocabEntryId"
-            app:argType="long"
             />
     </fragment>
 </navigation>

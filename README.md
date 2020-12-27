@@ -1,3 +1,11 @@
+# Architecture
+
+This project follows MVVM with Android Jetpack.
+It uses Rx rather than Coroutines,
+as parts of Coroutines were not ready for production at time of starting development.
+
+Activities and Fragments hold business logic in AndroidX ViewModels.
+
 # TODOs:
 
 I think the whole `VocabGroup` should be removed. Each word should belong to a language.

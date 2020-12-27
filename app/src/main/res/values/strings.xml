@@ -33,8 +33,8 @@
     <string name="change_language_name_button">Confirm</string>
     <string name="change_language_flag_button">Confirm</string>
 
-    <string name="add_entry_word_1_hint">Word 1</string>
-    <string name="add_entry_word_2_hint">Word 2</string>
+    <string name="add_entry_word_a_hint">Word A</string>
+    <string name="add_entry_word_b_hint">Word B</string>
     <string name="add_entry_button">Add Entry</string>
 
     <string name="add_vocab_group_name_hint">Vocab Book Name</string>
@@ -51,5 +51,7 @@
     <string name="vocab_entry_delete_confirm_yes">Delete</string>
 
     <string name="learn_button">Learn!</string>
+
+    <string name="vocab_entry_add">ADD NEW ENTRY</string>
 
 </resources>

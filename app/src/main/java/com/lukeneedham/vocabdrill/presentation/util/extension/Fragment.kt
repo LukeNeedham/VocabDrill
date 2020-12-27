@@ -3,6 +3,7 @@ package com.lukeneedham.vocabdrill.presentation.util.extension
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.view.inputmethod.InputMethodManager
 import androidx.annotation.IdRes
 import androidx.core.content.getSystemService
@@ -22,8 +23,7 @@ fun Fragment.hideKeyboard() {
 }
 
 fun Fragment.showKeyboard() {
-    val imm = context?.getSystemService<InputMethodManager>() ?: return
-    imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
+    requireContext().showKeyboard()
 }
 
 /** Sets the target fragment to this, and shows */
