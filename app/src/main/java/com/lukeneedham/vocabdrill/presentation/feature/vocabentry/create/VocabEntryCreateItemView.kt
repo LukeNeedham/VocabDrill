@@ -2,6 +2,7 @@ package com.lukeneedham.vocabdrill.presentation.feature.vocabentry.create
 
 import android.content.Context
 import android.graphics.Rect
+import android.text.TextWatcher
 import android.util.AttributeSet
 import android.widget.FrameLayout
 import androidx.core.widget.doOnTextChanged
@@ -11,9 +12,15 @@ import com.lukeneedham.flowerpotrecycler.adapter.RecyclerItemView
 import com.lukeneedham.vocabdrill.R
 import com.lukeneedham.vocabdrill.domain.model.VocabEntryProto
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryItem
+import com.lukeneedham.vocabdrill.presentation.util.BaseTextWatcher
 import com.lukeneedham.vocabdrill.presentation.util.extension.inflateFrom
 import com.lukeneedham.vocabdrill.presentation.util.extension.showKeyboard
 import kotlinx.android.synthetic.main.view_item_create_vocab_entry.view.*
+import kotlinx.android.synthetic.main.view_item_create_vocab_entry.view.tagsRecycler
+import kotlinx.android.synthetic.main.view_item_create_vocab_entry.view.wordAInputView
+import kotlinx.android.synthetic.main.view_item_create_vocab_entry.view.wordAInputViewLayout
+import kotlinx.android.synthetic.main.view_item_create_vocab_entry.view.wordBInputView
+import kotlinx.android.synthetic.main.view_item_vocab_entry.view.*
 import org.koin.core.KoinComponent
 
 class VocabEntryCreateItemView @JvmOverloads constructor(
@@ -30,6 +37,9 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
 //        )
 //    )
 
+    private var wordATextWatcher: TextWatcher? = null
+    private var wordBTextWatcher: TextWatcher? = null
+
     var callback: VocabEntryCreateCallback? = null
 
     init {
@@ -42,21 +52,29 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
     }
 
     override fun setItem(position: Int, item: VocabEntryItem.Create) {
-        wordAInputView.doOnTextChanged { _, _, _, _ -> }
-        wordBInputView.doOnTextChanged { _, _, _, _ -> }
+        wordAInputView.removeTextChangedListener(wordATextWatcher)
+        wordBInputView.removeTextChangedListener(wordBTextWatcher)
 
         wordAInputView.setText(item.wordA)
         wordBInputView.setText(item.wordB)
+
+        wordATextWatcher = object : BaseTextWatcher() {
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                requireCallback().onWordAChanged(item, s.toString())
+                refreshSaveButtonEnabled()
+            }
+        }
+        wordBTextWatcher = object : BaseTextWatcher() {
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                requireCallback().onWordBChanged(item, s.toString())
+                refreshSaveButtonEnabled()
+            }
+        }
+        wordAInputView.addTextChangedListener(wordATextWatcher)
+        wordBInputView.addTextChangedListener(wordBTextWatcher)
+
         refreshSaveButtonEnabled()
 
-        wordAInputView.doOnTextChanged { text, _, _, _ ->
-            requireCallback().onWordAChanged(item, text.toString())
-            refreshSaveButtonEnabled()
-        }
-        wordBInputView.doOnTextChanged { text, _, _, _ ->
-            requireCallback().onWordBChanged(item, text.toString())
-            refreshSaveButtonEnabled()
-        }
         saveButton.setOnClickListener {
             val wordA = getWordAInput() ?: error("Word A must have input")
             val wordB = getWordBInput() ?: error("Word B must have input")

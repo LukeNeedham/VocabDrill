@@ -7,18 +7,19 @@ class VocabEntryItemsHandler(
     private val languageId: Long,
     private val onItemsChangeListener: (items: List<VocabEntryItem>) -> Unit
 ) {
+    private val existingItems: MutableList<VocabEntryItem.Existing> = mutableListOf()
     private var createItem: VocabEntryItem.Create = newCreateItem()
-    private var existingItems: List<VocabEntryItem.Existing> = emptyList()
 
     fun submitExistingItems(items: List<VocabEntryRelations>) {
         val oldExistingItems = existingItems
         val newExistingItems = items.map { item ->
             // Use the existing existing item, if it exists, to not lose state.
             // Otherwise, create a new instance
-            val previousItem = oldExistingItems.firstOrNull { it.data == item }
+            val previousItem = oldExistingItems.firstOrNull { it.entryId == item.vocabEntry.id }
             previousItem ?: VocabEntryItem.Existing.newInstance(item)
         }
-        existingItems = newExistingItems
+        existingItems.clear()
+        existingItems.addAll(newExistingItems)
         notifyNewItems()
     }
 
@@ -38,19 +39,40 @@ class VocabEntryItemsHandler(
         notifyNewItems()
     }
 
-    fun onCreateItemSaving() {
-    }
-
     fun onCreateItemSaved() {
         createItem = newCreateItem()
         notifyNewItems()
     }
 
-    fun getItems(): List<VocabEntryItem> = existingItems + createItem
+    fun onExistingItemWordAChanged(
+        item: VocabEntryItem.Existing,
+        newWordA: String
+    ) {
+        val index = existingItems.indexOfFirst { it.entryId == item.entryId }
+        val oldItem = existingItems[index]
+        val newItem = oldItem.copy(wordA = newWordA)
+        existingItems[index] = newItem
+        notifyNewItems()
+    }
+
+    fun onExistingItemWordBChanged(
+        item: VocabEntryItem.Existing,
+        newWordB: String
+    ) {
+        val index = existingItems.indexOfFirst { it.entryId == item.entryId }
+        val oldItem = existingItems[index]
+        val newItem = oldItem.copy(wordB = newWordB)
+        existingItems[index] = newItem
+        notifyNewItems()
+    }
+
+    fun getAllItems(): List<VocabEntryItem> = existingItems + createItem
+
+    fun getExistingItems(): List<VocabEntryItem.Existing> = existingItems
 
     private fun newCreateItem() = VocabEntryItem.Create.newInstance(languageId)
 
     private fun notifyNewItems() {
-        onItemsChangeListener(getItems())
+        onItemsChangeListener(getAllItems())
     }
 }

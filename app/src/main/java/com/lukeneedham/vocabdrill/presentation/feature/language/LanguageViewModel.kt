@@ -2,14 +2,12 @@ package com.lukeneedham.vocabdrill.presentation.feature.language
 
 import androidx.lifecycle.MutableLiveData
 import com.lukeneedham.vocabdrill.domain.model.Country
+import com.lukeneedham.vocabdrill.domain.model.VocabEntry
 import com.lukeneedham.vocabdrill.domain.model.VocabEntryProto
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryItem
 import com.lukeneedham.vocabdrill.presentation.util.DisposingViewModel
 import com.lukeneedham.vocabdrill.presentation.util.extension.toLiveData
-import com.lukeneedham.vocabdrill.usecase.AddVocabEntry
-import com.lukeneedham.vocabdrill.usecase.DeleteVocabEntry
-import com.lukeneedham.vocabdrill.usecase.ObserveAllVocabEntryRelationsForLanguage
-import com.lukeneedham.vocabdrill.usecase.ObserveLanguage
+import com.lukeneedham.vocabdrill.usecase.*
 import io.reactivex.rxkotlin.plusAssign
 
 class LanguageViewModel(
@@ -17,7 +15,8 @@ class LanguageViewModel(
     private val observeAllVocabEntryRelationsForLanguage: ObserveAllVocabEntryRelationsForLanguage,
     private val observeLanguage: ObserveLanguage,
     private val addVocabEntry: AddVocabEntry,
-    private val deleteVocabEntry: DeleteVocabEntry
+    private val deleteVocabEntry: DeleteVocabEntry,
+    private val updateVocabEntry: UpdateVocabEntry
 ) : DisposingViewModel() {
 
     private val itemStateHandler = VocabEntryItemsHandler(languageId) {
@@ -34,7 +33,7 @@ class LanguageViewModel(
     val vocabEntriesLiveData = vocabEntriesMutableLiveData.toLiveData()
 
     init {
-        vocabEntriesMutableLiveData.value = itemStateHandler.getItems()
+        vocabEntriesMutableLiveData.value = itemStateHandler.getAllItems()
 
         disposables += observeLanguage(languageId).subscribe { language ->
             languageNameMutableLiveData.value = language.name
@@ -61,13 +60,28 @@ class LanguageViewModel(
     }
 
     fun save(proto: VocabEntryProto) {
-        itemStateHandler.onCreateItemSaving()
         val ignored = addVocabEntry(proto).subscribe {
             itemStateHandler.onCreateItemSaved()
         }
     }
 
     fun deleteEntry(item: VocabEntryItem.Existing) {
-        val ignored = deleteVocabEntry(item.data.vocabEntry.id).subscribe()
+        val ignored = deleteVocabEntry(item.entryId).subscribe()
+    }
+
+    fun onExistingItemWordAChanged(item: VocabEntryItem.Existing, newWordA: String) {
+        itemStateHandler.onExistingItemWordAChanged(item, newWordA)
+    }
+
+    fun onExistingItemWordBChanged(item: VocabEntryItem.Existing, newWordB: String) {
+        itemStateHandler.onExistingItemWordBChanged(item, newWordB)
+    }
+
+    fun saveDataChanges() {
+        val existingItems = itemStateHandler.getExistingItems()
+        existingItems.forEach {
+            val entry = VocabEntry(it.entryId, it.wordA, it.wordB, it.languageId)
+            val ignored = updateVocabEntry(entry).subscribe()
+        }
     }
 }
