@@ -2,12 +2,17 @@ package com.lukeneedham.vocabdrill.presentation.feature.language
 
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
+import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.lukeneedham.vocabdrill.R
 import com.lukeneedham.vocabdrill.domain.model.VocabEntryProto
+import com.lukeneedham.vocabdrill.presentation.feature.tag.TagCreateCallback
+import com.lukeneedham.vocabdrill.presentation.feature.tag.TagItem
+import com.lukeneedham.vocabdrill.presentation.feature.tag.TagSuggestionsView
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryItem
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.create.VocabEntryCreateCallback
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.create.VocabEntryCreateItemView
@@ -57,8 +62,25 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
         }
     }
 
+    private val tagCreateCallback = object : TagCreateCallback {
+        override fun onNameChanged(tagItem: TagItem.Create, name: String) {
+            val entryItem = tagItem.vocabEntryItem
+            viewModel.requestTagMatches(entryItem, name)
+            tagSuggestionsView.onSuggestionClickListener = { tag ->
+                viewModel.addTagToVocabEntry(entryItem, tag)
+                tagSuggestionsView.visibility = View.GONE
+            }
+            tagSuggestionsView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                // TODO: Position under tag view, which needs to be a parameter
+                topMargin = 100
+                leftMargin = 100
+            }
+            tagSuggestionsView.visibility = View.VISIBLE
+        }
+    }
+
     private val vocabEntriesAdapter =
-        VocabEntriesAdapter(vocabEntryExistingCallback, vocabEntryCreateCallback)
+        VocabEntriesAdapter(vocabEntryExistingCallback, vocabEntryCreateCallback, tagCreateCallback)
 
     /**
      * Has value true when the create item is awaiting focus.
@@ -82,6 +104,9 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
         }
         viewModel.countryLiveData.observe(viewLifecycleOwner) {
             settingsButton.setImageDrawable(it.getFlagDrawable(requireContext()))
+        }
+        viewModel.tagSuggestionsLiveData.observe(viewLifecycleOwner) {
+            tagSuggestionsView?.setTags(it)
         }
     }
 

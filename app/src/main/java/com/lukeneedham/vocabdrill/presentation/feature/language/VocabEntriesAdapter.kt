@@ -12,6 +12,7 @@ import com.lukeneedham.flowerpotrecycler.adapter.itemtype.builderbinder.implemen
 import com.lukeneedham.flowerpotrecycler.adapter.itemtype.config.ItemTypeConfigListRegistry
 import com.lukeneedham.flowerpotrecycler.util.ItemTypeConfigCreator
 import com.lukeneedham.flowerpotrecycler.util.extensions.addItemLayoutParams
+import com.lukeneedham.vocabdrill.presentation.feature.tag.TagCreateCallback
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryItem
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.create.VocabEntryCreateCallback
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.create.VocabEntryCreateItemView
@@ -20,7 +21,8 @@ import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.existing.Vocab
 
 class VocabEntriesAdapter(
     vocabEntryExistingCallback: VocabEntryExistingCallback,
-    vocabEntryCreateCallback: VocabEntryCreateCallback
+    vocabEntryCreateCallback: VocabEntryCreateCallback,
+    tagCreateCallback: TagCreateCallback
 ) : DelegatedRecyclerAdapter<VocabEntryItem, View>() {
 
     override val positionDelegate = LinearPositionDelegate(this, diffCallback)
@@ -30,7 +32,7 @@ class VocabEntriesAdapter(
             ItemTypeConfigCreator.fromBuilderBinder(
                 RecyclerItemViewBuilderBinder.newInstance {
                     VocabEntryExistingItemView(it.context).apply {
-                        callback = vocabEntryExistingCallback
+                        this.vocabEntryExistingCallback = vocabEntryExistingCallback
                     }
                 },
                 FeatureConfig<VocabEntryItem.Existing, VocabEntryExistingItemView>().apply {
@@ -40,7 +42,8 @@ class VocabEntriesAdapter(
             ItemTypeConfigCreator.fromBuilderBinder(
                 RecyclerItemViewBuilderBinder.newInstance {
                     VocabEntryCreateItemView(it.context).apply {
-                        callback = vocabEntryCreateCallback
+                        this.vocabEntryCreateCallback = vocabEntryCreateCallback
+                        this.tagCreateCallback = tagCreateCallback
                     }
                 },
                 FeatureConfig<VocabEntryItem.Create, VocabEntryCreateItemView>().apply {
@@ -61,11 +64,11 @@ class VocabEntriesAdapter(
                 }
 
             /**
-             * Always return true, as the item view itself
-             * ensures that "the items' visual representations are the same"
+             * The item view itself ensures that 
+             * "the items' visual representations are the same" for most things - except tags
              */
             override fun areContentsTheSame(oldItem: VocabEntryItem, newItem: VocabEntryItem) =
-                true
+                oldItem.tags == newItem.tags
         }
     }
 }

@@ -11,7 +11,7 @@ import io.reactivex.Single
 interface TagDao {
 
     @Insert
-    fun add(tag: Tag): Completable
+    fun add(tag: Tag): Single<Long>
 
     @Query("SELECT * FROM ${Tag.Table.NAME}")
     fun getAll(): Single<List<Tag>>

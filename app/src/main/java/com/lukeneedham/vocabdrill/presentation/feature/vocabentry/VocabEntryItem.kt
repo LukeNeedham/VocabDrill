@@ -4,10 +4,12 @@ import com.lukeneedham.vocabdrill.domain.model.Tag
 import com.lukeneedham.vocabdrill.domain.model.VocabEntryRelations
 
 sealed class VocabEntryItem {
+    abstract val tags: List<Tag>
+
     data class Existing(
         val entryId: Long,
         val languageId: Long,
-        val tags: List<Tag>,
+        override val tags: List<Tag>,
         val wordA: String,
         val wordB: String
     ) : VocabEntryItem() {
@@ -24,7 +26,7 @@ sealed class VocabEntryItem {
 
     data class Create(
         val languageId: Long,
-        val tags: List<Tag>,
+        override val tags: List<Tag>,
         val wordA: String?,
         val wordB: String?
     ) : VocabEntryItem() {

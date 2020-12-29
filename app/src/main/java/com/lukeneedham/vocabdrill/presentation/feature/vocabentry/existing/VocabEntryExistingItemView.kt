@@ -4,13 +4,22 @@ import android.content.Context
 import android.text.TextWatcher
 import android.util.AttributeSet
 import android.view.View
+import android.view.ViewGroup
 import android.widget.FrameLayout
-import androidx.core.widget.doOnTextChanged
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textfield.setHintEnabledMaintainMargin
+import com.lukeneedham.flowerpotrecycler.RecyclerAdapterCreator
 import com.lukeneedham.flowerpotrecycler.adapter.RecyclerItemView
+import com.lukeneedham.flowerpotrecycler.adapter.delegates.feature.config.FeatureConfig
+import com.lukeneedham.flowerpotrecycler.adapter.itemtype.builderbinder.implementation.view.RecyclerItemViewBuilderBinder
+import com.lukeneedham.flowerpotrecycler.util.ItemTypeConfigCreator
+import com.lukeneedham.flowerpotrecycler.util.extensions.addItemLayoutParams
 import com.lukeneedham.vocabdrill.R
+import com.lukeneedham.vocabdrill.presentation.feature.tag.TagCreateCallback
+import com.lukeneedham.vocabdrill.presentation.feature.tag.TagCreateView
+import com.lukeneedham.vocabdrill.presentation.feature.tag.TagExistingView
+import com.lukeneedham.vocabdrill.presentation.feature.tag.TagItem
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryItem
 import com.lukeneedham.vocabdrill.presentation.util.BaseTextWatcher
 import com.lukeneedham.vocabdrill.presentation.util.extension.inflateFrom
@@ -22,19 +31,36 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
     RecyclerItemView<VocabEntryItem.Existing> {
 
     // TODO: Extract into custom adapter, for re-use
-//    private val tagsAdapter = RecyclerAdapterCreator.fromItemTypeConfigs(
-//        listOf(
-//            ItemTypeConfigCreator.fromRecyclerItemView<Tag, TagView> {
-//                addItemLayoutParams(RecyclerView.LayoutParams(WRAP_CONTENT, WRAP_CONTENT))
-//            }
-//        )
-//    )
+    private val tagsAdapter = RecyclerAdapterCreator.fromItemTypeConfigs(
+        listOf(
+            ItemTypeConfigCreator.fromBuilderBinder(
+                RecyclerItemViewBuilderBinder.newInstance {
+                    TagCreateView(context).apply {
+                        callback = tagCreateCallback
+                    }
+                },
+                FeatureConfig<TagItem.Create, TagCreateView>().apply {
+                    addItemLayoutParams(RecyclerView.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                    ))
+                }
+            ),
+            ItemTypeConfigCreator.fromRecyclerItemView<TagItem.Existing, TagExistingView> {
+                addItemLayoutParams(RecyclerView.LayoutParams(
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                ))
+            }
+        )
+    )
 
     private var mode: ViewMode = ViewMode.Compressed
     private var wordATextWatcher: TextWatcher? = null
     private var wordBTextWatcher: TextWatcher? = null
 
-    var callback: VocabEntryExistingCallback? = null
+    var vocabEntryExistingCallback: VocabEntryExistingCallback? = null
+    var tagCreateCallback: TagCreateCallback? = null
 
     init {
         inflateFrom(R.layout.view_item_vocab_entry)
@@ -44,7 +70,7 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
         wordAInputViewLayout.setHintEnabledMaintainMargin(false)
         wordBInputViewLayout.setHintEnabledMaintainMargin(false)
 
-        //tagsRecycler.adapter = tagsAdapter
+        tagsRecycler.adapter = tagsAdapter
 
         topLayer.setOnClickListener {
             toggleMode()
@@ -78,14 +104,14 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
         wordAInputView.addTextChangedListener(wordATextWatcher)
         wordBInputView.addTextChangedListener(wordBTextWatcher)
 
-        //tagsAdapter.submitList(data.tags)
+        tagsAdapter.submitList(item.tags.map { TagItem.Existing(item, it) })
 
         deleteButton.setOnClickListener {
             requireCallback().onDelete(item)
         }
     }
 
-    private fun requireCallback() = callback ?: error("Callback must be set")
+    private fun requireCallback() = vocabEntryExistingCallback ?: error("Callback must be set")
 
     private fun toggleMode() {
         val mode = when (mode) {

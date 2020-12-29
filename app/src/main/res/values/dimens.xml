@@ -17,4 +17,7 @@
     <dimen name="learn_book_corner_radius">30dp</dimen>
     <dimen name="learn_book_border_width">1dp</dimen>
 
+    <dimen name="tag_item_corner_radius">10dp</dimen>
+    <dimen name="tag_item_suggestion_corner_radius">15dp</dimen>
+
 </resources>

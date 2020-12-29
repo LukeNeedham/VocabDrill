@@ -4,23 +4,27 @@ import android.content.Context
 import android.graphics.Rect
 import android.text.TextWatcher
 import android.util.AttributeSet
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.FrameLayout
-import androidx.core.widget.doOnTextChanged
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.lukeneedham.flowerpotrecycler.RecyclerAdapterCreator
 import com.lukeneedham.flowerpotrecycler.adapter.RecyclerItemView
+import com.lukeneedham.flowerpotrecycler.adapter.delegates.feature.config.FeatureConfig
+import com.lukeneedham.flowerpotrecycler.adapter.itemtype.builderbinder.implementation.view.RecyclerItemViewBuilderBinder
+import com.lukeneedham.flowerpotrecycler.util.ItemTypeConfigCreator
+import com.lukeneedham.flowerpotrecycler.util.extensions.addItemLayoutParams
 import com.lukeneedham.vocabdrill.R
 import com.lukeneedham.vocabdrill.domain.model.VocabEntryProto
+import com.lukeneedham.vocabdrill.presentation.feature.tag.TagCreateCallback
+import com.lukeneedham.vocabdrill.presentation.feature.tag.TagCreateView
+import com.lukeneedham.vocabdrill.presentation.feature.tag.TagExistingView
+import com.lukeneedham.vocabdrill.presentation.feature.tag.TagItem
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryItem
 import com.lukeneedham.vocabdrill.presentation.util.BaseTextWatcher
 import com.lukeneedham.vocabdrill.presentation.util.extension.inflateFrom
 import com.lukeneedham.vocabdrill.presentation.util.extension.showKeyboard
 import kotlinx.android.synthetic.main.view_item_create_vocab_entry.view.*
-import kotlinx.android.synthetic.main.view_item_create_vocab_entry.view.tagsRecycler
-import kotlinx.android.synthetic.main.view_item_create_vocab_entry.view.wordAInputView
-import kotlinx.android.synthetic.main.view_item_create_vocab_entry.view.wordAInputViewLayout
-import kotlinx.android.synthetic.main.view_item_create_vocab_entry.view.wordBInputView
-import kotlinx.android.synthetic.main.view_item_vocab_entry.view.*
 import org.koin.core.KoinComponent
 
 class VocabEntryCreateItemView @JvmOverloads constructor(
@@ -29,18 +33,29 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
     RecyclerItemView<VocabEntryItem.Create>,
     KoinComponent {
 
-//    private val tagsAdapter = RecyclerAdapterCreator.fromItemTypeConfigs(
-//        listOf(
-//            ItemTypeConfigCreator.fromRecyclerItemView<Tag, TagView> {
-//                addItemLayoutParams(RecyclerView.LayoutParams(WRAP_CONTENT, WRAP_CONTENT))
-//            }
-//        )
-//    )
+    private val tagsAdapter = RecyclerAdapterCreator.fromItemTypeConfigs(
+        listOf(
+            ItemTypeConfigCreator.fromBuilderBinder(
+                RecyclerItemViewBuilderBinder.newInstance {
+                    TagCreateView(context).apply {
+                        callback = tagCreateCallback
+                    }
+                },
+                FeatureConfig<TagItem.Create, TagCreateView>().apply {
+                    addItemLayoutParams(RecyclerView.LayoutParams(WRAP_CONTENT, WRAP_CONTENT))
+                }
+            ),
+            ItemTypeConfigCreator.fromRecyclerItemView<TagItem.Existing, TagExistingView> {
+                addItemLayoutParams(RecyclerView.LayoutParams(WRAP_CONTENT, WRAP_CONTENT))
+            }
+        )
+    )
 
     private var wordATextWatcher: TextWatcher? = null
     private var wordBTextWatcher: TextWatcher? = null
 
-    var callback: VocabEntryCreateCallback? = null
+    var vocabEntryCreateCallback: VocabEntryCreateCallback? = null
+    var tagCreateCallback: TagCreateCallback? = null
 
     init {
         inflateFrom(R.layout.view_item_create_vocab_entry)
@@ -48,7 +63,7 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
         tagsRecycler.layoutManager = LinearLayoutManager(context).apply {
             orientation = RecyclerView.HORIZONTAL
         }
-        //tagsRecycler.adapter = tagsAdapter
+        tagsRecycler.adapter = tagsAdapter
     }
 
     override fun setItem(position: Int, item: VocabEntryItem.Create) {
@@ -78,7 +93,10 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
         saveButton.setOnClickListener {
             val wordA = getWordAInput() ?: error("Word A must have input")
             val wordB = getWordBInput() ?: error("Word B must have input")
-            val proto = VocabEntryProto(wordA, wordB, item.languageId, item.tags)
+            val tags = tagsAdapter.positionDelegate.getItems()
+                .filterIsInstance<TagItem.Existing>()
+                .map { it.data }
+            val proto = VocabEntryProto(wordA, wordB, item.languageId, tags)
             requireCallback().save(proto)
 
             // Reset
@@ -87,7 +105,12 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
             refreshSaveButtonEnabled()
             wordAInputViewLayout.requestFocus()
         }
-        //tagsAdapter.submitList(item.tags)
+        val existingTagItems = item.tags.map {
+            TagItem.Existing(item, it)
+        }
+        val createTagItem = TagItem.Create(item, "")
+        val allTagItems = existingTagItems + createTagItem
+        tagsAdapter.submitList(allTagItems)
     }
 
     override fun requestFocus(direction: Int, previouslyFocusedRect: Rect?): Boolean {
@@ -107,5 +130,5 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
     private fun isSaveButtonEnabled(wordA: String?, wordB: String?): Boolean =
         !wordA.isNullOrBlank() && !wordB.isNullOrBlank()
 
-    private fun requireCallback() = callback ?: error("Callback must be set")
+    private fun requireCallback() = vocabEntryCreateCallback ?: error("Callback must be set")
 }

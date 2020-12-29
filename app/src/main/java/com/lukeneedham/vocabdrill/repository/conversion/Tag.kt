@@ -11,7 +11,7 @@ fun TagPersistence.toDomainModel(): TagDomain {
 }
 
 fun TagDomain.toPersistenceModel(): TagPersistence {
-    val hexColor = ColorExtraUtils.toHex(colour)
+    val hexColor = ColorExtraUtils.toHex(color)
     val persistence = TagPersistence(languageId, name, hexColor)
     persistence.id = id
     return persistence

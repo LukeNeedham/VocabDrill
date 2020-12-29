@@ -11,8 +11,9 @@ import com.lukeneedham.vocabdrill.presentation.feature.language.settings.changen
 import com.lukeneedham.vocabdrill.presentation.feature.learn.LearnViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.tag.VocabGroupViewModel
 import com.lukeneedham.vocabdrill.repository.LanguageRepository
-import com.lukeneedham.vocabdrill.repository.TagRepository
+import com.lukeneedham.vocabdrill.repository.LanguageTagsRepository
 import com.lukeneedham.vocabdrill.repository.VocabEntryRepository
+import com.lukeneedham.vocabdrill.repository.VocabEntryTagsRepository
 import com.lukeneedham.vocabdrill.usecase.*
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -44,7 +45,8 @@ object KoinModule {
     private val repositories = module {
         single { LanguageRepository(get()) }
         single { VocabEntryRepository(get()) }
-        single { TagRepository(get(), get()) }
+        single { LanguageTagsRepository(get()) }
+        single { VocabEntryTagsRepository(get(), get()) }
     }
 
     private val useCases = module {
@@ -52,8 +54,6 @@ object KoinModule {
         single { ObserveLanguage(get()) }
         single { DeleteLanguage(get()) }
         single { CheckValidLanguageName(get()) }
-
-        /* Vocab Group */
         single { ObserveAllVocabEntryRelationsForLanguage(get(), get(), get()) }
 
         /* Entries */
@@ -73,6 +73,12 @@ object KoinModule {
         single { EstimateColourDistance() }
         single { CalculateColourScheme(get()) }
 
+        /* Tag */
+        single { AddTagToVocabEntry(get()) }
+        single { AddNewTag(get()) }
+        single { CalculateColorForNewTag(get(), get()) }
+        single { FindTagNameMatches(get()) }
+
         /* Learn */
         single { PlaySoundEffect(androidContext()) }
     }
@@ -82,7 +88,20 @@ object KoinModule {
 
         /* Language */
         viewModel { AddLanguageViewModel(get(), get(), get()) }
-        viewModel { (languageId: Long) -> LanguageViewModel(languageId, get(), get(), get(), get(), get()) }
+        viewModel { (languageId: Long) ->
+            LanguageViewModel(
+                languageId,
+                get(),
+                get(),
+                get(),
+                get(),
+                get(),
+                get(),
+                get(),
+                get(),
+                get()
+            )
+        }
         viewModel { (languageId: Long) -> LanguageSettingsViewModel(languageId, get(), get()) }
         viewModel { (languageId: Long) -> ChangeLanguageNameViewModel(languageId, get(), get()) }
         viewModel { (languageId: Long) -> ChangeLanguageFlagViewModel(languageId, get(), get()) }

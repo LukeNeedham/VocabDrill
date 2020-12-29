@@ -39,5 +39,8 @@ class LanguageRepository(private val languageDao: LanguageDao) {
 
     fun observeLanguageForId(id: Long): Observable<LanguageDomain> =
         languageDao.observeWithId(id).map { it.toDomainModel() }
+
+    fun getLanguageForId(id: Long): Single<LanguageDomain> =
+        languageDao.getWithId(id).map { it.toDomainModel() }
 }
 

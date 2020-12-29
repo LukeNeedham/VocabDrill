@@ -5,16 +5,14 @@ import android.util.AttributeSet
 import android.widget.FrameLayout
 import com.lukeneedham.flowerpotrecycler.adapter.RecyclerItemView
 import com.lukeneedham.vocabdrill.R
-import com.lukeneedham.vocabdrill.domain.model.Tag
 import com.lukeneedham.vocabdrill.presentation.util.extension.inflateFrom
 import group.infotech.drawable.dsl.shapeDrawable
 
-class TagView @JvmOverloads constructor(
+class TagExistingView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr), RecyclerItemView<TagItem.Existing> {
     private val background = shapeDrawable {
-        // TODO: Use dimen
-        cornerRadius = 10f
+        cornerRadius = context.resources.getDimension(R.dimen.tag_item_corner_radius)
     }
 
     init {
@@ -23,7 +21,7 @@ class TagView @JvmOverloads constructor(
 
     override fun setItem(position: Int, item: TagItem.Existing) {
         val data = item.data
-        background.setColor(data.colour)
+        background.setColor(data.color)
         setBackground(background)
     }
 }

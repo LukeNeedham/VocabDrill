@@ -1,9 +1,8 @@
 package com.lukeneedham.vocabdrill.presentation.feature.language
 
 import androidx.lifecycle.MutableLiveData
-import com.lukeneedham.vocabdrill.domain.model.Country
-import com.lukeneedham.vocabdrill.domain.model.VocabEntry
-import com.lukeneedham.vocabdrill.domain.model.VocabEntryProto
+import com.lukeneedham.vocabdrill.domain.model.*
+import com.lukeneedham.vocabdrill.presentation.feature.tag.TagItem
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryItem
 import com.lukeneedham.vocabdrill.presentation.util.DisposingViewModel
 import com.lukeneedham.vocabdrill.presentation.util.extension.toLiveData
@@ -16,7 +15,11 @@ class LanguageViewModel(
     private val observeLanguage: ObserveLanguage,
     private val addVocabEntry: AddVocabEntry,
     private val deleteVocabEntry: DeleteVocabEntry,
-    private val updateVocabEntry: UpdateVocabEntry
+    private val updateVocabEntry: UpdateVocabEntry,
+    private val addTagToVocabEntry: AddTagToVocabEntry,
+    private val addNewTag: AddNewTag,
+    private val calculateColorForNewTag: CalculateColorForNewTag,
+    private val findTagNameMatches: FindTagNameMatches
 ) : DisposingViewModel() {
 
     private val itemStateHandler = VocabEntryItemsHandler(languageId) {
@@ -31,6 +34,9 @@ class LanguageViewModel(
 
     private val vocabEntriesMutableLiveData = MutableLiveData<List<VocabEntryItem>>()
     val vocabEntriesLiveData = vocabEntriesMutableLiveData.toLiveData()
+
+    private val tagSuggestionsMutableLiveData = MutableLiveData<List<TagItem>>()
+    val tagSuggestionsLiveData = tagSuggestionsMutableLiveData.toLiveData()
 
     init {
         vocabEntriesMutableLiveData.value = itemStateHandler.getAllItems()
@@ -77,6 +83,48 @@ class LanguageViewModel(
         itemStateHandler.onExistingItemWordBChanged(item, newWordB)
     }
 
+    fun addTagToVocabEntry(entryItem: VocabEntryItem, tagItem: TagItem) {
+        fun addExistingTag(tag: Tag) {
+            when (entryItem) {
+                is VocabEntryItem.Create -> {
+                    itemStateHandler.onCreateItemTagAdded(tag)
+                }
+                is VocabEntryItem.Existing -> {
+                    val ignored = addTagToVocabEntry(entryItem.entryId, tag.id).subscribe()
+                }
+            }
+        }
+
+        when (tagItem) {
+            is TagItem.Existing -> {
+                addExistingTag(tagItem.data)
+            }
+            is TagItem.Create -> {
+                val tagName = tagItem.name
+                calculateColorForNewTag(languageId).subscribe { color ->
+                    val proto = TagProto(tagName, color, languageId)
+                    addNewTag(proto).subscribe { tag ->
+                        addExistingTag(tag)
+                    }
+                }
+            }
+        }
+    }
+
+    fun requestTagMatches(entryItem: VocabEntryItem, tagName: String) {
+        disposables += findTagNameMatches(languageId, tagName).subscribe { tags ->
+            val existingTagItems = tags.map { TagItem.Existing(entryItem, it) }
+            val allTags = if(tags.any { it.name == tagName }) {
+                existingTagItems
+            } else {
+                val newTag = TagItem.Create(entryItem, tagName)
+                listOf(newTag) + existingTagItems
+            }
+            tagSuggestionsMutableLiveData.value = allTags
+        }
+    }
+
+    /** Perform the batched saves of changes to existing items */
     fun saveDataChanges() {
         val existingItems = itemStateHandler.getExistingItems()
         existingItems.forEach {

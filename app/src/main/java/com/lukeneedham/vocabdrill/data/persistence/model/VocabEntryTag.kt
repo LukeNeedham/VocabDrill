@@ -24,7 +24,7 @@ import androidx.room.PrimaryKey
 )
 data class VocabEntryTag(
     @ColumnInfo(name = Column.VOCAB_ENTRY_ID) val vocabEntryId: Long,
-    @ColumnInfo(name = Column.TAG_ID) val tagId: String
+    @ColumnInfo(name = Column.TAG_ID) val tagId: Long
 ) {
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = Column.ID)

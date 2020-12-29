@@ -1,5 +1,6 @@
 package com.lukeneedham.vocabdrill.presentation.feature.language
 
+import com.lukeneedham.vocabdrill.domain.model.Tag
 import com.lukeneedham.vocabdrill.domain.model.VocabEntryRelations
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryItem
 
@@ -63,6 +64,13 @@ class VocabEntryItemsHandler(
         val oldItem = existingItems[index]
         val newItem = oldItem.copy(wordB = newWordB)
         existingItems[index] = newItem
+        notifyNewItems()
+    }
+
+    fun onCreateItemTagAdded(tag: Tag) {
+        val tags = createItem.tags.toMutableList()
+        tags.add(tag)
+        createItem = createItem.copy(tags = tags)
         notifyNewItems()
     }
 
