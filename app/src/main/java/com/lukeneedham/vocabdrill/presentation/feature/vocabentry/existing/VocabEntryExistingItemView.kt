@@ -1,10 +1,12 @@
 package com.lukeneedham.vocabdrill.presentation.feature.vocabentry.existing
 
 import android.content.Context
+import android.text.Editable
 import android.text.TextWatcher
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.FrameLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -20,15 +22,26 @@ import com.lukeneedham.vocabdrill.presentation.feature.tag.TagCreateCallback
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagCreateView
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagExistingView
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagItem
-import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryItem
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.FocusItem
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.ViewMode
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryItemPresentationData
 import com.lukeneedham.vocabdrill.presentation.util.BaseTextWatcher
+import com.lukeneedham.vocabdrill.presentation.util.TextSelection
+import com.lukeneedham.vocabdrill.presentation.util.extension.getSelection
 import com.lukeneedham.vocabdrill.presentation.util.extension.inflateFrom
+import com.lukeneedham.vocabdrill.presentation.util.extension.setSelection
+import kotlinx.android.synthetic.main.view_item_create_vocab_entry.view.*
 import kotlinx.android.synthetic.main.view_item_vocab_entry.view.*
+import kotlinx.android.synthetic.main.view_item_vocab_entry.view.tagsRecycler
+import kotlinx.android.synthetic.main.view_item_vocab_entry.view.wordAInputView
+import kotlinx.android.synthetic.main.view_item_vocab_entry.view.wordAInputViewLayout
+import kotlinx.android.synthetic.main.view_item_vocab_entry.view.wordBInputView
+import kotlinx.android.synthetic.main.view_item_vocab_entry.view.wordBInputViewLayout
 
 class VocabEntryExistingItemView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr),
-    RecyclerItemView<VocabEntryItem.Existing> {
+    RecyclerItemView<VocabEntryItemPresentationData.Existing> {
 
     // TODO: Extract into custom adapter, for re-use
     private val tagsAdapter = RecyclerAdapterCreator.fromItemTypeConfigs(
@@ -55,7 +68,6 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
         )
     )
 
-    private var mode: ViewMode = ViewMode.Compressed
     private var wordATextWatcher: TextWatcher? = null
     private var wordBTextWatcher: TextWatcher? = null
 
@@ -71,59 +83,70 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
         wordBInputViewLayout.setHintEnabledMaintainMargin(false)
 
         tagsRecycler.adapter = tagsAdapter
-
-        topLayer.setOnClickListener {
-            toggleMode()
-        }
-        chevronIconView.setOnClickListener {
-            toggleMode()
-        }
-
-        setMode(ViewMode.Compressed)
     }
 
-    override fun setItem(position: Int, item: VocabEntryItem.Existing) {
-        setMode(ViewMode.Compressed)
-
+    override fun setItem(position: Int, item: VocabEntryItemPresentationData.Existing) {
         wordAInputView.removeTextChangedListener(wordATextWatcher)
         wordBInputView.removeTextChangedListener(wordBTextWatcher)
 
-        wordAInputView.setText(item.wordA)
-        wordBInputView.setText(item.wordB)
+        wordAInputView.setText(item.data.wordA)
+        wordBInputView.setText(item.data.wordB)
 
         wordATextWatcher = object : BaseTextWatcher() {
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                requireCallback().onWordAChanged(item, s.toString())
+            override fun afterTextChanged(s: Editable?) {
+                requireCallback().onWordAChanged(item, s.toString(), wordAInputView.getSelection())
             }
         }
         wordBTextWatcher = object : BaseTextWatcher() {
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                requireCallback().onWordBChanged(item, s.toString())
+            override fun afterTextChanged(s: Editable?) {
+                requireCallback().onWordBChanged(item, s.toString(), wordBInputView.getSelection())
             }
         }
         wordAInputView.addTextChangedListener(wordATextWatcher)
         wordBInputView.addTextChangedListener(wordBTextWatcher)
 
-        tagsAdapter.submitList(item.tags.map { TagItem.Existing(item, it) })
+        val viewMode = item.viewMode
+        setMode(viewMode)
+        if (viewMode is ViewMode.Active) {
+            val focus = viewMode.focusItem
+            when (focus) {
+                is FocusItem.WordA -> setFocus(wordAInputView, focus.selection)
+                is FocusItem.WordB -> setFocus(wordBInputView, focus.selection)
+            }
+        }
+
+        tagsAdapter.submitList(item.data.tags.map { TagItem.Existing(item.data, it) })
 
         deleteButton.setOnClickListener {
             requireCallback().onDelete(item)
+        }
+
+        topLayer.setOnClickListener {
+            val newMode = flipMode(viewMode)
+            requireCallback().onViewModeChanged(item, newMode)
+        }
+        chevronIconView.setOnClickListener {
+            val newMode = flipMode(viewMode)
+            requireCallback().onViewModeChanged(item, newMode)
         }
     }
 
     private fun requireCallback() = vocabEntryExistingCallback ?: error("Callback must be set")
 
-    private fun toggleMode() {
-        val mode = when (mode) {
-            ViewMode.Compressed -> ViewMode.Expanded
-            ViewMode.Expanded -> ViewMode.Compressed
+    private fun setFocus(focusView: EditText, selection: TextSelection) {
+        focusView.requestFocus()
+        focusView.setSelection(selection)
+    }
+
+    private fun flipMode(viewMode: ViewMode): ViewMode {
+        return when (viewMode) {
+            is ViewMode.Inactive -> ViewMode.Active(FocusItem.None)
+            is ViewMode.Active -> ViewMode.Inactive
         }
-        setMode(mode)
     }
 
     private fun setMode(mode: ViewMode) {
-        this.mode = mode
-        val isExpanded = mode == ViewMode.Expanded
+        val isExpanded = mode is ViewMode.Active
         deleteButton.visibility = if (isExpanded) View.VISIBLE else View.GONE
         val chevronResId = if (isExpanded) R.drawable.ic_chevron_up else R.drawable.ic_chevron_down
         chevronIconView.setImageResource(chevronResId)

@@ -6,17 +6,19 @@ import android.view.ViewGroup
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
+import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.lukeneedham.vocabdrill.R
 import com.lukeneedham.vocabdrill.domain.model.VocabEntryProto
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagCreateCallback
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagItem
-import com.lukeneedham.vocabdrill.presentation.feature.tag.TagSuggestionsView
-import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryItem
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryItemPresentationData
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.create.VocabEntryCreateCallback
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.create.VocabEntryCreateItemView
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.ViewMode
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.existing.VocabEntryExistingCallback
+import com.lukeneedham.vocabdrill.presentation.util.TextSelection
 import com.lukeneedham.vocabdrill.presentation.util.extension.*
 import com.lukeneedham.vocabdrill.presentation.util.recyclerview.decoration.LinearMarginItemDecorationCreator
 import kotlinx.android.synthetic.main.fragment_language.*
@@ -34,27 +36,43 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
         }
     }
 
-    private val vocabEntryExistingCallback = object : VocabEntryExistingCallback {
-        override fun onWordAChanged(item: VocabEntryItem.Existing, newWordA: String) {
-            viewModel.onExistingItemWordAChanged(item, newWordA)
+    private val vocabEntryExistingCallback: VocabEntryExistingCallback = object : VocabEntryExistingCallback {
+        override fun onWordAChanged(
+            itemPresentationData: VocabEntryItemPresentationData.Existing,
+            newWordA: String,
+            selection: TextSelection
+        ) {
+            viewModel.onExistingItemWordAChanged(itemPresentationData.data.entryId, newWordA, selection)
         }
 
-        override fun onWordBChanged(item: VocabEntryItem.Existing, newWordB: String) {
-            viewModel.onExistingItemWordBChanged(item, newWordB)
+        override fun onWordBChanged(
+            itemPresentationData: VocabEntryItemPresentationData.Existing,
+            newWordB: String,
+            selection: TextSelection
+        ) {
+            viewModel.onExistingItemWordBChanged(itemPresentationData.data.entryId, newWordB, selection)
         }
 
-        override fun onDelete(item: VocabEntryItem.Existing) {
-            viewModel.deleteEntry(item)
+        override fun onViewModeChanged(itemPresentationData: VocabEntryItemPresentationData.Existing, viewMode: ViewMode) {
+            viewModel.onViewModeChanged(itemPresentationData, viewMode)
+        }
+
+        override fun onDelete(itemPresentationData: VocabEntryItemPresentationData.Existing) {
+            viewModel.deleteEntry(itemPresentationData.data.entryId)
         }
     }
 
     private val vocabEntryCreateCallback = object : VocabEntryCreateCallback {
-        override fun onWordAChanged(item: VocabEntryItem.Create, newWordA: String) {
-            viewModel.onCreateItemWordAChanged(item, newWordA)
+        override fun onWordAChanged(newWordA: String, selection: TextSelection) {
+            viewModel.onCreateItemWordAChanged(newWordA, selection)
         }
 
-        override fun onWordBChanged(item: VocabEntryItem.Create, newWordA: String) {
-            viewModel.onCreateItemWordBChanged(item, newWordA)
+        override fun onWordBChanged(newWordA: String, selection: TextSelection) {
+            viewModel.onCreateItemWordBChanged(newWordA, selection)
+        }
+
+        override fun onInteraction() {
+            viewModel.onCreateItemInteraction()
         }
 
         override fun save(proto: VocabEntryProto) {
@@ -118,6 +136,9 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
     private fun setupView() {
         recyclerView.adapter = vocabEntriesAdapter
         recyclerView.layoutManager = layoutManager
+        recyclerView.itemAnimator = DefaultItemAnimator().apply {
+            supportsChangeAnimations = false
+        }
         recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)

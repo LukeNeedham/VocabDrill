@@ -3,6 +3,7 @@ package com.lukeneedham.vocabdrill.presentation.util.extension
 import android.view.KeyEvent
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
+import com.lukeneedham.vocabdrill.presentation.util.TextSelection
 
 fun EditText.setOnDoneListener(listener: () -> Unit) {
     setOnEditorActionListener { _, actionId, event ->
@@ -18,12 +19,18 @@ fun EditText.setOnDoneListener(listener: () -> Unit) {
 }
 
 fun EditText.setEditable(isEditable: Boolean) {
-    if(!isEditable) {
+    if (!isEditable) {
         clearFocus()
     }
     isFocusable = isEditable
     isFocusableInTouchMode = isEditable
-    if(isEditable) {
+    if (isEditable) {
         requestFocus()
     }
+}
+
+fun EditText.getSelection() = TextSelection(selectionStart, selectionEnd)
+
+fun EditText.setSelection(selection: TextSelection) {
+    setSelection(selection.start, selection.end)
 }

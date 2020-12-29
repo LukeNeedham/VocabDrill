@@ -1,10 +1,12 @@
 package com.lukeneedham.vocabdrill.presentation.feature.vocabentry.create
 
 import com.lukeneedham.vocabdrill.domain.model.VocabEntryProto
-import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryItem
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryItemPresentationData
+import com.lukeneedham.vocabdrill.presentation.util.TextSelection
 
 interface VocabEntryCreateCallback {
-    fun onWordAChanged(item: VocabEntryItem.Create, newWordA: String)
-    fun onWordBChanged(item: VocabEntryItem.Create, newWordA: String)
+    fun onWordAChanged(newWordA: String, selection: TextSelection)
+    fun onWordBChanged(newWordA: String, selection: TextSelection)
+    fun onInteraction()
     fun save(proto: VocabEntryProto)
 }

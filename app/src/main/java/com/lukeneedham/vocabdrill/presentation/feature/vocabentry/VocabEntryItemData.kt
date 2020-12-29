@@ -3,16 +3,14 @@ package com.lukeneedham.vocabdrill.presentation.feature.vocabentry
 import com.lukeneedham.vocabdrill.domain.model.Tag
 import com.lukeneedham.vocabdrill.domain.model.VocabEntryRelations
 
-sealed class VocabEntryItem {
-    abstract val tags: List<Tag>
-
+sealed class VocabEntryItemData {
     data class Existing(
         val entryId: Long,
         val languageId: Long,
-        override val tags: List<Tag>,
+        val tags: List<Tag>,
         val wordA: String,
-        val wordB: String
-    ) : VocabEntryItem() {
+        val wordB: String,
+    ) : VocabEntryItemData() {
         companion object {
             fun newInstance(data: VocabEntryRelations) = Existing(
                 data.vocabEntry.id,
@@ -26,10 +24,10 @@ sealed class VocabEntryItem {
 
     data class Create(
         val languageId: Long,
-        override val tags: List<Tag>,
+        val tags: List<Tag>,
         val wordA: String?,
         val wordB: String?
-    ) : VocabEntryItem() {
+    ) : VocabEntryItemData() {
 
         companion object {
             fun newInstance(languageId: Long) =

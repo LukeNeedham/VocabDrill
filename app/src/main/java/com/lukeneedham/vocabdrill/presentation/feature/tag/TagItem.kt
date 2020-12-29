@@ -1,9 +1,9 @@
 package com.lukeneedham.vocabdrill.presentation.feature.tag
 
 import com.lukeneedham.vocabdrill.domain.model.Tag
-import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryItem
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryItemData
 
 sealed class TagItem {
-    data class Existing(val vocabEntryItem: VocabEntryItem, val data: Tag) : TagItem()
-    class Create(val vocabEntryItem: VocabEntryItem, val name: String) : TagItem()
+    data class Existing(val vocabEntryItem: VocabEntryItemData, val data: Tag) : TagItem()
+    class Create(val vocabEntryItem: VocabEntryItemData, val name: String) : TagItem()
 }

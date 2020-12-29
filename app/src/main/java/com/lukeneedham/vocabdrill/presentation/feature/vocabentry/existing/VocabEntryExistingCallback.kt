@@ -1,9 +1,12 @@
 package com.lukeneedham.vocabdrill.presentation.feature.vocabentry.existing
 
-import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryItem
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.ViewMode
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryItemPresentationData
+import com.lukeneedham.vocabdrill.presentation.util.TextSelection
 
 interface VocabEntryExistingCallback {
-    fun onWordAChanged(item: VocabEntryItem.Existing, newWordA: String)
-    fun onWordBChanged(item: VocabEntryItem.Existing, newWordB: String)
-    fun onDelete(item: VocabEntryItem.Existing)
+    fun onWordAChanged(itemPresentationData: VocabEntryItemPresentationData.Existing, newWordA: String, selection: TextSelection)
+    fun onWordBChanged(itemPresentationData: VocabEntryItemPresentationData.Existing, newWordB: String, selection: TextSelection)
+    fun onViewModeChanged(itemPresentationData: VocabEntryItemPresentationData.Existing, viewMode: ViewMode)
+    fun onDelete(itemPresentationData: VocabEntryItemPresentationData.Existing)
 }

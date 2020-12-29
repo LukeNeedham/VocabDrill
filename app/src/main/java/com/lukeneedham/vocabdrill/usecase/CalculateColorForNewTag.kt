@@ -40,13 +40,13 @@ class CalculateColorForNewTag(
     private fun getRatio(targetIndex: Int): Float {
         var index = ratioListSoFar.size
         while(index < targetIndex) {
-            val crumb = ratioListSoFar[index]
-            val newDiff = crumb.diff / 2
-            val value = crumb.value
-            val minusCrumb = RatioStep(value - newDiff, newDiff)
-            ratioListSoFar.add(minusCrumb)
-            val addCrumb = RatioStep(value + newDiff, newDiff)
-            ratioListSoFar.add(addCrumb)
+            val step = ratioListSoFar[index]
+            val newDiff = step.diff / 2
+            val value = step.value
+            val minusChild = RatioStep(value - newDiff, newDiff)
+            ratioListSoFar.add(minusChild)
+            val addChild = RatioStep(value + newDiff, newDiff)
+            ratioListSoFar.add(addChild)
             index++
         }
         return ratioListSoFar[targetIndex].value

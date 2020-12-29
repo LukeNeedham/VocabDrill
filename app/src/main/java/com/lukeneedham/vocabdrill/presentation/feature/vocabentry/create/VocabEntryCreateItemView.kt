@@ -2,9 +2,12 @@ package com.lukeneedham.vocabdrill.presentation.feature.vocabentry.create
 
 import android.content.Context
 import android.graphics.Rect
+import android.text.Editable
 import android.text.TextWatcher
 import android.util.AttributeSet
+import android.view.MotionEvent
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+import android.widget.EditText
 import android.widget.FrameLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -20,9 +23,14 @@ import com.lukeneedham.vocabdrill.presentation.feature.tag.TagCreateCallback
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagCreateView
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagExistingView
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagItem
-import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryItem
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.FocusItem
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.ViewMode
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryItemPresentationData
 import com.lukeneedham.vocabdrill.presentation.util.BaseTextWatcher
+import com.lukeneedham.vocabdrill.presentation.util.TextSelection
+import com.lukeneedham.vocabdrill.presentation.util.extension.getSelection
 import com.lukeneedham.vocabdrill.presentation.util.extension.inflateFrom
+import com.lukeneedham.vocabdrill.presentation.util.extension.setSelection
 import com.lukeneedham.vocabdrill.presentation.util.extension.showKeyboard
 import kotlinx.android.synthetic.main.view_item_create_vocab_entry.view.*
 import org.koin.core.KoinComponent
@@ -30,7 +38,7 @@ import org.koin.core.KoinComponent
 class VocabEntryCreateItemView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr),
-    RecyclerItemView<VocabEntryItem.Create>,
+    RecyclerItemView<VocabEntryItemPresentationData.Create>,
     KoinComponent {
 
     private val tagsAdapter = RecyclerAdapterCreator.fromItemTypeConfigs(
@@ -66,27 +74,42 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
         tagsRecycler.adapter = tagsAdapter
     }
 
-    override fun setItem(position: Int, item: VocabEntryItem.Create) {
+    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
+        val result = super.dispatchTouchEvent(ev)
+        requireCallback().onInteraction()
+        return result
+    }
+
+    override fun setItem(position: Int, item: VocabEntryItemPresentationData.Create) {
         wordAInputView.removeTextChangedListener(wordATextWatcher)
         wordBInputView.removeTextChangedListener(wordBTextWatcher)
 
-        wordAInputView.setText(item.wordA)
-        wordBInputView.setText(item.wordB)
+        wordAInputView.setText(item.data.wordA)
+        wordBInputView.setText(item.data.wordB)
 
         wordATextWatcher = object : BaseTextWatcher() {
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                requireCallback().onWordAChanged(item, s.toString())
+            override fun afterTextChanged(s: Editable?) {
+                requireCallback().onWordAChanged(s.toString(), wordAInputView.getSelection())
                 refreshSaveButtonEnabled()
             }
         }
         wordBTextWatcher = object : BaseTextWatcher() {
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                requireCallback().onWordBChanged(item, s.toString())
+            override fun afterTextChanged(s: Editable?) {
+                requireCallback().onWordBChanged(s.toString(), wordBInputView.getSelection())
                 refreshSaveButtonEnabled()
             }
         }
         wordAInputView.addTextChangedListener(wordATextWatcher)
         wordBInputView.addTextChangedListener(wordBTextWatcher)
+
+        val viewMode = item.viewMode
+        if (viewMode is ViewMode.Active) {
+            val focus = viewMode.focusItem
+            when (focus) {
+                is FocusItem.WordA -> setFocus(wordAInputView, focus.selection)
+                is FocusItem.WordB -> setFocus(wordBInputView, focus.selection)
+            }
+        }
 
         refreshSaveButtonEnabled()
 
@@ -96,19 +119,20 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
             val tags = tagsAdapter.positionDelegate.getItems()
                 .filterIsInstance<TagItem.Existing>()
                 .map { it.data }
-            val proto = VocabEntryProto(wordA, wordB, item.languageId, tags)
+            val proto = VocabEntryProto(wordA, wordB, item.data.languageId, tags)
             requireCallback().save(proto)
 
+            // TODO: This reset state change should be driven by 'setItem'
             // Reset
             wordAInputView.setText("")
             wordBInputView.setText("")
             refreshSaveButtonEnabled()
             wordAInputViewLayout.requestFocus()
         }
-        val existingTagItems = item.tags.map {
-            TagItem.Existing(item, it)
+        val existingTagItems = item.data.tags.map {
+            TagItem.Existing(item.data, it)
         }
-        val createTagItem = TagItem.Create(item, "")
+        val createTagItem = TagItem.Create(item.data, "")
         val allTagItems = existingTagItems + createTagItem
         tagsAdapter.submitList(allTagItems)
     }
@@ -121,6 +145,11 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
 
     private fun refreshSaveButtonEnabled() {
         saveButton.isEnabled = isSaveButtonEnabled(getWordAInput(), getWordBInput())
+    }
+
+    private fun setFocus(focusView: EditText, selection: TextSelection) {
+        focusView.requestFocus()
+        focusView.setSelection(selection)
     }
 
     private fun getWordAInput() = wordAInputView.text?.toString()

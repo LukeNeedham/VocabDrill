@@ -13,7 +13,8 @@ import com.lukeneedham.flowerpotrecycler.adapter.itemtype.config.ItemTypeConfigL
 import com.lukeneedham.flowerpotrecycler.util.ItemTypeConfigCreator
 import com.lukeneedham.flowerpotrecycler.util.extensions.addItemLayoutParams
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagCreateCallback
-import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryItem
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryItemData
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryItemPresentationData
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.create.VocabEntryCreateCallback
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.create.VocabEntryCreateItemView
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.existing.VocabEntryExistingCallback
@@ -23,11 +24,11 @@ class VocabEntriesAdapter(
     vocabEntryExistingCallback: VocabEntryExistingCallback,
     vocabEntryCreateCallback: VocabEntryCreateCallback,
     tagCreateCallback: TagCreateCallback
-) : DelegatedRecyclerAdapter<VocabEntryItem, View>() {
+) : DelegatedRecyclerAdapter<VocabEntryItemPresentationData, View>() {
 
     override val positionDelegate = LinearPositionDelegate(this, diffCallback)
 
-    override val itemTypeConfigRegistry = ItemTypeConfigListRegistry<VocabEntryItem, View>(
+    override val itemTypeConfigRegistry = ItemTypeConfigListRegistry<VocabEntryItemPresentationData, View>(
         listOf(
             ItemTypeConfigCreator.fromBuilderBinder(
                 RecyclerItemViewBuilderBinder.newInstance {
@@ -35,7 +36,7 @@ class VocabEntriesAdapter(
                         this.vocabEntryExistingCallback = vocabEntryExistingCallback
                     }
                 },
-                FeatureConfig<VocabEntryItem.Existing, VocabEntryExistingItemView>().apply {
+                FeatureConfig<VocabEntryItemPresentationData.Existing, VocabEntryExistingItemView>().apply {
                     addItemLayoutParams(RecyclerView.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
                 }
             ),
@@ -46,29 +47,37 @@ class VocabEntriesAdapter(
                         this.tagCreateCallback = tagCreateCallback
                     }
                 },
-                FeatureConfig<VocabEntryItem.Create, VocabEntryCreateItemView>().apply {
+                FeatureConfig<VocabEntryItemPresentationData.Create, VocabEntryCreateItemView>().apply {
                     addItemLayoutParams(RecyclerView.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
                 }
             )
-        ),
+        )
     )
 
+    init {
+        setHasStableIds(true)
+    }
+
+    override fun getItemId(position: Int): Long {
+        val data = positionDelegate.getItemAt(position).data
+        return when(data) {
+            is VocabEntryItemData.Existing -> data.entryId
+            is VocabEntryItemData.Create -> -1
+        }
+    }
+
     companion object {
-        private val diffCallback = object : DiffUtil.ItemCallback<VocabEntryItem>() {
-            override fun areItemsTheSame(oldItem: VocabEntryItem, newItem: VocabEntryItem) =
-                when (oldItem) {
+        private val diffCallback = object : DiffUtil.ItemCallback<VocabEntryItemPresentationData>() {
+            override fun areItemsTheSame(oldItemPresentationData: VocabEntryItemPresentationData, newItemPresentationData: VocabEntryItemPresentationData) =
+                when (oldItemPresentationData) {
                     /* There can only be 1 create item */
-                    is VocabEntryItem.Create -> newItem is VocabEntryItem.Create
-                    is VocabEntryItem.Existing ->
-                        newItem is VocabEntryItem.Existing && oldItem.entryId == newItem.entryId
+                    is VocabEntryItemPresentationData.Create -> newItemPresentationData is VocabEntryItemPresentationData.Create
+                    is VocabEntryItemPresentationData.Existing ->
+                        newItemPresentationData is VocabEntryItemPresentationData.Existing && oldItemPresentationData.data.entryId == newItemPresentationData.data.entryId
                 }
 
-            /**
-             * The item view itself ensures that 
-             * "the items' visual representations are the same" for most things - except tags
-             */
-            override fun areContentsTheSame(oldItem: VocabEntryItem, newItem: VocabEntryItem) =
-                oldItem.tags == newItem.tags
+            override fun areContentsTheSame(oldItemPresentationData: VocabEntryItemPresentationData, newItemPresentationData: VocabEntryItemPresentationData) =
+                oldItemPresentationData == newItemPresentationData
         }
     }
 }
