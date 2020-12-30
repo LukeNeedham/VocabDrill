@@ -1,7 +1,6 @@
 package com.lukeneedham.vocabdrill.presentation.feature.learn
 
 import android.os.Bundle
-import android.text.InputType
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils

@@ -30,13 +30,7 @@ import com.lukeneedham.vocabdrill.presentation.util.TextSelection
 import com.lukeneedham.vocabdrill.presentation.util.extension.getSelection
 import com.lukeneedham.vocabdrill.presentation.util.extension.inflateFrom
 import com.lukeneedham.vocabdrill.presentation.util.extension.setSelection
-import kotlinx.android.synthetic.main.view_item_create_vocab_entry.view.*
 import kotlinx.android.synthetic.main.view_item_vocab_entry.view.*
-import kotlinx.android.synthetic.main.view_item_vocab_entry.view.tagsRecycler
-import kotlinx.android.synthetic.main.view_item_vocab_entry.view.wordAInputView
-import kotlinx.android.synthetic.main.view_item_vocab_entry.view.wordAInputViewLayout
-import kotlinx.android.synthetic.main.view_item_vocab_entry.view.wordBInputView
-import kotlinx.android.synthetic.main.view_item_vocab_entry.view.wordBInputViewLayout
 
 class VocabEntryExistingItemView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -53,17 +47,21 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
                     }
                 },
                 FeatureConfig<TagItem.Create, TagCreateView>().apply {
-                    addItemLayoutParams(RecyclerView.LayoutParams(
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT
-                    ))
+                    addItemLayoutParams(
+                        RecyclerView.LayoutParams(
+                            ViewGroup.LayoutParams.WRAP_CONTENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT
+                        )
+                    )
                 }
             ),
             ItemTypeConfigCreator.fromRecyclerItemView<TagItem.Existing, TagExistingView> {
-                addItemLayoutParams(RecyclerView.LayoutParams(
-                    ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                ))
+                addItemLayoutParams(
+                    RecyclerView.LayoutParams(
+                        ViewGroup.LayoutParams.WRAP_CONTENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT
+                    )
+                )
             }
         )
     )
@@ -86,6 +84,20 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
     }
 
     override fun setItem(position: Int, item: VocabEntryItemPresentationData.Existing) {
+        setupTextWatchers(item)
+        setupTextFocus(item)
+
+        tagsAdapter.submitList(item.data.tags.map { TagItem.Existing(item.data, it) })
+
+        deleteButton.setOnClickListener {
+            requireCallback().onDelete(item)
+        }
+
+        backgroundView.setOnClickListener { flipMode(item) }
+        chevronIconView.setOnClickListener { flipMode(item) }
+    }
+
+    private fun setupTextWatchers(item: VocabEntryItemPresentationData.Existing) {
         wordAInputView.removeTextChangedListener(wordATextWatcher)
         wordBInputView.removeTextChangedListener(wordBTextWatcher)
 
@@ -104,6 +116,11 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
         }
         wordAInputView.addTextChangedListener(wordATextWatcher)
         wordBInputView.addTextChangedListener(wordBTextWatcher)
+    }
+
+    private fun setupTextFocus(item: VocabEntryItemPresentationData.Existing) {
+        wordAInputView.setOnFocusChangeListener { _, _ -> }
+        wordBInputView.setOnFocusChangeListener { _, _ -> }
 
         val viewMode = item.viewMode
         setMode(viewMode)
@@ -115,20 +132,33 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
             }
         }
 
-        tagsAdapter.submitList(item.data.tags.map { TagItem.Existing(item.data, it) })
+        wordAInputView.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                wordAInputView.post {
+                    requireCallback().onViewModeChanged(
+                        item,
+                        ViewMode.Active(FocusItem.WordA(wordAInputView.getSelection()))
+                    )
+                }
+            }
+        }
+        wordBInputView.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                wordBInputView.post {
+                    requireCallback().onViewModeChanged(
+                        item,
+                        // selection is incorrect. Maybe needs a post?
+                        ViewMode.Active(FocusItem.WordB(wordBInputView.getSelection()))
+                    )
+                }
+            }
+        }
+    }
 
-        deleteButton.setOnClickListener {
-            requireCallback().onDelete(item)
-        }
-
-        topLayer.setOnClickListener {
-            val newMode = flipMode(viewMode)
-            requireCallback().onViewModeChanged(item, newMode)
-        }
-        chevronIconView.setOnClickListener {
-            val newMode = flipMode(viewMode)
-            requireCallback().onViewModeChanged(item, newMode)
-        }
+    private fun flipMode(item: VocabEntryItemPresentationData.Existing) {
+        val viewMode = item.viewMode
+        val newMode = getFlippedMode(viewMode)
+        requireCallback().onViewModeChanged(item, newMode)
     }
 
     private fun requireCallback() = vocabEntryExistingCallback ?: error("Callback must be set")
@@ -138,7 +168,7 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
         focusView.setSelection(selection)
     }
 
-    private fun flipMode(viewMode: ViewMode): ViewMode {
+    private fun getFlippedMode(viewMode: ViewMode): ViewMode {
         return when (viewMode) {
             is ViewMode.Inactive -> ViewMode.Active(FocusItem.None)
             is ViewMode.Active -> ViewMode.Inactive
@@ -150,11 +180,9 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
         deleteButton.visibility = if (isExpanded) View.VISIBLE else View.GONE
         val chevronResId = if (isExpanded) R.drawable.ic_chevron_up else R.drawable.ic_chevron_down
         chevronIconView.setImageResource(chevronResId)
-        // This view intercepts all clicks when in compressed view
-        topLayer.visibility = if(isExpanded) View.GONE else View.VISIBLE
 
         val textInputEnabled = isExpanded
-        wordAInputViewLayout.isEnabled = textInputEnabled
-        wordBInputViewLayout.isEnabled = textInputEnabled
+        //wordAInputViewLayout.isEnabled = textInputEnabled
+        //wordBInputViewLayout.isEnabled = textInputEnabled
     }
 }

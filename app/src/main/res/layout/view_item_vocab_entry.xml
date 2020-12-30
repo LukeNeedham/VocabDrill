@@ -5,6 +5,7 @@
     android:layout_height="wrap_content">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/backgroundView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/vocab_entry_item_elevation"
@@ -19,7 +20,6 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="10dp"
             android:layout_marginEnd="5dp"
-            android:enabled="false"
             android:hint="@string/add_entry_word_a_hint"
             app:layout_constraintEnd_toStartOf="@+id/wordBInputViewLayout"
             app:layout_constraintStart_toStartOf="parent"
@@ -30,7 +30,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:importantForAutofill="no"
-                android:inputType="text"
+                android:inputType="textNoSuggestions"
                 android:textColor="@color/vocab_entry_word" />
 
         </com.google.android.material.textfield.TextInputLayout>
@@ -42,7 +42,6 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="5dp"
             android:layout_marginEnd="10dp"
-            android:enabled="false"
             android:hint="@string/add_entry_word_b_hint"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/wordAInputViewLayout"
@@ -53,7 +52,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:importantForAutofill="no"
-                android:inputType="text"
+                android:inputType="textNoSuggestions"
                 android:textColor="@color/vocab_entry_word" />
 
         </com.google.android.material.textfield.TextInputLayout>
@@ -93,15 +92,6 @@
             app:layout_constraintTop_toBottomOf="@+id/wordBInputViewLayout"
             app:layout_constraintVertical_bias="1"
             app:srcCompat="@drawable/ic_chevron_down" />
-
-        <View
-            android:id="@+id/topLayer"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -3,10 +3,7 @@ package com.lukeneedham.vocabdrill.presentation.feature.language
 import androidx.lifecycle.MutableLiveData
 import com.lukeneedham.vocabdrill.domain.model.*
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagItem
-import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.FocusItem
-import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.ViewMode
-import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryItemPresentationData
-import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryItemData
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.*
 import com.lukeneedham.vocabdrill.presentation.util.DisposingViewModel
 import com.lukeneedham.vocabdrill.presentation.util.TextSelection
 import com.lukeneedham.vocabdrill.presentation.util.extension.toLiveData
@@ -71,14 +68,23 @@ class LanguageViewModel(
         refreshEntryItems()
     }
 
-    fun onCreateItemInteraction() {
-        selectedItem = SelectedVocabEntry.Create(FocusItem.None)
+    fun onCreateItemInteraction(section: InteractionSection, selection: TextSelection?) {
+        val selectionOrDefault = selection ?: TextSelection(0, 0)
+        val focus = when(section) {
+            InteractionSection.WordAInput -> FocusItem.WordA(selectionOrDefault)
+            InteractionSection.WordBInput -> FocusItem.WordB(selectionOrDefault)
+            // TODO: We need a section for tag name input
+            InteractionSection.Other -> FocusItem.None
+        }
+        selectedItem = SelectedVocabEntry.Create(focus)
         refreshEntryItems()
     }
 
     fun save(proto: VocabEntryProto) {
         val ignored = addVocabEntry(proto).subscribe {
             itemStateHandler.onCreateItemSaved()
+            selectedItem = SelectedVocabEntry.Create(FocusItem.WordA(TextSelection(0, 0)))
+            refreshEntryItems()
         }
     }
 
@@ -100,9 +106,10 @@ class LanguageViewModel(
         refreshEntryItems()
     }
 
-    private fun refreshEntryItems() {
-        vocabEntriesMutableLiveData.value =
-            getVocabEntryItemsFromData(itemStateHandler.getAllItems())
+    fun focusCreateItem() {
+        val focus = FocusItem.WordA(TextSelection(0, 0))
+        selectedItem = SelectedVocabEntry.Create(focus)
+        refreshEntryItems()
     }
 
     fun onViewModeChanged(itemPresentationData: VocabEntryItemPresentationData, viewMode: ViewMode) {
@@ -217,5 +224,10 @@ class LanguageViewModel(
                 is VocabEntryItemData.Existing -> VocabEntryItemPresentationData.Existing(it, mode)
             }
         }
+    }
+
+    private fun refreshEntryItems() {
+        vocabEntriesMutableLiveData.value =
+            getVocabEntryItemsFromData(itemStateHandler.getAllItems())
     }
 }

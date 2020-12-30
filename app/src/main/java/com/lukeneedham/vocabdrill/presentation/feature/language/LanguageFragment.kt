@@ -13,9 +13,9 @@ import com.lukeneedham.vocabdrill.R
 import com.lukeneedham.vocabdrill.domain.model.VocabEntryProto
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagCreateCallback
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagItem
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.InteractionSection
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryItemPresentationData
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.create.VocabEntryCreateCallback
-import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.create.VocabEntryCreateItemView
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.ViewMode
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.existing.VocabEntryExistingCallback
 import com.lukeneedham.vocabdrill.presentation.util.TextSelection
@@ -71,8 +71,8 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
             viewModel.onCreateItemWordBChanged(newWordA, selection)
         }
 
-        override fun onInteraction() {
-            viewModel.onCreateItemInteraction()
+        override fun onInteraction(section: InteractionSection, selection: TextSelection) {
+            viewModel.onCreateItemInteraction(section, selection)
         }
 
         override fun save(proto: VocabEntryProto) {
@@ -82,6 +82,10 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
 
     private val tagCreateCallback = object : TagCreateCallback {
         override fun onNameChanged(tagItem: TagItem.Create, name: String) {
+            if(name.isBlank()) {
+                tagSuggestionsView.visibility = View.GONE
+                return
+            }
             val entryItem = tagItem.vocabEntryItem
             viewModel.requestTagMatches(entryItem, name)
             tagSuggestionsView.onSuggestionClickListener = { tag ->
@@ -94,6 +98,10 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
                 leftMargin = 100
             }
             tagSuggestionsView.visibility = View.VISIBLE
+        }
+
+        override fun onStartNameInput() {
+            //viewModel.onCreateItemInteraction(InteractionSection.Other, null)
         }
     }
 
@@ -146,7 +154,7 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
                 if (focusCreateItemQueued) {
                     if (scrollPercent >= MIN_SCROLL_PERCENT_TO_TRIGGER_CREATE_FOCUS) {
                         focusCreateItemQueued = false
-                        getCreateItemView()?.requestFocus()
+                        focusCreateItem()
                     }
                 }
                 val addButtonScale = if (scrollPercent < MIN_SCROLL_PERCENT_TO_HIDE_ADD_BUTTON) {
@@ -180,21 +188,21 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
         }
 
         addButton.setOnClickListener {
-            focusCreateItemQueued = true
             val lastItemPosition = getLastItemPosition()
             val lastVisiblePosition = layoutManager.findLastCompletelyVisibleItemPosition()
 
             if (lastVisiblePosition == lastItemPosition) {
-                getCreateItemView()?.requestFocus()
+                focusCreateItem()
             } else {
+                focusCreateItemQueued = true
                 recyclerView.smoothScrollToPosition(lastItemPosition)
             }
         }
     }
 
-    private fun getCreateItemView(): VocabEntryCreateItemView? {
-        val view = recyclerView.findViewHolderForAdapterPosition(getLastItemPosition())?.itemView
-        return view as? VocabEntryCreateItemView
+    private fun focusCreateItem() {
+        viewModel.focusCreateItem()
+        showKeyboard()
     }
 
     private fun getLastItemPosition() = vocabEntriesAdapter.itemCount - 1

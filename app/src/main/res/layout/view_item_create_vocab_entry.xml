@@ -24,7 +24,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:importantForAutofill="no"
-            android:inputType="text"
+            android:inputType="textNoSuggestions"
             android:textColor="@color/vocab_entry_word" />
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -46,7 +46,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:importantForAutofill="no"
-            android:inputType="text"
+            android:inputType="textNoSuggestions"
             android:textColor="@color/vocab_entry_word" />
 
     </com.google.android.material.textfield.TextInputLayout>
