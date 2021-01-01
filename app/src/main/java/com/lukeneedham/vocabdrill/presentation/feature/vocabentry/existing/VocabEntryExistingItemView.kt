@@ -147,7 +147,6 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
                 wordBInputView.post {
                     requireCallback().onViewModeChanged(
                         item,
-                        // selection is incorrect. Maybe needs a post?
                         ViewMode.Active(FocusItem.WordB(wordBInputView.getSelection()))
                     )
                 }
@@ -170,7 +169,7 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
 
     private fun getFlippedMode(viewMode: ViewMode): ViewMode {
         return when (viewMode) {
-            is ViewMode.Inactive -> ViewMode.Active(FocusItem.None)
+            is ViewMode.Inactive -> ViewMode.Active(FocusItem.WordA(TextSelection.End))
             is ViewMode.Active -> ViewMode.Inactive
         }
     }

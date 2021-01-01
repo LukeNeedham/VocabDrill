@@ -29,8 +29,12 @@ fun EditText.setEditable(isEditable: Boolean) {
     }
 }
 
-fun EditText.getSelection() = TextSelection(selectionStart, selectionEnd)
+fun EditText.getSelection() = TextSelection.Range(selectionStart, selectionEnd)
 
 fun EditText.setSelection(selection: TextSelection) {
-    setSelection(selection.start, selection.end)
+    val (start, end) = when(selection) {
+        is TextSelection.Range -> selection.start to selection.end
+        TextSelection.End -> length() to length()
+    }
+    setSelection(start, end)
 }

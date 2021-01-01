@@ -130,18 +130,22 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
 
         wordAInputView.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
-                requireCallback().onInteraction(
-                    InteractionSection.WordAInput,
-                    wordAInputView.getSelection()
-                )
+                wordAInputView.post {
+                    requireCallback().onInteraction(
+                        InteractionSection.WordAInput,
+                        wordAInputView.getSelection()
+                    )
+                }
             }
         }
         wordBInputView.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
-                requireCallback().onInteraction(
-                    InteractionSection.WordBInput,
-                    wordBInputView.getSelection()
-                )
+                wordBInputView.post {
+                    requireCallback().onInteraction(
+                        InteractionSection.WordBInput,
+                        wordBInputView.getSelection()
+                    )
+                }
             }
         }
     }

@@ -69,12 +69,12 @@ class LanguageViewModel(
     }
 
     fun onCreateItemInteraction(section: InteractionSection, selection: TextSelection?) {
-        val selectionOrDefault = selection ?: TextSelection(0, 0)
+        val selectionOrDefault = selection ?: TextSelection.End
         val focus = when(section) {
             InteractionSection.WordAInput -> FocusItem.WordA(selectionOrDefault)
             InteractionSection.WordBInput -> FocusItem.WordB(selectionOrDefault)
             // TODO: We need a section for tag name input
-            InteractionSection.Other -> FocusItem.None
+            InteractionSection.Other -> FocusItem.WordA(TextSelection.End)
         }
         selectedItem = SelectedVocabEntry.Create(focus)
         refreshEntryItems()
@@ -83,7 +83,7 @@ class LanguageViewModel(
     fun save(proto: VocabEntryProto) {
         val ignored = addVocabEntry(proto).subscribe {
             itemStateHandler.onCreateItemSaved()
-            selectedItem = SelectedVocabEntry.Create(FocusItem.WordA(TextSelection(0, 0)))
+            selectedItem = SelectedVocabEntry.Create(FocusItem.WordA(TextSelection.End))
             refreshEntryItems()
         }
     }
@@ -107,7 +107,7 @@ class LanguageViewModel(
     }
 
     fun focusCreateItem() {
-        val focus = FocusItem.WordA(TextSelection(0, 0))
+        val focus = FocusItem.WordA(TextSelection.End)
         selectedItem = SelectedVocabEntry.Create(focus)
         refreshEntryItems()
     }

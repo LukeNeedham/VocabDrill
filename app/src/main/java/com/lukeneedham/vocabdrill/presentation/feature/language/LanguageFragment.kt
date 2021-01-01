@@ -3,6 +3,7 @@ package com.lukeneedham.vocabdrill.presentation.feature.language
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.doOnNextLayout
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
@@ -14,9 +15,9 @@ import com.lukeneedham.vocabdrill.domain.model.VocabEntryProto
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagCreateCallback
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagItem
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.InteractionSection
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.ViewMode
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryItemPresentationData
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.create.VocabEntryCreateCallback
-import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.ViewMode
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.existing.VocabEntryExistingCallback
 import com.lukeneedham.vocabdrill.presentation.util.TextSelection
 import com.lukeneedham.vocabdrill.presentation.util.extension.*
@@ -36,31 +37,43 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
         }
     }
 
-    private val vocabEntryExistingCallback: VocabEntryExistingCallback = object : VocabEntryExistingCallback {
-        override fun onWordAChanged(
-            itemPresentationData: VocabEntryItemPresentationData.Existing,
-            newWordA: String,
-            selection: TextSelection
-        ) {
-            viewModel.onExistingItemWordAChanged(itemPresentationData.data.entryId, newWordA, selection)
-        }
+    private val vocabEntryExistingCallback: VocabEntryExistingCallback =
+        object : VocabEntryExistingCallback {
+            override fun onWordAChanged(
+                itemPresentationData: VocabEntryItemPresentationData.Existing,
+                newWordA: String,
+                selection: TextSelection
+            ) {
+                viewModel.onExistingItemWordAChanged(
+                    itemPresentationData.data.entryId,
+                    newWordA,
+                    selection
+                )
+            }
 
-        override fun onWordBChanged(
-            itemPresentationData: VocabEntryItemPresentationData.Existing,
-            newWordB: String,
-            selection: TextSelection
-        ) {
-            viewModel.onExistingItemWordBChanged(itemPresentationData.data.entryId, newWordB, selection)
-        }
+            override fun onWordBChanged(
+                itemPresentationData: VocabEntryItemPresentationData.Existing,
+                newWordB: String,
+                selection: TextSelection
+            ) {
+                viewModel.onExistingItemWordBChanged(
+                    itemPresentationData.data.entryId,
+                    newWordB,
+                    selection
+                )
+            }
 
-        override fun onViewModeChanged(itemPresentationData: VocabEntryItemPresentationData.Existing, viewMode: ViewMode) {
-            viewModel.onViewModeChanged(itemPresentationData, viewMode)
-        }
+            override fun onViewModeChanged(
+                itemPresentationData: VocabEntryItemPresentationData.Existing,
+                viewMode: ViewMode
+            ) {
+                viewModel.onViewModeChanged(itemPresentationData, viewMode)
+            }
 
-        override fun onDelete(itemPresentationData: VocabEntryItemPresentationData.Existing) {
-            viewModel.deleteEntry(itemPresentationData.data.entryId)
+            override fun onDelete(itemPresentationData: VocabEntryItemPresentationData.Existing) {
+                viewModel.deleteEntry(itemPresentationData.data.entryId)
+            }
         }
-    }
 
     private val vocabEntryCreateCallback = object : VocabEntryCreateCallback {
         override fun onWordAChanged(newWordA: String, selection: TextSelection) {
@@ -82,7 +95,7 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
 
     private val tagCreateCallback = object : TagCreateCallback {
         override fun onNameChanged(tagItem: TagItem.Create, name: String) {
-            if(name.isBlank()) {
+            if (name.isBlank()) {
                 tagSuggestionsView.visibility = View.GONE
                 return
             }
@@ -101,6 +114,7 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
         }
 
         override fun onStartNameInput() {
+            // TODO: Fix or delete
             //viewModel.onCreateItemInteraction(InteractionSection.Other, null)
         }
     }
@@ -154,7 +168,7 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
                 if (focusCreateItemQueued) {
                     if (scrollPercent >= MIN_SCROLL_PERCENT_TO_TRIGGER_CREATE_FOCUS) {
                         focusCreateItemQueued = false
-                        focusCreateItem()
+                        viewModel.focusCreateItem()
                     }
                 }
                 val addButtonScale = if (scrollPercent < MIN_SCROLL_PERCENT_TO_HIDE_ADD_BUTTON) {
@@ -192,17 +206,16 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
             val lastVisiblePosition = layoutManager.findLastCompletelyVisibleItemPosition()
 
             if (lastVisiblePosition == lastItemPosition) {
-                focusCreateItem()
+                viewModel.focusCreateItem()
+                showKeyboard()
             } else {
                 focusCreateItemQueued = true
                 recyclerView.smoothScrollToPosition(lastItemPosition)
+                recyclerView.doOnNextLayout {
+                    showKeyboard()
+                }
             }
         }
-    }
-
-    private fun focusCreateItem() {
-        viewModel.focusCreateItem()
-        showKeyboard()
     }
 
     private fun getLastItemPosition() = vocabEntriesAdapter.itemCount - 1
