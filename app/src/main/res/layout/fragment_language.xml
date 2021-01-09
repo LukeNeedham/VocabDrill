@@ -56,9 +56,11 @@
 
     <com.lukeneedham.vocabdrill.presentation.feature.tag.TagSuggestionsView
         android:id="@+id/tagSuggestionsView"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="@dimen/tag_suggestions_view_width"
+        android:layout_height="0dp"
         android:visibility="gone"
+        app:layout_constraintHeight_default="wrap"
+        app:layout_constraintHeight_max="90dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

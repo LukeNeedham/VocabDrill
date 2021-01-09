@@ -3,6 +3,7 @@ package com.lukeneedham.vocabdrill.presentation.feature.language
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.core.view.doOnNextLayout
 import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
@@ -25,6 +26,7 @@ import com.lukeneedham.vocabdrill.presentation.util.recyclerview.decoration.Line
 import kotlinx.android.synthetic.main.fragment_language.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
+import kotlin.math.max
 
 class LanguageFragment : Fragment(R.layout.fragment_language) {
     private val navArgs: LanguageFragmentArgs by navArgs()
@@ -94,28 +96,42 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
     }
 
     private val tagCreateCallback = object : TagCreateCallback {
-        override fun onNameChanged(tagItem: TagItem.Create, name: String) {
-            if (name.isBlank()) {
-                tagSuggestionsView.visibility = View.GONE
-                return
-            }
+        override fun onNameChanged(tagItem: TagItem.Create, name: String, nameInputView: View) {
             val entryItem = tagItem.vocabEntryItem
             viewModel.requestTagMatches(entryItem, name)
             tagSuggestionsView.onSuggestionClickListener = { tag ->
                 viewModel.addTagToVocabEntry(entryItem, tag)
                 tagSuggestionsView.visibility = View.GONE
             }
-            tagSuggestionsView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                // TODO: Position under tag view, which needs to be a parameter
-                topMargin = 100
-                leftMargin = 100
-            }
-            tagSuggestionsView.visibility = View.VISIBLE
-        }
 
-        override fun onStartNameInput() {
-            // TODO: Fix or delete
-            //viewModel.onCreateItemInteraction(InteractionSection.Other, null)
+            fun updateSuggestionsViewPosition() {
+                tagSuggestionsView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    val nameInputViewPosition =
+                        nameInputView.getLocationInDisplayFrame(requireActivity())
+                    val nameInputWidth = nameInputView.width
+                    val popupSideMargin =
+                        resources.getDimensionPixelSize(R.dimen.tag_suggestions_view_input_margin)
+                    val popupWidth = nameInputWidth + (2 * popupSideMargin)
+
+                    width = popupWidth
+                    leftMargin = max(0, nameInputViewPosition.x - popupSideMargin)
+                    topMargin = nameInputViewPosition.y + nameInputView.height
+                }
+            }
+
+            nameInputView.doOnNextLayout {
+                updateSuggestionsViewPosition()
+            }
+            createTagNameInputViewLayoutListener = { updateSuggestionsViewPosition() }
+            val showSuggestions = !name.isBlank()
+            tagSuggestionsView.visibility = if (showSuggestions) View.VISIBLE else View.GONE
+            val inputBackgroundRes = if (showSuggestions) {
+                R.drawable.background_tag_create_expanded
+            } else {
+                R.drawable.background_tag_create_collapsed
+            }
+            nameInputView.background =
+                ContextCompat.getDrawable(requireContext(), inputBackgroundRes)
         }
     }
 
@@ -128,6 +144,8 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
      * and then this flag is considered resolved
      */
     private var focusCreateItemQueued: Boolean = false
+
+    private var createTagNameInputViewLayoutListener: () -> Unit = {}
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -165,12 +183,19 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 val scrollPercent = recyclerView.computeVerticalScrollPercent()
+
+                // Focus pending
                 if (focusCreateItemQueued) {
                     if (scrollPercent >= MIN_SCROLL_PERCENT_TO_TRIGGER_CREATE_FOCUS) {
                         focusCreateItemQueued = false
                         viewModel.focusCreateItem()
                     }
                 }
+
+                // Update tag name suggestions view
+                createTagNameInputViewLayoutListener()
+
+                // Button scale
                 val addButtonScale = if (scrollPercent < MIN_SCROLL_PERCENT_TO_HIDE_ADD_BUTTON) {
                     1f
                 } else {

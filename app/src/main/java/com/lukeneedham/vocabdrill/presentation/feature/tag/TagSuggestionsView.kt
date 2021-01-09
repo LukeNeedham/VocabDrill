@@ -20,8 +20,8 @@ class TagSuggestionsView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
-    private val adapter = SingleTypeRecyclerAdapterCreator.fromRecyclerItemView<TagItem, TagSuggestionView>(
-        SingleTypeAdapterConfig<TagItem, TagSuggestionView>().apply {
+    private val adapter = SingleTypeRecyclerAdapterCreator.fromRecyclerItemView<TagSuggestionItem, TagSuggestionView>(
+        SingleTypeAdapterConfig<TagSuggestionItem, TagSuggestionView>().apply {
             addItemLayoutParams(RecyclerView.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
             addOnItemClickListener { item, _, _ ->
                 onSuggestionClickListener(item)
@@ -29,7 +29,7 @@ class TagSuggestionsView @JvmOverloads constructor(
         }
     )
 
-    lateinit var onSuggestionClickListener: (TagItem) -> Unit
+    lateinit var onSuggestionClickListener: (TagSuggestionItem) -> Unit
 
     init {
         inflateFrom(R.layout.view_tag_suggestions_pop_up)
@@ -39,7 +39,7 @@ class TagSuggestionsView @JvmOverloads constructor(
         }
     }
 
-    fun setTags(tags: List<TagItem>) {
+    fun setTags(tags: List<TagSuggestionItem>) {
         adapter.submitList(tags)
     }
 }

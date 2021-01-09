@@ -10,7 +10,7 @@ class CalculateColorForNewTag(
     private val languageTagsRepository: LanguageTagsRepository,
     private val extractFlagColoursFromLanguageId: ExtractFlagColoursFromLanguageId
 ) {
-    private val ratioListSoFar = mutableListOf<RatioStep>(RatioStep(0.5f, 0.5f))
+    private val ratioListSoFar = mutableListOf(RatioStep(0.5f, 0.5f))
 
     operator fun invoke(languageId: Long): Single<Int> {
         return Single.zip(
@@ -26,7 +26,8 @@ class CalculateColorForNewTag(
 
     private fun getColourForIndex(flagColours: List<Int>, index: Int): Int {
         val numFlagColors = flagColours.size
-        val hue = index % numFlagColors
+        val hueIndex = index % numFlagColors
+        val hue = flagColours[hueIndex]
         val luminanceIndex = index / numFlagColors
 
         /* Alternate between white and black with the same ratios - so divide by 2 */
@@ -38,7 +39,7 @@ class CalculateColorForNewTag(
     }
 
     private fun getRatio(targetIndex: Int): Float {
-        var index = ratioListSoFar.size
+        var index = ratioListSoFar.lastIndex
         while(index < targetIndex) {
             val step = ratioListSoFar[index]
             val newDiff = step.diff / 2
@@ -47,7 +48,7 @@ class CalculateColorForNewTag(
             ratioListSoFar.add(minusChild)
             val addChild = RatioStep(value + newDiff, newDiff)
             ratioListSoFar.add(addChild)
-            index++
+            index += 2
         }
         return ratioListSoFar[targetIndex].value
     }

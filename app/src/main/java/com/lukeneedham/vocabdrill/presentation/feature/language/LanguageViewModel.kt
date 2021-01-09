@@ -3,6 +3,7 @@ package com.lukeneedham.vocabdrill.presentation.feature.language
 import androidx.lifecycle.MutableLiveData
 import com.lukeneedham.vocabdrill.domain.model.*
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagItem
+import com.lukeneedham.vocabdrill.presentation.feature.tag.TagSuggestionItem
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.*
 import com.lukeneedham.vocabdrill.presentation.util.DisposingViewModel
 import com.lukeneedham.vocabdrill.presentation.util.TextSelection
@@ -35,10 +36,11 @@ class LanguageViewModel(
     private val countryMutableLiveData = MutableLiveData<Country>()
     val countryLiveData = countryMutableLiveData.toLiveData()
 
-    private val vocabEntriesMutableLiveData = MutableLiveData<List<VocabEntryItemPresentationData>>()
+    private val vocabEntriesMutableLiveData =
+        MutableLiveData<List<VocabEntryItemPresentationData>>()
     val vocabEntriesLiveData = vocabEntriesMutableLiveData.toLiveData()
 
-    private val tagSuggestionsMutableLiveData = MutableLiveData<List<TagItem>>()
+    private val tagSuggestionsMutableLiveData = MutableLiveData<List<TagSuggestionItem>>()
     val tagSuggestionsLiveData = tagSuggestionsMutableLiveData.toLiveData()
 
     init {
@@ -70,7 +72,7 @@ class LanguageViewModel(
 
     fun onCreateItemInteraction(section: InteractionSection, selection: TextSelection?) {
         val selectionOrDefault = selection ?: TextSelection.End
-        val focus = when(section) {
+        val focus = when (section) {
             InteractionSection.WordAInput -> FocusItem.WordA(selectionOrDefault)
             InteractionSection.WordBInput -> FocusItem.WordB(selectionOrDefault)
             // TODO: We need a section for tag name input
@@ -112,8 +114,11 @@ class LanguageViewModel(
         refreshEntryItems()
     }
 
-    fun onViewModeChanged(itemPresentationData: VocabEntryItemPresentationData, viewMode: ViewMode) {
-        when(viewMode) {
+    fun onViewModeChanged(
+        itemPresentationData: VocabEntryItemPresentationData,
+        viewMode: ViewMode
+    ) {
+        when (viewMode) {
             is ViewMode.Active -> {
                 val focusItem = viewMode.focusItem
 
@@ -127,15 +132,15 @@ class LanguageViewModel(
             ViewMode.Inactive -> {
                 // Set selected item to None, but only if [item] is indeed the current selection
                 val oldSelected = selectedItem
-                when(oldSelected) {
+                when (oldSelected) {
                     is SelectedVocabEntry.Create -> {
-                        if(itemPresentationData.data is VocabEntryItemData.Create) {
+                        if (itemPresentationData.data is VocabEntryItemData.Create) {
                             selectedItem = SelectedVocabEntry.None
                         }
                     }
                     is SelectedVocabEntry.Existing -> {
                         val data = itemPresentationData.data
-                        if(data is VocabEntryItemData.Existing && oldSelected.id == data.entryId) {
+                        if (data is VocabEntryItemData.Existing && oldSelected.id == data.entryId) {
                             selectedItem = SelectedVocabEntry.None
                         }
                     }
@@ -145,7 +150,7 @@ class LanguageViewModel(
         refreshEntryItems()
     }
 
-    fun addTagToVocabEntry(entryItem: VocabEntryItemData, tagItem: TagItem) {
+    fun addTagToVocabEntry(entryItem: VocabEntryItemData, tagItem: TagSuggestionItem) {
 
         fun addExistingTag(tag: Tag) {
             when (entryItem) {
@@ -159,10 +164,10 @@ class LanguageViewModel(
         }
 
         when (tagItem) {
-            is TagItem.Existing -> {
+            is TagSuggestionItem.Existing -> {
                 addExistingTag(tagItem.data)
             }
-            is TagItem.Create -> {
+            is TagSuggestionItem.Create -> {
                 val tagName = tagItem.name
                 calculateColorForNewTag(languageId).subscribe { color ->
                     val proto = TagProto(tagName, color, languageId)
@@ -176,14 +181,16 @@ class LanguageViewModel(
 
     fun requestTagMatches(entryItem: VocabEntryItemData, tagName: String) {
         disposables += findTagNameMatches(languageId, tagName).subscribe { tags ->
-            val existingTagItems = tags.map { TagItem.Existing(entryItem, it) }
-            val allTags = if (tags.any { it.name == tagName }) {
-                existingTagItems
+            val existingTagItems = tags.map { TagSuggestionItem.Existing(entryItem, it) }
+            if (tags.any { it.name == tagName }) {
+                tagSuggestionsMutableLiveData.value = existingTagItems
             } else {
-                val newTag = TagItem.Create(entryItem, tagName)
-                listOf(newTag) + existingTagItems
+                disposables += calculateColorForNewTag(languageId).subscribe { color ->
+                    val newTag = TagSuggestionItem.Create(entryItem, tagName, color)
+                    val allTags = listOf(newTag) + existingTagItems
+                    tagSuggestionsMutableLiveData.value = allTags
+                }
             }
-            tagSuggestionsMutableLiveData.value = allTags
         }
     }
 
@@ -219,7 +226,7 @@ class LanguageViewModel(
     private fun getVocabEntryItemsFromData(datas: List<VocabEntryItemData>): List<VocabEntryItemPresentationData> {
         return datas.map {
             val mode = getViewModeForVocabEntryItemData(it)
-            when(it) {
+            when (it) {
                 is VocabEntryItemData.Create -> VocabEntryItemPresentationData.Create(it, mode)
                 is VocabEntryItemData.Existing -> VocabEntryItemPresentationData.Existing(it, mode)
             }

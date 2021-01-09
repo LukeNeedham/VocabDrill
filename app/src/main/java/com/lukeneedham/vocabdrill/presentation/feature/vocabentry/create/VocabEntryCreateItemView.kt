@@ -4,6 +4,7 @@ import android.content.Context
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.AttributeSet
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.EditText
 import android.widget.FrameLayout
@@ -48,11 +49,11 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
                     }
                 },
                 FeatureConfig<TagItem.Create, TagCreateView>().apply {
-                    addItemLayoutParams(RecyclerView.LayoutParams(WRAP_CONTENT, WRAP_CONTENT))
+                    addItemLayoutParams(RecyclerView.LayoutParams(WRAP_CONTENT, MATCH_PARENT))
                 }
             ),
             ItemTypeConfigCreator.fromRecyclerItemView<TagItem.Existing, TagExistingView> {
-                addItemLayoutParams(RecyclerView.LayoutParams(WRAP_CONTENT, WRAP_CONTENT))
+                addItemLayoutParams(RecyclerView.LayoutParams(WRAP_CONTENT, MATCH_PARENT))
             }
         )
     )

@@ -11,6 +11,7 @@ import com.lukeneedham.vocabdrill.R
 import com.lukeneedham.vocabdrill.presentation.util.BaseTextWatcher
 import com.lukeneedham.vocabdrill.presentation.util.extension.inflateFrom
 import com.lukeneedham.vocabdrill.presentation.util.extension.showKeyboard
+import group.infotech.drawable.dsl.shapeDrawable
 import kotlinx.android.synthetic.main.view_tag_create.view.*
 import org.koin.core.KoinComponent
 
@@ -36,7 +37,6 @@ class TagCreateView @JvmOverloads constructor(
             tagNameInput.visibility = View.VISIBLE
             tagNameInput.requestFocus()
             context.showKeyboard()
-            requireCallback().onStartNameInput()
         }
     }
 
@@ -45,7 +45,7 @@ class TagCreateView @JvmOverloads constructor(
         tagNameInput.setText("")
         tagNameTextWatcher = object : BaseTextWatcher() {
             override fun afterTextChanged(s: Editable?) {
-                requireCallback().onNameChanged(item, s.toString())
+                requireCallback().onNameChanged(item, s.toString(), this@TagCreateView)
             }
         }
         tagNameInput.addTextChangedListener(tagNameTextWatcher)

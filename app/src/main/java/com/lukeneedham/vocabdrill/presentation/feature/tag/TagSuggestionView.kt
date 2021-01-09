@@ -13,7 +13,7 @@ import kotlinx.android.synthetic.main.view_tag_suggestion.view.*
 
 class TagSuggestionView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : FrameLayout(context, attrs, defStyleAttr), RecyclerItemView<TagItem> {
+) : FrameLayout(context, attrs, defStyleAttr), RecyclerItemView<TagSuggestionItem> {
 
     val background = shapeDrawable {
         cornerRadius = context.resources.getDimension(R.dimen.tag_item_suggestion_corner_radius)
@@ -23,12 +23,12 @@ class TagSuggestionView @JvmOverloads constructor(
         inflateFrom(R.layout.view_tag_suggestion)
     }
 
-    override fun setItem(position: Int, item: TagItem) {
+    override fun setItem(position: Int, item: TagSuggestionItem) {
         val (backgroundColor, text) = when(item) {
-            is TagItem.Create -> {
-                ContextCompat.getColor(context, R.color.tag_create_background) to item.name
+            is TagSuggestionItem.Create -> {
+                item.color to item.name
             }
-            is TagItem.Existing -> {
+            is TagSuggestionItem.Existing -> {
                 item.data.color to item.data.name
             }
         }
