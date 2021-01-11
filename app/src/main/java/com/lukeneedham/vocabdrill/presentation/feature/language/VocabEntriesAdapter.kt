@@ -13,6 +13,7 @@ import com.lukeneedham.flowerpotrecycler.adapter.itemtype.config.ItemTypeConfigL
 import com.lukeneedham.flowerpotrecycler.util.ItemTypeConfigCreator
 import com.lukeneedham.flowerpotrecycler.util.extensions.addItemLayoutParams
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagCreateCallback
+import com.lukeneedham.vocabdrill.presentation.feature.tag.TagItem
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryItemData
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryItemPresentationData
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.create.VocabEntryCreateCallback
@@ -23,7 +24,8 @@ import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.existing.Vocab
 class VocabEntriesAdapter(
     vocabEntryExistingCallback: VocabEntryExistingCallback,
     vocabEntryCreateCallback: VocabEntryCreateCallback,
-    tagCreateCallback: TagCreateCallback
+    tagCreateCallback: TagCreateCallback,
+    tagExistingClickListener: (TagItem.Existing) -> Unit
 ) : DelegatedRecyclerAdapter<VocabEntryItemPresentationData, View>() {
 
     override val positionDelegate = LinearPositionDelegate(this, diffCallback)
@@ -34,6 +36,7 @@ class VocabEntriesAdapter(
                 RecyclerItemViewBuilderBinder.newInstance {
                     VocabEntryExistingItemView(it.context).apply {
                         this.vocabEntryExistingCallback = vocabEntryExistingCallback
+                        this.tagCreateCallback = tagCreateCallback
                     }
                 },
                 FeatureConfig<VocabEntryItemPresentationData.Existing, VocabEntryExistingItemView>().apply {
@@ -45,6 +48,7 @@ class VocabEntriesAdapter(
                     VocabEntryCreateItemView(it.context).apply {
                         this.vocabEntryCreateCallback = vocabEntryCreateCallback
                         this.tagCreateCallback = tagCreateCallback
+                        this.tagExistingClickListener = tagExistingClickListener
                     }
                 },
                 FeatureConfig<VocabEntryItemPresentationData.Create, VocabEntryCreateItemView>().apply {

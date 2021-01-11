@@ -11,9 +11,9 @@ import com.lukeneedham.vocabdrill.presentation.feature.language.settings.changen
 import com.lukeneedham.vocabdrill.presentation.feature.learn.LearnViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.tag.VocabGroupViewModel
 import com.lukeneedham.vocabdrill.repository.LanguageRepository
-import com.lukeneedham.vocabdrill.repository.LanguageTagsRepository
+import com.lukeneedham.vocabdrill.repository.TagRepository
 import com.lukeneedham.vocabdrill.repository.VocabEntryRepository
-import com.lukeneedham.vocabdrill.repository.VocabEntryTagsRepository
+import com.lukeneedham.vocabdrill.repository.VocabEntryTagRelationRepository
 import com.lukeneedham.vocabdrill.usecase.*
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -45,8 +45,8 @@ object KoinModule {
     private val repositories = module {
         single { LanguageRepository(get()) }
         single { VocabEntryRepository(get()) }
-        single { LanguageTagsRepository(get()) }
-        single { VocabEntryTagsRepository(get(), get()) }
+        single { TagRepository(get()) }
+        single { VocabEntryTagRelationRepository(get(), get()) }
     }
 
     private val useCases = module {
@@ -57,9 +57,9 @@ object KoinModule {
         single { ObserveAllVocabEntryRelationsForLanguage(get(), get(), get()) }
 
         /* Entries */
-        single { DeleteVocabEntry(get()) }
+        single { DeleteVocabEntry(get(), get()) }
         single { UpdateVocabEntry(get()) }
-        single { AddVocabEntry(get()) }
+        single { AddVocabEntry(get(), get()) }
 
         /* Countries */
         single { ExtractFlagColoursFromLanguageId(get(), get()) }
@@ -91,6 +91,7 @@ object KoinModule {
         viewModel { (languageId: Long) ->
             LanguageViewModel(
                 languageId,
+                get(),
                 get(),
                 get(),
                 get(),

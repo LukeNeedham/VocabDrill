@@ -2,12 +2,12 @@ package com.lukeneedham.vocabdrill.usecase
 
 import android.graphics.Color
 import androidx.core.graphics.ColorUtils
-import com.lukeneedham.vocabdrill.repository.LanguageTagsRepository
+import com.lukeneedham.vocabdrill.repository.TagRepository
 import com.lukeneedham.vocabdrill.util.RxSchedulers
 import io.reactivex.Single
 
 class CalculateColorForNewTag(
-    private val languageTagsRepository: LanguageTagsRepository,
+    private val tagRepository: TagRepository,
     private val extractFlagColoursFromLanguageId: ExtractFlagColoursFromLanguageId
 ) {
     private val ratioListSoFar = mutableListOf(RatioStep(0.5f, 0.5f))
@@ -15,8 +15,11 @@ class CalculateColorForNewTag(
     operator fun invoke(languageId: Long): Single<Int> {
         return Single.zip(
             extractFlagColoursFromLanguageId(languageId),
-            languageTagsRepository.getAllForLanguage(languageId)
+            tagRepository.getAllForLanguage(languageId)
         ) { flagColours, tags ->
+            // TODO: Tags can be deleted, so this size method is not robust.
+            //  Leads to duplicate colors.
+            // Use latest id instead
             val newTagIndex = tags.size
             getColourForIndex(flagColours, newTagIndex)
         }

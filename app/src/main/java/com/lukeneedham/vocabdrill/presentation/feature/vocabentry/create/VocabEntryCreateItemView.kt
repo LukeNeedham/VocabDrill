@@ -16,6 +16,7 @@ import com.lukeneedham.flowerpotrecycler.adapter.delegates.feature.config.Featur
 import com.lukeneedham.flowerpotrecycler.adapter.itemtype.builderbinder.implementation.view.RecyclerItemViewBuilderBinder
 import com.lukeneedham.flowerpotrecycler.util.ItemTypeConfigCreator
 import com.lukeneedham.flowerpotrecycler.util.extensions.addItemLayoutParams
+import com.lukeneedham.flowerpotrecycler.util.extensions.addOnItemClickListener
 import com.lukeneedham.vocabdrill.R
 import com.lukeneedham.vocabdrill.domain.model.VocabEntryProto
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagCreateCallback
@@ -54,6 +55,9 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
             ),
             ItemTypeConfigCreator.fromRecyclerItemView<TagItem.Existing, TagExistingView> {
                 addItemLayoutParams(RecyclerView.LayoutParams(WRAP_CONTENT, MATCH_PARENT))
+                addOnItemClickListener { item, position, itemView ->
+                    tagExistingClickListener(item)
+                }
             }
         )
     )
@@ -63,6 +67,7 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
 
     var vocabEntryCreateCallback: VocabEntryCreateCallback? = null
     var tagCreateCallback: TagCreateCallback? = null
+    var tagExistingClickListener: (item: TagItem.Existing) -> Unit = {}
 
     init {
         inflateFrom(R.layout.view_item_create_vocab_entry)
@@ -90,7 +95,7 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
         val existingTagItems = item.data.tags.map {
             TagItem.Existing(item.data, it)
         }
-        val createTagItem = TagItem.Create(item.data, "")
+        val createTagItem = TagItem.Create(item.data)
         val allTagItems = existingTagItems + createTagItem
         tagsAdapter.submitList(allTagItems)
     }

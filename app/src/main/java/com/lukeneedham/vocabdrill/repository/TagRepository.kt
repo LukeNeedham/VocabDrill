@@ -5,10 +5,11 @@ import com.lukeneedham.vocabdrill.domain.model.Tag
 import com.lukeneedham.vocabdrill.domain.model.TagProto
 import com.lukeneedham.vocabdrill.repository.conversion.toDomainModel
 import com.lukeneedham.vocabdrill.util.ColorExtraUtils
+import io.reactivex.Completable
 import io.reactivex.Single
 import com.lukeneedham.vocabdrill.data.persistence.model.Tag as TagPersistence
 
-class LanguageTagsRepository(
+class TagRepository(
     private val tagDao: TagDao
 ) {
     fun addNewTag(proto: TagProto): Single<Tag> {
@@ -17,6 +18,10 @@ class LanguageTagsRepository(
         return tagDao.add(persistence).flatMap {
             tagDao.getWithId(it).map { it.toDomainModel() }
         }
+    }
+
+    fun deleteUnused(): Completable {
+        return tagDao.deleteAllUnused()
     }
 
     fun getAllForLanguage(languageId: Long): Single<List<Tag>> {

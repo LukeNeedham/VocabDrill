@@ -5,7 +5,8 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.AttributeSet
 import android.view.View
-import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.EditText
 import android.widget.FrameLayout
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -47,21 +48,11 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
                     }
                 },
                 FeatureConfig<TagItem.Create, TagCreateView>().apply {
-                    addItemLayoutParams(
-                        RecyclerView.LayoutParams(
-                            ViewGroup.LayoutParams.WRAP_CONTENT,
-                            ViewGroup.LayoutParams.WRAP_CONTENT
-                        )
-                    )
+                    addItemLayoutParams(RecyclerView.LayoutParams(WRAP_CONTENT, MATCH_PARENT))
                 }
             ),
             ItemTypeConfigCreator.fromRecyclerItemView<TagItem.Existing, TagExistingView> {
-                addItemLayoutParams(
-                    RecyclerView.LayoutParams(
-                        ViewGroup.LayoutParams.WRAP_CONTENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT
-                    )
-                )
+                addItemLayoutParams(RecyclerView.LayoutParams(WRAP_CONTENT, MATCH_PARENT))
             }
         )
     )
@@ -87,7 +78,14 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
         setupTextWatchers(item)
         setupTextFocus(item)
 
-        tagsAdapter.submitList(item.data.tags.map { TagItem.Existing(item.data, it) })
+        val existingTagItems = item.data.tags.map { TagItem.Existing(item.data, it) }
+        val allTagItems = if(item.viewMode is ViewMode.Inactive) {
+            existingTagItems
+        } else {
+            val createItem = TagItem.Create(item.data)
+            existingTagItems + createItem
+        }
+        tagsAdapter.submitList(allTagItems)
 
         deleteButton.setOnClickListener {
             requireCallback().onDelete(item)

@@ -1,7 +1,6 @@
 package com.lukeneedham.vocabdrill.repository
 
 import com.lukeneedham.vocabdrill.data.persistence.dao.VocabEntryDao
-import com.lukeneedham.vocabdrill.domain.model.VocabEntryProto
 import com.lukeneedham.vocabdrill.repository.conversion.toDomainModel
 import com.lukeneedham.vocabdrill.repository.conversion.toPersistenceModel
 import io.reactivex.Completable
@@ -11,8 +10,9 @@ import com.lukeneedham.vocabdrill.data.persistence.model.VocabEntry as VocabEntr
 import com.lukeneedham.vocabdrill.domain.model.VocabEntry as VocabEntryDomain
 
 class VocabEntryRepository(private val vocabEntryDao: VocabEntryDao) {
-    fun addVocabEntry(proto: VocabEntryProto): Completable {
-        val entry = VocabEntryPersistence(proto.languageId, proto.wordA, proto.wordB)
+    /** Adds the entry, tags are added separately */
+    fun addVocabEntry(wordA: String, wordB: String, languageId: Long): Single<Long> {
+        val entry = VocabEntryPersistence(languageId, wordA, wordB)
         return vocabEntryDao.add(entry)
     }
 

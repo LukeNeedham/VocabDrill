@@ -12,13 +12,7 @@ class VocabEntryItemsHandler(
     private var createItem: VocabEntryItemData.Create = newCreateItem()
 
     fun submitExistingItems(items: List<VocabEntryRelations>) {
-        val oldExistingItems = existingItems
-        val newExistingItems = items.map { item ->
-            // Use the existing existing item, if it exists, to not lose state.
-            // Otherwise, create a new instance
-            val previousItem = oldExistingItems.firstOrNull { it.entryId == item.vocabEntry.id }
-            previousItem ?: VocabEntryItemData.Existing.newInstance(item)
-        }
+        val newExistingItems = items.map { VocabEntryItemData.Existing.newInstance(it) }
         existingItems.clear()
         existingItems.addAll(newExistingItems)
         notifyNewItems()
@@ -64,6 +58,13 @@ class VocabEntryItemsHandler(
     fun onCreateItemTagAdded(tag: Tag) {
         val tags = createItem.tags.toMutableList()
         tags.add(tag)
+        createItem = createItem.copy(tags = tags)
+        notifyNewItems()
+    }
+
+    fun onCreateItemTagRemoved(tag: Tag) {
+        val tags = createItem.tags.toMutableList()
+        tags.remove(tag)
         createItem = createItem.copy(tags = tags)
         notifyNewItems()
     }

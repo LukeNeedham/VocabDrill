@@ -13,7 +13,7 @@ import io.reactivex.Single
 interface VocabEntryDao {
 
     @Insert
-    fun add(vocabEntry: VocabEntry): Completable
+    fun add(vocabEntry: VocabEntry): Single<Long>
 
     @Update
     fun update(vocabEntry: VocabEntry): Completable

@@ -6,23 +6,23 @@ import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 
 @Entity(
-    tableName = VocabEntryTag.Table.NAME,
+    tableName = VocabEntryTagRelation.Table.NAME,
     foreignKeys = [
         ForeignKey(
             entity = VocabEntry::class,
             parentColumns = [VocabEntry.Column.ID],
-            childColumns = [VocabEntryTag.Column.VOCAB_ENTRY_ID],
+            childColumns = [VocabEntryTagRelation.Column.VOCAB_ENTRY_ID],
             onDelete = ForeignKey.CASCADE
         ),
         ForeignKey(
             entity = Tag::class,
             parentColumns = [Tag.Column.ID],
-            childColumns = [VocabEntryTag.Column.TAG_ID],
+            childColumns = [VocabEntryTagRelation.Column.TAG_ID],
             onDelete = ForeignKey.CASCADE
         )
     ]
 )
-data class VocabEntryTag(
+data class VocabEntryTagRelation(
     @ColumnInfo(name = Column.VOCAB_ENTRY_ID) val vocabEntryId: Long,
     @ColumnInfo(name = Column.TAG_ID) val tagId: Long
 ) {

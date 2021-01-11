@@ -91,7 +91,7 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
         }
 
         override fun save(proto: VocabEntryProto) {
-            viewModel.save(proto)
+            viewModel.addEntry(proto)
         }
     }
 
@@ -135,8 +135,12 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
         }
     }
 
-    private val vocabEntriesAdapter =
-        VocabEntriesAdapter(vocabEntryExistingCallback, vocabEntryCreateCallback, tagCreateCallback)
+    private val vocabEntriesAdapter = VocabEntriesAdapter(
+        vocabEntryExistingCallback,
+        vocabEntryCreateCallback,
+        tagCreateCallback,
+        ::onTagExistingClick
+    )
 
     /**
      * Has value true when the create item is awaiting focus.
@@ -241,6 +245,10 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
                 }
             }
         }
+    }
+
+    private fun onTagExistingClick(item: TagItem.Existing) {
+        viewModel.deleteTagFromVocabEntry(item.vocabEntryItem, item)
     }
 
     private fun getLastItemPosition() = vocabEntriesAdapter.itemCount - 1

@@ -8,6 +8,7 @@ import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.*
 import com.lukeneedham.vocabdrill.presentation.util.DisposingViewModel
 import com.lukeneedham.vocabdrill.presentation.util.TextSelection
 import com.lukeneedham.vocabdrill.presentation.util.extension.toLiveData
+import com.lukeneedham.vocabdrill.repository.TagRepository
 import com.lukeneedham.vocabdrill.usecase.*
 import io.reactivex.rxkotlin.plusAssign
 
@@ -21,7 +22,8 @@ class LanguageViewModel(
     private val addTagToVocabEntry: AddTagToVocabEntry,
     private val addNewTag: AddNewTag,
     private val calculateColorForNewTag: CalculateColorForNewTag,
-    private val findTagNameMatches: FindTagNameMatches
+    private val findTagNameMatches: FindTagNameMatches,
+    private val tagRepository: TagRepository
 ) : DisposingViewModel() {
 
     private val itemStateHandler = VocabEntryItemsHandler(languageId) {
@@ -82,7 +84,7 @@ class LanguageViewModel(
         refreshEntryItems()
     }
 
-    fun save(proto: VocabEntryProto) {
+    fun addEntry(proto: VocabEntryProto) {
         val ignored = addVocabEntry(proto).subscribe {
             itemStateHandler.onCreateItemSaved()
             selectedItem = SelectedVocabEntry.Create(FocusItem.WordA(TextSelection.End))
@@ -125,8 +127,9 @@ class LanguageViewModel(
                 val data = itemPresentationData.data
                 selectedItem = when (data) {
                     is VocabEntryItemData.Create -> SelectedVocabEntry.Create(focusItem)
-                    is VocabEntryItemData.Existing ->
+                    is VocabEntryItemData.Existing -> {
                         SelectedVocabEntry.Existing(data.entryId, focusItem)
+                    }
                 }
             }
             ViewMode.Inactive -> {
@@ -168,13 +171,21 @@ class LanguageViewModel(
                 addExistingTag(tagItem.data)
             }
             is TagSuggestionItem.Create -> {
-                val tagName = tagItem.name
-                calculateColorForNewTag(languageId).subscribe { color ->
-                    val proto = TagProto(tagName, color, languageId)
-                    addNewTag(proto).subscribe { tag ->
-                        addExistingTag(tag)
-                    }
+                val proto = TagProto(tagItem.name, tagItem.color, languageId)
+                addNewTag(proto).subscribe { tag ->
+                    addExistingTag(tag)
                 }
+            }
+        }
+    }
+
+    fun deleteTagFromVocabEntry(entryItem: VocabEntryItemData, tagItem: TagItem.Existing) {
+        when (entryItem) {
+            is VocabEntryItemData.Create -> {
+                itemStateHandler.onCreateItemTagRemoved(tagItem.data)
+            }
+            is VocabEntryItemData.Existing -> {
+                TODO("Handle tags for existing items")
             }
         }
     }

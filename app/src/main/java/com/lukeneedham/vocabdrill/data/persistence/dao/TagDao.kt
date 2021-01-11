@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import com.lukeneedham.vocabdrill.data.persistence.model.Tag
+import com.lukeneedham.vocabdrill.data.persistence.model.VocabEntryTagRelation
 import io.reactivex.Completable
 import io.reactivex.Single
 
@@ -15,6 +16,18 @@ interface TagDao {
 
     @Query("SELECT * FROM ${Tag.Table.NAME}")
     fun getAll(): Single<List<Tag>>
+
+    /** If a [Tag] is not referenced in any [VocabEntryTagRelation], it is never used. */
+    @Query(
+        """
+        DELETE FROM ${Tag.Table.NAME}
+        WHERE ${Tag.Column.ID} NOT IN (
+            SELECT DISTINCT ${VocabEntryTagRelation.Column.TAG_ID} 
+            FROM ${VocabEntryTagRelation.Table.NAME} 
+        )
+        """
+    )
+    fun deleteAllUnused(): Completable
 
     @Query(
         """

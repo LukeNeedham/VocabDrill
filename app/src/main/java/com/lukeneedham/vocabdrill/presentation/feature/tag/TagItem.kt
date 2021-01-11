@@ -5,5 +5,5 @@ import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryItem
 
 sealed class TagItem {
     data class Existing(val vocabEntryItem: VocabEntryItemData, val data: Tag) : TagItem()
-    class Create(val vocabEntryItem: VocabEntryItemData, val name: String) : TagItem()
+    class Create(val vocabEntryItem: VocabEntryItemData) : TagItem()
 }
