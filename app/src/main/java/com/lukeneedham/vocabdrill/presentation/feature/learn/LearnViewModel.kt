@@ -2,24 +2,22 @@ package com.lukeneedham.vocabdrill.presentation.feature.learn
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.lukeneedham.vocabdrill.domain.model.LearnBook
+import com.lukeneedham.vocabdrill.domain.model.LearnSet
 import com.lukeneedham.vocabdrill.presentation.audio.SoundEffect
 import com.lukeneedham.vocabdrill.presentation.util.extension.toLiveData
 import com.lukeneedham.vocabdrill.usecase.PlaySoundEffect
 
 class LearnViewModel(
-    private val learnBook: LearnBook,
+    private val learnSet: LearnSet,
     private val playSoundEffect: PlaySoundEffect
 ) : ViewModel() {
-    private val entryList = learnBook.entries
+    private val entryList = learnSet.entries
 
     private val bookStateMutableLiveData = MutableLiveData<BookState>()
     val bookStateLiveData = bookStateMutableLiveData.toLiveData()
 
     private val feedbackStateMutableLiveData = MutableLiveData<FeedbackState>(FeedbackState.Ready)
     val feedbackStateLiveData = feedbackStateMutableLiveData.toLiveData()
-
-    val colourScheme = learnBook.colourScheme
 
     private var currentEntryIndex = 0
 

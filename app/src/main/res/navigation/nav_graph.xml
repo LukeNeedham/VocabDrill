@@ -53,8 +53,8 @@
         android:label="LearnFragment"
         >
         <argument
-            android:name="learnBook"
-            app:argType="com.lukeneedham.vocabdrill.domain.model.LearnBook"
+            android:name="learnSet"
+            app:argType="com.lukeneedham.vocabdrill.domain.model.LearnSet"
             />
     </fragment>
 </navigation>

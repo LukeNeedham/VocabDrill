@@ -1,7 +1,6 @@
 package com.lukeneedham.vocabdrill.usecase
 
 import com.lukeneedham.vocabdrill.domain.model.VocabEntry
-import com.lukeneedham.vocabdrill.domain.model.VocabEntryProto
 import com.lukeneedham.vocabdrill.repository.VocabEntryRepository
 import com.lukeneedham.vocabdrill.util.RxSchedulers
 import io.reactivex.Completable

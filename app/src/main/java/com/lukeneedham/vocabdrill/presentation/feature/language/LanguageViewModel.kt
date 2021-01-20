@@ -4,17 +4,18 @@ import androidx.lifecycle.MutableLiveData
 import com.lukeneedham.vocabdrill.domain.model.*
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagItem
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagSuggestionItem
-import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.*
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.InteractionSection
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.ViewMode
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryEditItem
 import com.lukeneedham.vocabdrill.presentation.util.DisposingViewModel
 import com.lukeneedham.vocabdrill.presentation.util.TextSelection
 import com.lukeneedham.vocabdrill.presentation.util.extension.toLiveData
-import com.lukeneedham.vocabdrill.repository.TagRepository
 import com.lukeneedham.vocabdrill.usecase.*
 import io.reactivex.rxkotlin.plusAssign
 
 class LanguageViewModel(
     val languageId: Long,
-    private val observeAllVocabEntryRelationsForLanguage: ObserveAllVocabEntryRelationsForLanguage,
+    private val observeAllVocabEntryAndTagsForLanguage: ObserveAllVocabEntryAndTagsForLanguage,
     private val observeLanguage: ObserveLanguage,
     private val addVocabEntry: AddVocabEntry,
     private val deleteVocabEntry: DeleteVocabEntry,
@@ -23,14 +24,9 @@ class LanguageViewModel(
     private val addNewTag: AddNewTag,
     private val calculateColorForNewTag: CalculateColorForNewTag,
     private val findTagNameMatches: FindTagNameMatches,
-    private val tagRepository: TagRepository
+    private val deleteTagFromVocabEntry: DeleteTagFromVocabEntry,
+    private val deleteUnusedTags: DeleteUnusedTags
 ) : DisposingViewModel() {
-
-    private val itemStateHandler = VocabEntryItemsHandler(languageId) {
-        vocabEntriesMutableLiveData.value = getVocabEntryItemsFromData(it)
-    }
-
-    private var selectedItem: SelectedVocabEntry = SelectedVocabEntry.None
 
     private val languageNameMutableLiveData = MutableLiveData<String>()
     val languageNameLiveData = languageNameMutableLiveData.toLiveData()
@@ -38,130 +34,90 @@ class LanguageViewModel(
     private val countryMutableLiveData = MutableLiveData<Country>()
     val countryLiveData = countryMutableLiveData.toLiveData()
 
-    private val vocabEntriesMutableLiveData =
-        MutableLiveData<List<VocabEntryItemPresentationData>>()
-    val vocabEntriesLiveData = vocabEntriesMutableLiveData.toLiveData()
+    private val vocabEntriesOrCreateMutableLiveData = MutableLiveData<List<VocabEntryEditItem>>()
+    val vocabEntriesOrCreateLiveData = vocabEntriesOrCreateMutableLiveData.toLiveData()
 
     private val tagSuggestionsMutableLiveData = MutableLiveData<List<TagSuggestionItem>>()
     val tagSuggestionsLiveData = tagSuggestionsMutableLiveData.toLiveData()
 
+    private val itemStateHandler = VocabEntryEditItemsHandler(languageId) {
+        vocabEntriesOrCreateMutableLiveData.value = it
+    }
+
     init {
-        refreshEntryItems()
+        /*
+        It's possible that tags are created by create item,
+        and then create item resets (for example, by killing the Fragment).
+        So we need to clean up tags in init.
+        */
+        deleteUnusedTagsExceptCreate()
 
         disposables += observeLanguage(languageId).subscribe { language ->
             languageNameMutableLiveData.value = language.name
             countryMutableLiveData.value = language.country
         }
 
-        disposables += observeAllVocabEntryRelationsForLanguage(languageId).subscribe {
+        disposables += observeAllVocabEntryAndTagsForLanguage(languageId).subscribe {
             itemStateHandler.submitExistingItems(it)
         }
     }
 
     fun onCreateItemWordAChanged(newWordA: String, selection: TextSelection) {
-        itemStateHandler.onCreateItemWordAChanged(newWordA)
-        val focus = FocusItem.WordA(selection)
-        selectedItem = SelectedVocabEntry.Create(focus)
-        refreshEntryItems()
+        itemStateHandler.onCreateItemWordAChanged(newWordA, selection)
     }
 
     fun onCreateItemWordBChanged(newWordB: String, selection: TextSelection) {
-        itemStateHandler.onCreateItemWordBChanged(newWordB)
-        val focus = FocusItem.WordB(selection)
-        selectedItem = SelectedVocabEntry.Create(focus)
-        refreshEntryItems()
+        itemStateHandler.onCreateItemWordBChanged(newWordB, selection)
     }
 
     fun onCreateItemInteraction(section: InteractionSection, selection: TextSelection?) {
-        val selectionOrDefault = selection ?: TextSelection.End
-        val focus = when (section) {
-            InteractionSection.WordAInput -> FocusItem.WordA(selectionOrDefault)
-            InteractionSection.WordBInput -> FocusItem.WordB(selectionOrDefault)
-            // TODO: We need a section for tag name input
-            InteractionSection.Other -> FocusItem.WordA(TextSelection.End)
-        }
-        selectedItem = SelectedVocabEntry.Create(focus)
-        refreshEntryItems()
+        itemStateHandler.selectCreateItem(section, selection)
     }
 
     fun addEntry(proto: VocabEntryProto) {
         val ignored = addVocabEntry(proto).subscribe {
             itemStateHandler.onCreateItemSaved()
-            selectedItem = SelectedVocabEntry.Create(FocusItem.WordA(TextSelection.End))
-            refreshEntryItems()
         }
     }
 
     fun deleteEntry(entryId: Long) {
-        val ignored = deleteVocabEntry(entryId).subscribe()
+        val ignored = deleteVocabEntry(entryId).subscribe {
+            deleteUnusedTagsExceptCreate()
+        }
     }
 
     fun onExistingItemWordAChanged(entryId: Long, newWordA: String, selection: TextSelection) {
-        itemStateHandler.onExistingItemWordAChanged(entryId, newWordA)
-        val focus = FocusItem.WordA(selection)
-        selectedItem = SelectedVocabEntry.Existing(entryId, focus)
-        refreshEntryItems()
+        itemStateHandler.onExistingItemWordAChanged(entryId, newWordA, selection)
     }
 
     fun onExistingItemWordBChanged(entryId: Long, newWordB: String, selection: TextSelection) {
-        itemStateHandler.onExistingItemWordBChanged(entryId, newWordB)
-        val focus = FocusItem.WordB(selection)
-        selectedItem = SelectedVocabEntry.Existing(entryId, focus)
-        refreshEntryItems()
+        itemStateHandler.onExistingItemWordBChanged(entryId, newWordB, selection)
+    }
+
+    fun getLearnSet(): LearnSet {
+        val entriesOrCreate = vocabEntriesOrCreateMutableLiveData.value ?: emptyList()
+        val entries =
+            entriesOrCreate.filterIsInstance<VocabEntryEditItem.Existing>().map { it.entry }
+        return LearnSet(entries)
     }
 
     fun focusCreateItem() {
-        val focus = FocusItem.WordA(TextSelection.End)
-        selectedItem = SelectedVocabEntry.Create(focus)
-        refreshEntryItems()
+        itemStateHandler.focusCreateItem()
     }
 
-    fun onViewModeChanged(
-        itemPresentationData: VocabEntryItemPresentationData,
-        viewMode: ViewMode
-    ) {
-        when (viewMode) {
-            is ViewMode.Active -> {
-                val focusItem = viewMode.focusItem
-
-                val data = itemPresentationData.data
-                selectedItem = when (data) {
-                    is VocabEntryItemData.Create -> SelectedVocabEntry.Create(focusItem)
-                    is VocabEntryItemData.Existing -> {
-                        SelectedVocabEntry.Existing(data.entryId, focusItem)
-                    }
-                }
-            }
-            ViewMode.Inactive -> {
-                // Set selected item to None, but only if [item] is indeed the current selection
-                val oldSelected = selectedItem
-                when (oldSelected) {
-                    is SelectedVocabEntry.Create -> {
-                        if (itemPresentationData.data is VocabEntryItemData.Create) {
-                            selectedItem = SelectedVocabEntry.None
-                        }
-                    }
-                    is SelectedVocabEntry.Existing -> {
-                        val data = itemPresentationData.data
-                        if (data is VocabEntryItemData.Existing && oldSelected.id == data.entryId) {
-                            selectedItem = SelectedVocabEntry.None
-                        }
-                    }
-                }
-            }
-        }
-        refreshEntryItems()
+    fun onViewModeChanged(item: VocabEntryEditItem, viewMode: ViewMode) {
+        itemStateHandler.onViewModeChanged(item, viewMode)
     }
 
-    fun addTagToVocabEntry(entryItem: VocabEntryItemData, tagItem: TagSuggestionItem) {
+    fun addTagToVocabEntry(entryItem: VocabEntryEditItem, tagItem: TagSuggestionItem) {
 
         fun addExistingTag(tag: Tag) {
             when (entryItem) {
-                is VocabEntryItemData.Create -> {
+                is VocabEntryEditItem.Create -> {
                     itemStateHandler.onCreateItemTagAdded(tag)
                 }
-                is VocabEntryItemData.Existing -> {
-                    val ignored = addTagToVocabEntry(entryItem.entryId, tag.id).subscribe()
+                is VocabEntryEditItem.Existing -> {
+                    val ignored = addTagToVocabEntry(entryItem.entry.id, tag.id).subscribe()
                 }
             }
         }
@@ -179,18 +135,22 @@ class LanguageViewModel(
         }
     }
 
-    fun deleteTagFromVocabEntry(entryItem: VocabEntryItemData, tagItem: TagItem.Existing) {
+    fun deleteTagFromVocabEntry(entryItem: VocabEntryEditItem, tagItem: TagItem.Existing) {
         when (entryItem) {
-            is VocabEntryItemData.Create -> {
+            is VocabEntryEditItem.Create -> {
                 itemStateHandler.onCreateItemTagRemoved(tagItem.data)
+                deleteUnusedTagsExceptCreate()
             }
-            is VocabEntryItemData.Existing -> {
-                TODO("Handle tags for existing items")
+            is VocabEntryEditItem.Existing -> {
+                val ignored =
+                    deleteTagFromVocabEntry(entryItem.entry.id, tagItem.data.id).subscribe {
+                        deleteUnusedTagsExceptCreate()
+                    }
             }
         }
     }
 
-    fun requestTagMatches(entryItem: VocabEntryItemData, tagName: String) {
+    fun requestTagMatches(entryItem: VocabEntryEditItem, tagName: String) {
         disposables += findTagNameMatches(languageId, tagName).subscribe { tags ->
             val existingTagItems = tags.map { TagSuggestionItem.Existing(entryItem, it) }
             if (tags.any { it.name == tagName }) {
@@ -207,45 +167,16 @@ class LanguageViewModel(
 
     /** Perform the batched saves of changes to existing items */
     fun saveDataChanges() {
-        val existingItems = itemStateHandler.getExistingItems()
+        val existingItems = itemStateHandler.getExistingEditItems()
         existingItems.forEach {
-            val entry = VocabEntry(it.entryId, it.wordA, it.wordB, it.languageId)
-            val ignored = updateVocabEntry(entry).subscribe()
+            val ignored = updateVocabEntry(it.entry).subscribe()
         }
     }
 
-    private fun getViewModeForVocabEntryItemData(data: VocabEntryItemData): ViewMode {
-        val selectedItem = selectedItem
-        return when (data) {
-            is VocabEntryItemData.Create -> {
-                if (selectedItem is SelectedVocabEntry.Create) {
-                    ViewMode.Active(selectedItem.focusItem)
-                } else {
-                    ViewMode.Inactive
-                }
-            }
-            is VocabEntryItemData.Existing -> {
-                if (selectedItem is SelectedVocabEntry.Existing && selectedItem.id == data.entryId) {
-                    ViewMode.Active(selectedItem.focusItem)
-                } else {
-                    ViewMode.Inactive
-                }
-            }
-        }
-    }
+    private fun getCreateItemTagIds() = itemStateHandler.getCreateEditItem().tags.map { it.id }
 
-    private fun getVocabEntryItemsFromData(datas: List<VocabEntryItemData>): List<VocabEntryItemPresentationData> {
-        return datas.map {
-            val mode = getViewModeForVocabEntryItemData(it)
-            when (it) {
-                is VocabEntryItemData.Create -> VocabEntryItemPresentationData.Create(it, mode)
-                is VocabEntryItemData.Existing -> VocabEntryItemPresentationData.Existing(it, mode)
-            }
-        }
-    }
-
-    private fun refreshEntryItems() {
-        vocabEntriesMutableLiveData.value =
-            getVocabEntryItemsFromData(itemStateHandler.getAllItems())
+    /** Delete all unused tags, except the ones referenced by the create item */
+    private fun deleteUnusedTagsExceptCreate() {
+        val ignored = deleteUnusedTags(getCreateItemTagIds()).subscribe()
     }
 }

@@ -26,7 +26,7 @@ import com.lukeneedham.vocabdrill.presentation.feature.tag.TagItem
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.FocusItem
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.InteractionSection
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.ViewMode
-import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryItemPresentationData
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryEditItem
 import com.lukeneedham.vocabdrill.presentation.util.BaseTextWatcher
 import com.lukeneedham.vocabdrill.presentation.util.TextSelection
 import com.lukeneedham.vocabdrill.presentation.util.extension.getSelection
@@ -38,7 +38,7 @@ import org.koin.core.KoinComponent
 class VocabEntryCreateItemView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr),
-    RecyclerItemView<VocabEntryItemPresentationData.Create>,
+    RecyclerItemView<VocabEntryEditItem.Create>,
     KoinComponent {
 
     private val tagsAdapter = RecyclerAdapterCreator.fromItemTypeConfigs(
@@ -55,9 +55,7 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
             ),
             ItemTypeConfigCreator.fromRecyclerItemView<TagItem.Existing, TagExistingView> {
                 addItemLayoutParams(RecyclerView.LayoutParams(WRAP_CONTENT, MATCH_PARENT))
-                addOnItemClickListener { item, position, itemView ->
-                    tagExistingClickListener(item)
-                }
+                addOnItemClickListener { item, _, _ -> tagExistingClickListener(item) }
             }
         )
     )
@@ -78,7 +76,7 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
         tagsRecycler.adapter = tagsAdapter
     }
 
-    override fun setItem(position: Int, item: VocabEntryItemPresentationData.Create) {
+    override fun setItem(position: Int, item: VocabEntryEditItem.Create) {
         setupTextWatchers(item)
         setupTextFocus(item)
         refreshSaveButtonEnabled()
@@ -89,23 +87,23 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
             val tags = tagsAdapter.positionDelegate.getItems()
                 .filterIsInstance<TagItem.Existing>()
                 .map { it.data }
-            val proto = VocabEntryProto(wordA, wordB, item.data.languageId, tags)
+            val proto = VocabEntryProto(wordA, wordB, item.languageId, tags)
             requireCallback().save(proto)
         }
-        val existingTagItems = item.data.tags.map {
-            TagItem.Existing(item.data, it)
+        val existingTagItems = item.tags.map {
+            TagItem.Existing(item, it)
         }
-        val createTagItem = TagItem.Create(item.data)
+        val createTagItem = TagItem.Create(item)
         val allTagItems = existingTagItems + createTagItem
         tagsAdapter.submitList(allTagItems)
     }
 
-    private fun setupTextWatchers(item: VocabEntryItemPresentationData.Create) {
+    private fun setupTextWatchers(item: VocabEntryEditItem.Create) {
         wordAInputView.removeTextChangedListener(wordATextWatcher)
         wordBInputView.removeTextChangedListener(wordBTextWatcher)
 
-        wordAInputView.setText(item.data.wordA)
-        wordBInputView.setText(item.data.wordB)
+        wordAInputView.setText(item.wordA)
+        wordBInputView.setText(item.wordB)
 
         wordATextWatcher = object : BaseTextWatcher() {
             override fun afterTextChanged(s: Editable?) {
@@ -121,7 +119,7 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
         wordBInputView.addTextChangedListener(wordBTextWatcher)
     }
 
-    private fun setupTextFocus(item: VocabEntryItemPresentationData.Create) {
+    private fun setupTextFocus(item: VocabEntryEditItem.Create) {
         wordAInputView.setOnFocusChangeListener { _, _ -> }
         wordBInputView.setOnFocusChangeListener { _, _ -> }
 

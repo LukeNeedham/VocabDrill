@@ -1,5 +1,6 @@
 package com.lukeneedham.vocabdrill.presentation.feature.learn
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.view.animation.Animation
@@ -22,7 +23,7 @@ import org.koin.core.parameter.parametersOf
 class LearnFragment : Fragment(R.layout.fragment_learn) {
 
     private val navArgs: LearnFragmentArgs by navArgs()
-    private val viewModel: LearnViewModel by viewModel { parametersOf(navArgs.learnBook) }
+    private val viewModel: LearnViewModel by viewModel { parametersOf(navArgs.learnSet) }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -71,10 +72,10 @@ class LearnFragment : Fragment(R.layout.fragment_learn) {
             submitInput()
         }
 
-        val colourScheme = viewModel.colourScheme
-        flipBookView.setPaperColour(colourScheme.mainColour)
-        flipBookView.setTextColour(colourScheme.textColour)
-        flipBookView.setBorderColour(colourScheme.borderColour)
+        // TODO: Better color setup
+        flipBookView.setPaperColour(Color.WHITE)
+        flipBookView.setTextColour(Color.BLACK)
+        flipBookView.setBorderColour(Color.BLACK)
         flipBookView.setPageTurnAnimationListener(object : DefaultAnimationListener {
             override fun onAnimationEnd(animation: Animation?) {
                 onPageTurnAnimationCompleted()

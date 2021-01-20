@@ -17,7 +17,7 @@ import com.lukeneedham.vocabdrill.presentation.feature.tag.TagCreateCallback
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagItem
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.InteractionSection
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.ViewMode
-import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryItemPresentationData
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryEditItem
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.create.VocabEntryCreateCallback
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.existing.VocabEntryExistingCallback
 import com.lukeneedham.vocabdrill.presentation.util.TextSelection
@@ -33,47 +33,43 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
 
     private val viewModel: LanguageViewModel by viewModel { parametersOf(navArgs.languageId) }
 
-    private val layoutManager by lazy {
-        LinearLayoutManager(requireContext()).apply {
-            orientation = RecyclerView.VERTICAL
-        }
-    }
+    private lateinit var layoutManager: LinearLayoutManager
 
     private val vocabEntryExistingCallback: VocabEntryExistingCallback =
         object : VocabEntryExistingCallback {
             override fun onWordAChanged(
-                itemPresentationData: VocabEntryItemPresentationData.Existing,
+                editItem: VocabEntryEditItem.Existing,
                 newWordA: String,
                 selection: TextSelection
             ) {
                 viewModel.onExistingItemWordAChanged(
-                    itemPresentationData.data.entryId,
+                    editItem.entry.id,
                     newWordA,
                     selection
                 )
             }
 
             override fun onWordBChanged(
-                itemPresentationData: VocabEntryItemPresentationData.Existing,
+                editItem: VocabEntryEditItem.Existing,
                 newWordB: String,
                 selection: TextSelection
             ) {
                 viewModel.onExistingItemWordBChanged(
-                    itemPresentationData.data.entryId,
+                    editItem.entry.id,
                     newWordB,
                     selection
                 )
             }
 
             override fun onViewModeChanged(
-                itemPresentationData: VocabEntryItemPresentationData.Existing,
+                editItem: VocabEntryEditItem.Existing,
                 viewMode: ViewMode
             ) {
-                viewModel.onViewModeChanged(itemPresentationData, viewMode)
+                viewModel.onViewModeChanged(editItem, viewMode)
             }
 
-            override fun onDelete(itemPresentationData: VocabEntryItemPresentationData.Existing) {
-                viewModel.deleteEntry(itemPresentationData.data.entryId)
+            override fun onDelete(editItem: VocabEntryEditItem.Existing) {
+                viewModel.deleteEntry(editItem.entry.id)
             }
         }
 
@@ -158,7 +154,7 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel.vocabEntriesLiveData.observe(viewLifecycleOwner) {
+        viewModel.vocabEntriesOrCreateLiveData.observe(viewLifecycleOwner) {
             vocabEntriesAdapter.submitList(it)
         }
         viewModel.languageNameLiveData.observe(viewLifecycleOwner) {
@@ -179,6 +175,9 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
 
     private fun setupView() {
         recyclerView.adapter = vocabEntriesAdapter
+        layoutManager = LinearLayoutManager(requireContext()).apply {
+            orientation = RecyclerView.VERTICAL
+        }
         recyclerView.layoutManager = layoutManager
         recyclerView.itemAnimator = DefaultItemAnimator().apply {
             supportsChangeAnimations = false
@@ -200,7 +199,7 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
                 createTagNameInputViewLayoutListener()
 
                 // Button scale
-                val addButtonScale = if (scrollPercent < MIN_SCROLL_PERCENT_TO_HIDE_ADD_BUTTON) {
+                val fabScale = if (scrollPercent < MIN_SCROLL_PERCENT_TO_HIDE_ADD_BUTTON) {
                     1f
                 } else {
                     val factor = 1 / (1 - MIN_SCROLL_PERCENT_TO_HIDE_ADD_BUTTON)
@@ -208,7 +207,8 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
                         (scrollPercent - MIN_SCROLL_PERCENT_TO_HIDE_ADD_BUTTON) * factor
                     1 - normalisedScroll
                 }
-                addButton.setScale(addButtonScale)
+                addButton.setScale(fabScale)
+                learnButton.setScale(fabScale)
             }
         })
 
@@ -244,6 +244,13 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
                     showKeyboard()
                 }
             }
+        }
+
+        learnButton.setOnClickListener {
+            val learnSet = viewModel.getLearnSet()
+            navigateSafe(
+                LanguageFragmentDirections.actionLanguageFragmentToLearnFragment(learnSet)
+            )
         }
     }
 

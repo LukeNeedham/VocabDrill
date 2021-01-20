@@ -18,6 +18,7 @@ import com.lukeneedham.flowerpotrecycler.adapter.delegates.feature.config.Featur
 import com.lukeneedham.flowerpotrecycler.adapter.itemtype.builderbinder.implementation.view.RecyclerItemViewBuilderBinder
 import com.lukeneedham.flowerpotrecycler.util.ItemTypeConfigCreator
 import com.lukeneedham.flowerpotrecycler.util.extensions.addItemLayoutParams
+import com.lukeneedham.flowerpotrecycler.util.extensions.addOnItemClickListener
 import com.lukeneedham.vocabdrill.R
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagCreateCallback
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagCreateView
@@ -25,7 +26,7 @@ import com.lukeneedham.vocabdrill.presentation.feature.tag.TagExistingView
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagItem
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.FocusItem
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.ViewMode
-import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryItemPresentationData
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryEditItem
 import com.lukeneedham.vocabdrill.presentation.util.BaseTextWatcher
 import com.lukeneedham.vocabdrill.presentation.util.TextSelection
 import com.lukeneedham.vocabdrill.presentation.util.extension.getSelection
@@ -36,7 +37,7 @@ import kotlinx.android.synthetic.main.view_item_vocab_entry.view.*
 class VocabEntryExistingItemView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr),
-    RecyclerItemView<VocabEntryItemPresentationData.Existing> {
+    RecyclerItemView<VocabEntryEditItem.Existing> {
 
     // TODO: Extract into custom adapter, for re-use
     private val tagsAdapter = RecyclerAdapterCreator.fromItemTypeConfigs(
@@ -53,6 +54,7 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
             ),
             ItemTypeConfigCreator.fromRecyclerItemView<TagItem.Existing, TagExistingView> {
                 addItemLayoutParams(RecyclerView.LayoutParams(WRAP_CONTENT, MATCH_PARENT))
+                addOnItemClickListener { item, _, _ -> tagExistingClickListener(item) }
             }
         )
     )
@@ -62,6 +64,7 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
 
     var vocabEntryExistingCallback: VocabEntryExistingCallback? = null
     var tagCreateCallback: TagCreateCallback? = null
+    var tagExistingClickListener: (item: TagItem.Existing) -> Unit = {}
 
     init {
         inflateFrom(R.layout.view_item_vocab_entry)
@@ -74,15 +77,15 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
         tagsRecycler.adapter = tagsAdapter
     }
 
-    override fun setItem(position: Int, item: VocabEntryItemPresentationData.Existing) {
+    override fun setItem(position: Int, item: VocabEntryEditItem.Existing) {
         setupTextWatchers(item)
         setupTextFocus(item)
 
-        val existingTagItems = item.data.tags.map { TagItem.Existing(item.data, it) }
+        val existingTagItems = item.entry.tags.map { TagItem.Existing(item, it) }
         val allTagItems = if(item.viewMode is ViewMode.Inactive) {
             existingTagItems
         } else {
-            val createItem = TagItem.Create(item.data)
+            val createItem = TagItem.Create(item)
             existingTagItems + createItem
         }
         tagsAdapter.submitList(allTagItems)
@@ -95,12 +98,12 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
         chevronIconView.setOnClickListener { flipMode(item) }
     }
 
-    private fun setupTextWatchers(item: VocabEntryItemPresentationData.Existing) {
+    private fun setupTextWatchers(item: VocabEntryEditItem.Existing) {
         wordAInputView.removeTextChangedListener(wordATextWatcher)
         wordBInputView.removeTextChangedListener(wordBTextWatcher)
 
-        wordAInputView.setText(item.data.wordA)
-        wordBInputView.setText(item.data.wordB)
+        wordAInputView.setText(item.entry.wordA)
+        wordBInputView.setText(item.entry.wordB)
 
         wordATextWatcher = object : BaseTextWatcher() {
             override fun afterTextChanged(s: Editable?) {
@@ -116,7 +119,7 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
         wordBInputView.addTextChangedListener(wordBTextWatcher)
     }
 
-    private fun setupTextFocus(item: VocabEntryItemPresentationData.Existing) {
+    private fun setupTextFocus(item: VocabEntryEditItem.Existing) {
         wordAInputView.setOnFocusChangeListener { _, _ -> }
         wordBInputView.setOnFocusChangeListener { _, _ -> }
 
@@ -152,7 +155,7 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
         }
     }
 
-    private fun flipMode(item: VocabEntryItemPresentationData.Existing) {
+    private fun flipMode(item: VocabEntryEditItem.Existing) {
         val viewMode = item.viewMode
         val newMode = getFlippedMode(viewMode)
         requireCallback().onViewModeChanged(item, newMode)

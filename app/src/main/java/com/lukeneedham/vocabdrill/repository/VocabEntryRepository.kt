@@ -1,7 +1,8 @@
 package com.lukeneedham.vocabdrill.repository
 
 import com.lukeneedham.vocabdrill.data.persistence.dao.VocabEntryDao
-import com.lukeneedham.vocabdrill.repository.conversion.toDomainModel
+import com.lukeneedham.vocabdrill.domain.model.VocabEntryPartial
+import com.lukeneedham.vocabdrill.repository.conversion.toPartialModel
 import com.lukeneedham.vocabdrill.repository.conversion.toPersistenceModel
 import io.reactivex.Completable
 import io.reactivex.Observable
@@ -20,17 +21,17 @@ class VocabEntryRepository(private val vocabEntryDao: VocabEntryDao) {
         return vocabEntryDao.deleteWithId(vocabEntryId)
     }
 
-    fun observeVocabEntryForId(vocabEntryId: Long): Observable<VocabEntryDomain> {
-        return vocabEntryDao.observeWithId(vocabEntryId).map { it.toDomainModel() }
+    fun observeVocabEntryForId(vocabEntryId: Long): Observable<VocabEntryPartial> {
+        return vocabEntryDao.observeWithId(vocabEntryId).map { it.toPartialModel() }
     }
 
-    fun requireVocabEntryForId(vocabEntryId: Long): Single<VocabEntryDomain> {
-        return vocabEntryDao.getWithId(vocabEntryId).map { it.toDomainModel() }
+    fun requireVocabEntryForId(vocabEntryId: Long): Single<VocabEntryPartial> {
+        return vocabEntryDao.getWithId(vocabEntryId).map { it.toPartialModel() }
     }
 
-    fun observeAllVocabEntriesForLanguage(languageId: Long): Observable<List<VocabEntryDomain>> {
+    fun observeAllVocabEntriesForLanguage(languageId: Long): Observable<List<VocabEntryPartial>> {
         return vocabEntryDao.observeAllForLanguage(languageId)
-            .map { it.map { it.toDomainModel() } }
+            .map { it.map { it.toPartialModel() } }
     }
 
     fun updateVocabEntry(vocabEntry: VocabEntryDomain): Completable {

@@ -20,8 +20,8 @@ class TagRepository(
         }
     }
 
-    fun deleteUnused(): Completable {
-        return tagDao.deleteAllUnused()
+    fun deleteUnused(excludeTagIds: List<Long>): Completable {
+        return tagDao.deleteAllUnused(excludeTagIds)
     }
 
     fun getAllForLanguage(languageId: Long): Single<List<Tag>> {

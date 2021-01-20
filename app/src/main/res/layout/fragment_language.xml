@@ -46,13 +46,26 @@
         app:layout_constraintTop_toBottomOf="@+id/backButton" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/learnButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="15dp"
+        android:src="@drawable/ic_learn"
+        app:backgroundTint="@android:color/white"
+        app:layout_constraintBottom_toTopOf="@+id/addButton"
+        app:layout_constraintStart_toStartOf="@+id/addButton"
+        app:tint="@color/dark_grey" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/addButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="30dp"
         android:src="@drawable/ic_add"
+        app:backgroundTint="@color/dark_grey"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:tint="@android:color/white" />
 
     <com.lukeneedham.vocabdrill.presentation.feature.tag.TagSuggestionsView
         android:id="@+id/tagSuggestionsView"

@@ -6,6 +6,7 @@ import com.lukeneedham.vocabdrill.data.persistence.model.VocabEntryTagRelation
 import com.lukeneedham.vocabdrill.domain.model.Tag
 import com.lukeneedham.vocabdrill.repository.conversion.toDomainModel
 import com.lukeneedham.vocabdrill.util.extension.zip
+import io.reactivex.Completable
 import io.reactivex.Observable
 import io.reactivex.Single
 
@@ -16,6 +17,10 @@ class VocabEntryTagRelationRepository(
     fun addTagToVocabEntry(vocabEntryId: Long, tagId: Long): Single<Long> {
         val entryTag = VocabEntryTagRelation(vocabEntryId, tagId)
         return vocabEntryTagDao.add(entryTag)
+    }
+
+    fun deleteTagFromVocabEntry(vocabEntryId: Long, tagId: Long): Completable {
+        return vocabEntryTagDao.delete(vocabEntryId, tagId)
     }
 
     fun observeAllTagsForVocabEntry(entryId: Long): Observable<List<Tag>> {

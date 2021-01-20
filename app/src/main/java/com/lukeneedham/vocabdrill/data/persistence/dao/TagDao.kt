@@ -25,9 +25,10 @@ interface TagDao {
             SELECT DISTINCT ${VocabEntryTagRelation.Column.TAG_ID} 
             FROM ${VocabEntryTagRelation.Table.NAME} 
         )
+        AND ${Tag.Column.ID} NOT IN (:excludeTagIds)
         """
     )
-    fun deleteAllUnused(): Completable
+    fun deleteAllUnused(excludeTagIds: List<Long>): Completable
 
     @Query(
         """

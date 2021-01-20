@@ -1,7 +1,7 @@
 package com.lukeneedham.vocabdrill.di
 
 import com.lukeneedham.vocabdrill.data.persistence.AppDatabase
-import com.lukeneedham.vocabdrill.domain.model.LearnBook
+import com.lukeneedham.vocabdrill.domain.model.LearnSet
 import com.lukeneedham.vocabdrill.presentation.feature.home.HomeViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.language.LanguageViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.language.create.AddLanguageViewModel
@@ -9,7 +9,6 @@ import com.lukeneedham.vocabdrill.presentation.feature.language.settings.Languag
 import com.lukeneedham.vocabdrill.presentation.feature.language.settings.changeflag.ChangeLanguageFlagViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.language.settings.changename.ChangeLanguageNameViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.learn.LearnViewModel
-import com.lukeneedham.vocabdrill.presentation.feature.tag.VocabGroupViewModel
 import com.lukeneedham.vocabdrill.repository.LanguageRepository
 import com.lukeneedham.vocabdrill.repository.TagRepository
 import com.lukeneedham.vocabdrill.repository.VocabEntryRepository
@@ -54,10 +53,10 @@ object KoinModule {
         single { ObserveLanguage(get()) }
         single { DeleteLanguage(get()) }
         single { CheckValidLanguageName(get()) }
-        single { ObserveAllVocabEntryRelationsForLanguage(get(), get(), get()) }
+        single { ObserveAllVocabEntryAndTagsForLanguage(get(), get(), get()) }
 
         /* Entries */
-        single { DeleteVocabEntry(get(), get()) }
+        single { DeleteVocabEntry(get()) }
         single { UpdateVocabEntry(get()) }
         single { AddVocabEntry(get(), get()) }
 
@@ -78,6 +77,8 @@ object KoinModule {
         single { AddNewTag(get()) }
         single { CalculateColorForNewTag(get(), get()) }
         single { FindTagNameMatches(get()) }
+        single { DeleteUnusedTags(get()) }
+        single { DeleteTagFromVocabEntry(get()) }
 
         /* Learn */
         single { PlaySoundEffect(androidContext()) }
@@ -100,6 +101,7 @@ object KoinModule {
                 get(),
                 get(),
                 get(),
+                get(),
                 get()
             )
         }
@@ -107,13 +109,10 @@ object KoinModule {
         viewModel { (languageId: Long) -> ChangeLanguageNameViewModel(languageId, get(), get()) }
         viewModel { (languageId: Long) -> ChangeLanguageFlagViewModel(languageId, get(), get()) }
 
-        /* Vocab Group */
-        viewModel { (vocabGroupId: Long) -> VocabGroupViewModel(vocabGroupId, get(), get()) }
-
         /* Vocab Entry */
 
         /* Learn */
-        viewModel { (learnBook: LearnBook) -> LearnViewModel(learnBook, get()) }
+        viewModel { (learnSet: LearnSet) -> LearnViewModel(learnSet, get()) }
     }
 
     private val vanillaViewModels = module {

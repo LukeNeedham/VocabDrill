@@ -4,7 +4,4 @@ import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
 
 @Parcelize
-data class LearnBook(
-    val entries: List<VocabEntry>,
-    val colourScheme: TagColourScheme
-) : Parcelable
+data class LearnSet(val entries: List<VocabEntry>) : Parcelable
