@@ -11,7 +11,6 @@ import com.lukeneedham.vocabdrill.R
 import com.lukeneedham.vocabdrill.presentation.util.BaseTextWatcher
 import com.lukeneedham.vocabdrill.presentation.util.extension.inflateFrom
 import com.lukeneedham.vocabdrill.presentation.util.extension.showKeyboard
-import group.infotech.drawable.dsl.shapeDrawable
 import kotlinx.android.synthetic.main.view_tag_create.view.*
 import org.koin.core.KoinComponent
 
@@ -21,7 +20,7 @@ class TagCreateView @JvmOverloads constructor(
 
     private var tagNameTextWatcher: TextWatcher? = null
 
-    var callback: TagCreateCallback? = null
+    var onNameChanged: ((tag: TagItem.Create, name: String, nameInputView: View) -> Unit)? = null
 
     init {
         inflateFrom(R.layout.view_tag_create)
@@ -45,11 +44,10 @@ class TagCreateView @JvmOverloads constructor(
         tagNameInput.setText("")
         tagNameTextWatcher = object : BaseTextWatcher() {
             override fun afterTextChanged(s: Editable?) {
-                requireCallback().onNameChanged(item, s.toString(), this@TagCreateView)
+                val onNameChanged = onNameChanged ?: error("Callback must be set")
+                onNameChanged(item, s.toString(), this@TagCreateView)
             }
         }
         tagNameInput.addTextChangedListener(tagNameTextWatcher)
     }
-
-    private fun requireCallback() = callback ?: error("Callback must be set")
 }

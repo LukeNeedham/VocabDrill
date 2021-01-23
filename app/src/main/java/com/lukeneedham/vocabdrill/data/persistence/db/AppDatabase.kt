@@ -1,18 +1,18 @@
-package com.lukeneedham.vocabdrill.data.persistence
+package com.lukeneedham.vocabdrill.data.persistence.db
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.lukeneedham.vocabdrill.data.persistence.AppDatabase.Companion.VERSION
-import com.lukeneedham.vocabdrill.data.persistence.dao.LanguageDao
-import com.lukeneedham.vocabdrill.data.persistence.dao.TagDao
-import com.lukeneedham.vocabdrill.data.persistence.dao.VocabEntryDao
-import com.lukeneedham.vocabdrill.data.persistence.dao.VocabEntryTagRelationDao
-import com.lukeneedham.vocabdrill.data.persistence.model.Language
-import com.lukeneedham.vocabdrill.data.persistence.model.Tag
-import com.lukeneedham.vocabdrill.data.persistence.model.VocabEntry
-import com.lukeneedham.vocabdrill.data.persistence.model.VocabEntryTagRelation
+import com.lukeneedham.vocabdrill.data.persistence.db.AppDatabase.Companion.VERSION
+import com.lukeneedham.vocabdrill.data.persistence.db.dao.LanguageDao
+import com.lukeneedham.vocabdrill.data.persistence.db.dao.TagDao
+import com.lukeneedham.vocabdrill.data.persistence.db.dao.VocabEntryDao
+import com.lukeneedham.vocabdrill.data.persistence.db.dao.VocabEntryTagRelationDao
+import com.lukeneedham.vocabdrill.data.persistence.db.model.Language
+import com.lukeneedham.vocabdrill.data.persistence.db.model.Tag
+import com.lukeneedham.vocabdrill.data.persistence.db.model.VocabEntry
+import com.lukeneedham.vocabdrill.data.persistence.db.model.VocabEntryTagRelation
 
 @Database(
     entities = [

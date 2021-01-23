@@ -13,14 +13,8 @@ class CalculateColorForNewTag(
     private val ratioListSoFar = mutableListOf(RatioStep(0.5f, 0.5f))
 
     operator fun invoke(languageId: Long): Single<Int> {
-        return Single.zip(
-            extractFlagColoursFromLanguageId(languageId),
-            tagRepository.getAllForLanguage(languageId)
-        ) { flagColours, tags ->
-            // TODO: Tags can be deleted, so this size method is not robust.
-            //  Leads to duplicate colors.
-            // Use latest id instead
-            val newTagIndex = tags.size
+        val newTagIndex = tagRepository.getTagCreationCount(languageId)
+        return extractFlagColoursFromLanguageId(languageId).map { flagColours ->
             getColourForIndex(flagColours, newTagIndex)
         }
             .subscribeOn(RxSchedulers.database)
@@ -43,7 +37,7 @@ class CalculateColorForNewTag(
 
     private fun getRatio(targetIndex: Int): Float {
         var index = ratioListSoFar.lastIndex
-        while(index < targetIndex) {
+        while (index < targetIndex) {
             val step = ratioListSoFar[index]
             val newDiff = step.diff / 2
             val value = step.value

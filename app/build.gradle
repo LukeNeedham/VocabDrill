@@ -87,6 +87,9 @@ dependencies {
     // Palette
     implementation 'androidx.palette:palette:1.0.0'
 
+    // Krate
+    implementation 'hu.autsoft:krate:1.0.0'
+
     // Drawable DSL
     implementation "com.github.infotech-group:android-drawable-dsl:0.3.0"
 

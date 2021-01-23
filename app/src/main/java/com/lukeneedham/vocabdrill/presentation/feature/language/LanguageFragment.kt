@@ -92,11 +92,15 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
     }
 
     private val tagCreateCallback = object : TagCreateCallback {
-        override fun onNameChanged(tagItem: TagItem.Create, name: String, nameInputView: View) {
-            val entryItem = tagItem.vocabEntryItem
-            viewModel.requestTagMatches(entryItem, name)
-            tagSuggestionsView.onSuggestionClickListener = { tag ->
-                viewModel.addTagToVocabEntry(entryItem, tag)
+        override fun onNameChanged(
+            entry: VocabEntryEditItem,
+            tag: TagItem.Create,
+            name: String,
+            nameInputView: View
+        ) {
+            viewModel.requestTagMatches(entry, name)
+            tagSuggestionsView.onSuggestionClickListener = { suggestion ->
+                viewModel.addTagToVocabEntry(entry, suggestion)
                 tagSuggestionsView.visibility = View.GONE
             }
 
@@ -254,8 +258,8 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
         }
     }
 
-    private fun onTagExistingClick(item: TagItem.Existing) {
-        viewModel.deleteTagFromVocabEntry(item.vocabEntryItem, item)
+    private fun onTagExistingClick(entryItem: VocabEntryEditItem, tag: TagItem.Existing) {
+        viewModel.deleteTagFromVocabEntry(entryItem, tag)
     }
 
     private fun getLastItemPosition() = vocabEntriesAdapter.itemCount - 1

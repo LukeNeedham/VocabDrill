@@ -1,8 +1,8 @@
 package com.lukeneedham.vocabdrill.repository
 
-import com.lukeneedham.vocabdrill.data.persistence.dao.TagDao
-import com.lukeneedham.vocabdrill.data.persistence.dao.VocabEntryTagRelationDao
-import com.lukeneedham.vocabdrill.data.persistence.model.VocabEntryTagRelation
+import com.lukeneedham.vocabdrill.data.persistence.db.dao.TagDao
+import com.lukeneedham.vocabdrill.data.persistence.db.dao.VocabEntryTagRelationDao
+import com.lukeneedham.vocabdrill.data.persistence.db.model.VocabEntryTagRelation
 import com.lukeneedham.vocabdrill.domain.model.Tag
 import com.lukeneedham.vocabdrill.repository.conversion.toDomainModel
 import com.lukeneedham.vocabdrill.util.extension.zip

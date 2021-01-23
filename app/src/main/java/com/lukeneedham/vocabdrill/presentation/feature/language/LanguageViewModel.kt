@@ -96,8 +96,8 @@ class LanguageViewModel(
 
     fun getLearnSet(): LearnSet {
         val entriesOrCreate = vocabEntriesOrCreateMutableLiveData.value ?: emptyList()
-        val entries =
-            entriesOrCreate.filterIsInstance<VocabEntryEditItem.Existing>().map { it.entry }
+        val entries = entriesOrCreate.filterIsInstance<VocabEntryEditItem.Existing>()
+            .map { it.entry }
         return LearnSet(entries)
     }
 
@@ -173,7 +173,9 @@ class LanguageViewModel(
         }
     }
 
-    private fun getCreateItemTagIds() = itemStateHandler.getCreateEditItem().tags.map { it.id }
+    private fun getCreateItemTagIds(): List<Long> = itemStateHandler.getCreateEditItem().tags
+        .filterIsInstance<TagItem.Existing>()
+        .map { it.data.id }
 
     /** Delete all unused tags, except the ones referenced by the create item */
     private fun deleteUnusedTagsExceptCreate() {

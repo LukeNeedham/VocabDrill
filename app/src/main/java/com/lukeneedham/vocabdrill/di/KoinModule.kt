@@ -1,6 +1,7 @@
 package com.lukeneedham.vocabdrill.di
 
-import com.lukeneedham.vocabdrill.data.persistence.AppDatabase
+import com.lukeneedham.vocabdrill.data.persistence.db.AppDatabase
+import com.lukeneedham.vocabdrill.data.persistence.preferences.PreferencesDao
 import com.lukeneedham.vocabdrill.domain.model.LearnSet
 import com.lukeneedham.vocabdrill.presentation.feature.home.HomeViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.language.LanguageViewModel
@@ -39,12 +40,14 @@ object KoinModule {
         single { get<AppDatabase>().vocabEntryDao() }
         single { get<AppDatabase>().tagDao() }
         single { get<AppDatabase>().vocabEntryTagDao() }
+
+        single { PreferencesDao(androidContext()) }
     }
 
     private val repositories = module {
         single { LanguageRepository(get()) }
         single { VocabEntryRepository(get()) }
-        single { TagRepository(get()) }
+        single { TagRepository(get(), get()) }
         single { VocabEntryTagRelationRepository(get(), get()) }
     }
 
@@ -115,9 +118,5 @@ object KoinModule {
         viewModel { (learnSet: LearnSet) -> LearnViewModel(learnSet, get()) }
     }
 
-    private val vanillaViewModels = module {
-    }
-
-    val modules =
-        listOf(utils, database, daos, repositories, useCases, viewModels, vanillaViewModels)
+    val modules = listOf(utils, database, daos, repositories, useCases, viewModels)
 }

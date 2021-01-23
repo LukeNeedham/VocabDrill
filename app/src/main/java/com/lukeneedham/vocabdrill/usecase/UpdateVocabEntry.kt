@@ -8,8 +8,8 @@ import io.reactivex.Completable
 class UpdateVocabEntry(
     private val vocabEntryRepository: VocabEntryRepository
 ) {
-    operator fun invoke(entry: VocabEntry): Completable =
-        vocabEntryRepository.updateVocabEntry(entry)
+    operator fun invoke(entryAndTags: VocabEntry): Completable =
+        vocabEntryRepository.updateVocabEntry(entryAndTags)
             .subscribeOn(RxSchedulers.database)
             .observeOn(RxSchedulers.main)
 }

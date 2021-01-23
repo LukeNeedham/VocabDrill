@@ -1,7 +1,8 @@
 package com.lukeneedham.vocabdrill.presentation.feature.language
 
 import com.lukeneedham.vocabdrill.domain.model.Tag
-import com.lukeneedham.vocabdrill.domain.model.VocabEntry
+import com.lukeneedham.vocabdrill.domain.model.VocabEntryAndTags
+import com.lukeneedham.vocabdrill.presentation.feature.tag.TagItem
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.FocusItem
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.InteractionSection
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.ViewMode
@@ -13,8 +14,8 @@ class VocabEntryEditItemsHandler(
     private val languageId: Long,
     private val onItemsChangeListener: (items: List<VocabEntryEditItem>) -> Unit
 ) {
-    private val existingItems: MutableList<VocabEntryPartialItem.Existing> = mutableListOf()
-    private var createItem: VocabEntryPartialItem.Create = newCreateItem()
+    private val existingItems: MutableList<VocabEntryEditPartialItem.Existing> = mutableListOf()
+    private var createItem: VocabEntryEditPartialItem.Create = newCreateItem()
 
     private var selectedItem: SelectedVocabEntry = SelectedVocabEntry.None
 
@@ -22,7 +23,7 @@ class VocabEntryEditItemsHandler(
         notifyNewItems()
     }
 
-    fun submitExistingItems(items: List<VocabEntry>) {
+    fun submitExistingItems(items: List<VocabEntryAndTags>) {
         val newExistingItems = items.map { createVocabEntryOrCreateFromEntry(it) }
         existingItems.clear()
         existingItems.addAll(newExistingItems)
@@ -69,7 +70,11 @@ class VocabEntryEditItemsHandler(
 
     fun onExistingItemWordAChanged(entryId: Long, newWordA: String, selection: TextSelection) {
         updateEntryId(entryId) {
-            it.copy(wordA = newWordA)
+            it.copy(
+                entry = it.entry.copy(
+                    wordA = newWordA
+                )
+            )
         }
         val focus = FocusItem.WordA(selection)
         selectedItem = SelectedVocabEntry.Existing(entryId, focus)
@@ -78,7 +83,11 @@ class VocabEntryEditItemsHandler(
 
     fun onExistingItemWordBChanged(entryId: Long, newWordB: String, selection: TextSelection) {
         updateEntryId(entryId) {
-            it.copy(wordB = newWordB)
+            it.copy(
+                entry = it.entry.copy(
+                    wordB = newWordB
+                )
+            )
         }
         val focus = FocusItem.WordB(selection)
         selectedItem = SelectedVocabEntry.Existing(entryId, focus)
@@ -107,8 +116,9 @@ class VocabEntryEditItemsHandler(
     }
 
     fun getExistingEditItems(): List<VocabEntryEditItem.Existing> = existingItems.map {
-        val entry = it.entry
+        val entry = it.entryAndTags.entry
         val selectedItem = selectedItem
+
         val viewMode = if (
             selectedItem is SelectedVocabEntry.Existing &&
             selectedItem.id == entry.id
@@ -117,7 +127,15 @@ class VocabEntryEditItemsHandler(
         } else {
             ViewMode.Inactive
         }
-        VocabEntryEditItem.Existing(entry, viewMode)
+
+        val existingTagItems = it.entryAndTags.tags.map { TagItem.Existing(it) }
+        val allTagItems = if (viewMode is ViewMode.Inactive) {
+            existingTagItems
+        } else {
+            existingTagItems + TagItem.Create
+        }
+
+        VocabEntryEditItem.Existing(entry, allTagItems, viewMode)
     }
 
     fun getCreateEditItem(): VocabEntryEditItem.Create {
@@ -128,9 +146,15 @@ class VocabEntryEditItemsHandler(
         } else {
             ViewMode.Inactive
         }
+
+        val existingTagItems = createItem.tags.map {
+            TagItem.Existing(it)
+        }
+        val allTagItems = existingTagItems + TagItem.Create
+
         return VocabEntryEditItem.Create(
             createItem.languageId,
-            createItem.tags,
+            allTagItems,
             createItem.wordA,
             createItem.wordB,
             mode
@@ -172,11 +196,11 @@ class VocabEntryEditItemsHandler(
         notifyNewItems()
     }
 
-    private fun newCreateItem() = VocabEntryPartialItem.Create.newInstance(languageId)
+    private fun newCreateItem() = VocabEntryEditPartialItem.Create.newInstance(languageId)
 
-    private fun updateEntryId(id: Long, updateWork: (VocabEntry) -> VocabEntry) {
-        val index = existingItems.indexOfFirst { it.entry.id == id }
-        val oldItem = existingItems[index].entry
+    private fun updateEntryId(id: Long, updateWork: (VocabEntryAndTags) -> VocabEntryAndTags) {
+        val index = existingItems.indexOfFirst { it.entryAndTags.entry.id == id }
+        val oldItem = existingItems[index].entryAndTags
         val newEntry = updateWork(oldItem)
         val newItem = createVocabEntryOrCreateFromEntry(newEntry)
         existingItems[index] = newItem
@@ -186,8 +210,8 @@ class VocabEntryEditItemsHandler(
         onItemsChangeListener(getAllItems())
     }
 
-    private fun createVocabEntryOrCreateFromEntry(entry: VocabEntry) =
-        VocabEntryPartialItem.Existing(entry)
+    private fun createVocabEntryOrCreateFromEntry(entryAndTags: VocabEntryAndTags) =
+        VocabEntryEditPartialItem.Existing(entryAndTags)
 
     private fun getViewModeForEntryId(id: Long): ViewMode {
         val selectedItem = selectedItem
@@ -198,15 +222,15 @@ class VocabEntryEditItemsHandler(
         }
     }
 
-    private sealed class VocabEntryPartialItem {
-        data class Existing(val entry: VocabEntry) : VocabEntryPartialItem()
+    private sealed class VocabEntryEditPartialItem {
+        data class Existing(val entryAndTags: VocabEntryAndTags) : VocabEntryEditPartialItem()
 
         data class Create(
             val languageId: Long,
             val tags: List<Tag>,
             val wordA: String?,
             val wordB: String?
-        ) : VocabEntryPartialItem() {
+        ) : VocabEntryEditPartialItem() {
 
             companion object {
                 fun newInstance(languageId: Long) = Create(languageId, emptyList(), null, null)

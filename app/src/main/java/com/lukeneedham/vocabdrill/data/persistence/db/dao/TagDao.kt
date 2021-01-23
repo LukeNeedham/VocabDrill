@@ -1,10 +1,10 @@
-package com.lukeneedham.vocabdrill.data.persistence.dao
+package com.lukeneedham.vocabdrill.data.persistence.db.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
-import com.lukeneedham.vocabdrill.data.persistence.model.Tag
-import com.lukeneedham.vocabdrill.data.persistence.model.VocabEntryTagRelation
+import com.lukeneedham.vocabdrill.data.persistence.db.model.Tag
+import com.lukeneedham.vocabdrill.data.persistence.db.model.VocabEntryTagRelation
 import io.reactivex.Completable
 import io.reactivex.Single
 

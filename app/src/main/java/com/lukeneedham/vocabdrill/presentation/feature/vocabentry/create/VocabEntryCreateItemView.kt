@@ -4,29 +4,17 @@ import android.content.Context
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.AttributeSet
-import android.view.ViewGroup.LayoutParams.MATCH_PARENT
-import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+import android.view.View
 import android.widget.EditText
 import android.widget.FrameLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.lukeneedham.flowerpotrecycler.RecyclerAdapterCreator
 import com.lukeneedham.flowerpotrecycler.adapter.RecyclerItemView
-import com.lukeneedham.flowerpotrecycler.adapter.delegates.feature.config.FeatureConfig
-import com.lukeneedham.flowerpotrecycler.adapter.itemtype.builderbinder.implementation.view.RecyclerItemViewBuilderBinder
-import com.lukeneedham.flowerpotrecycler.util.ItemTypeConfigCreator
-import com.lukeneedham.flowerpotrecycler.util.extensions.addItemLayoutParams
-import com.lukeneedham.flowerpotrecycler.util.extensions.addOnItemClickListener
 import com.lukeneedham.vocabdrill.R
 import com.lukeneedham.vocabdrill.domain.model.VocabEntryProto
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagCreateCallback
-import com.lukeneedham.vocabdrill.presentation.feature.tag.TagCreateView
-import com.lukeneedham.vocabdrill.presentation.feature.tag.TagExistingView
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagItem
-import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.FocusItem
-import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.InteractionSection
-import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.ViewMode
-import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryEditItem
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.*
 import com.lukeneedham.vocabdrill.presentation.util.BaseTextWatcher
 import com.lukeneedham.vocabdrill.presentation.util.TextSelection
 import com.lukeneedham.vocabdrill.presentation.util.extension.getSelection
@@ -41,31 +29,15 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
     RecyclerItemView<VocabEntryEditItem.Create>,
     KoinComponent {
 
-    private val tagsAdapter = RecyclerAdapterCreator.fromItemTypeConfigs(
-        listOf(
-            ItemTypeConfigCreator.fromBuilderBinder(
-                RecyclerItemViewBuilderBinder.newInstance {
-                    TagCreateView(context).apply {
-                        callback = tagCreateCallback
-                    }
-                },
-                FeatureConfig<TagItem.Create, TagCreateView>().apply {
-                    addItemLayoutParams(RecyclerView.LayoutParams(WRAP_CONTENT, MATCH_PARENT))
-                }
-            ),
-            ItemTypeConfigCreator.fromRecyclerItemView<TagItem.Existing, TagExistingView> {
-                addItemLayoutParams(RecyclerView.LayoutParams(WRAP_CONTENT, MATCH_PARENT))
-                addOnItemClickListener { item, _, _ -> tagExistingClickListener(item) }
-            }
-        )
-    )
+    private val tagsAdapter = TagsAdapter(context, ::onExistingTagClick, ::onCreateTagNameChanged)
 
     private var wordATextWatcher: TextWatcher? = null
     private var wordBTextWatcher: TextWatcher? = null
+    private var entryItem: VocabEntryEditItem.Create? = null
 
     var vocabEntryCreateCallback: VocabEntryCreateCallback? = null
     var tagCreateCallback: TagCreateCallback? = null
-    var tagExistingClickListener: (item: TagItem.Existing) -> Unit = {}
+    var tagExistingClickListener: (VocabEntryEditItem, TagItem.Existing) -> Unit = { _, _ -> }
 
     init {
         inflateFrom(R.layout.view_item_create_vocab_entry)
@@ -77,6 +49,7 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
     }
 
     override fun setItem(position: Int, item: VocabEntryEditItem.Create) {
+        this.entryItem = item
         setupTextWatchers(item)
         setupTextFocus(item)
         refreshSaveButtonEnabled()
@@ -88,14 +61,10 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
                 .filterIsInstance<TagItem.Existing>()
                 .map { it.data }
             val proto = VocabEntryProto(wordA, wordB, item.languageId, tags)
-            requireCallback().save(proto)
+            requireEntryCallback().save(proto)
         }
-        val existingTagItems = item.tags.map {
-            TagItem.Existing(item, it)
-        }
-        val createTagItem = TagItem.Create(item)
-        val allTagItems = existingTagItems + createTagItem
-        tagsAdapter.submitList(allTagItems)
+
+        tagsAdapter.submitList(item.tags)
     }
 
     private fun setupTextWatchers(item: VocabEntryEditItem.Create) {
@@ -107,12 +76,12 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
 
         wordATextWatcher = object : BaseTextWatcher() {
             override fun afterTextChanged(s: Editable?) {
-                requireCallback().onWordAChanged(s.toString(), wordAInputView.getSelection())
+                requireEntryCallback().onWordAChanged(s.toString(), wordAInputView.getSelection())
             }
         }
         wordBTextWatcher = object : BaseTextWatcher() {
             override fun afterTextChanged(s: Editable?) {
-                requireCallback().onWordBChanged(s.toString(), wordBInputView.getSelection())
+                requireEntryCallback().onWordBChanged(s.toString(), wordBInputView.getSelection())
             }
         }
         wordAInputView.addTextChangedListener(wordATextWatcher)
@@ -135,7 +104,7 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
         wordAInputView.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
                 wordAInputView.post {
-                    requireCallback().onInteraction(
+                    requireEntryCallback().onInteraction(
                         InteractionSection.WordAInput,
                         wordAInputView.getSelection()
                     )
@@ -145,7 +114,7 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
         wordBInputView.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
                 wordBInputView.post {
-                    requireCallback().onInteraction(
+                    requireEntryCallback().onInteraction(
                         InteractionSection.WordBInput,
                         wordBInputView.getSelection()
                     )
@@ -171,5 +140,19 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
     private fun isSaveButtonEnabled(wordA: String?, wordB: String?): Boolean =
         !wordA.isNullOrBlank() && !wordB.isNullOrBlank()
 
-    private fun requireCallback() = vocabEntryCreateCallback ?: error("Callback must be set")
+    private fun onExistingTagClick(tag: TagItem.Existing) {
+        tagExistingClickListener(requireEntryItem(), tag)
+    }
+
+    private fun onCreateTagNameChanged(tag: TagItem.Create, name: String, nameInputView: View) {
+        requireTagCreateCallback().onNameChanged(requireEntryItem(), tag, name, nameInputView)
+    }
+
+    private fun requireEntryItem() = entryItem ?: error("entryItem must be set")
+
+    private fun requireTagCreateCallback() =
+        tagCreateCallback ?: error("Tag create callback must be set")
+
+    private fun requireEntryCallback() =
+        vocabEntryCreateCallback ?: error("Create entry callback must be set")
 }

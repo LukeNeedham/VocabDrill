@@ -24,7 +24,7 @@ class VocabEntriesAdapter(
     vocabEntryExistingCallback: VocabEntryExistingCallback,
     vocabEntryCreateCallback: VocabEntryCreateCallback,
     tagCreateCallback: TagCreateCallback,
-    tagExistingClickListener: (TagItem.Existing) -> Unit
+    tagExistingClickListener: (entryItem: VocabEntryEditItem, tag: TagItem.Existing) -> Unit
 ) : DelegatedRecyclerAdapter<VocabEntryEditItem, View>() {
 
     override val positionDelegate = LinearPositionDelegate(this, diffCallback)

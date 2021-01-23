@@ -1,6 +1,6 @@
 package com.lukeneedham.vocabdrill.usecase
 
-import com.lukeneedham.vocabdrill.domain.model.VocabEntry
+import com.lukeneedham.vocabdrill.domain.model.VocabEntryAndTags
 import com.lukeneedham.vocabdrill.repository.LanguageRepository
 import com.lukeneedham.vocabdrill.repository.VocabEntryRepository
 import com.lukeneedham.vocabdrill.repository.VocabEntryTagRelationRepository
@@ -14,7 +14,7 @@ class ObserveAllVocabEntryAndTagsForLanguage(
     private val vocabEntryRepository: VocabEntryRepository,
     private val vocabEntryTagRelationRepository: VocabEntryTagRelationRepository
 ) {
-    operator fun invoke(languageId: Long): Observable<List<VocabEntry>> {
+    operator fun invoke(languageId: Long): Observable<List<VocabEntryAndTags>> {
         return languageRepository.observeLanguageForId(languageId).switchMap { language ->
             vocabEntryRepository.observeAllVocabEntriesForLanguage(languageId)
                 .switchMap { entries ->

@@ -1,4 +1,4 @@
-package com.lukeneedham.vocabdrill.data.persistence.model
+package com.lukeneedham.vocabdrill.data.persistence.db.model
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity

@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.lukeneedham.vocabdrill
 
 import android.app.Application
