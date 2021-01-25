@@ -45,12 +45,17 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/backButton" />
 
+    <!--
+    TODO: Put the learn button somewhere - but not here!
+     It is too in the way
+     -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/learnButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="15dp"
         android:src="@drawable/ic_learn"
+        android:visibility="gone"
         app:backgroundTint="@android:color/white"
         app:layout_constraintBottom_toTopOf="@+id/addButton"
         app:layout_constraintStart_toStartOf="@+id/addButton"
@@ -70,9 +75,9 @@
     <com.lukeneedham.vocabdrill.presentation.feature.tag.TagSuggestionsView
         android:id="@+id/tagSuggestionsView"
         android:layout_width="@dimen/tag_suggestions_view_width"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:visibility="gone"
-        app:layout_constraintHeight_default="wrap"
+        app:layout_constrainedHeight="true"
         app:layout_constraintHeight_max="90dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

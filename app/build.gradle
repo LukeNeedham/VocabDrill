@@ -96,6 +96,9 @@ dependencies {
     // Material
     implementation 'com.google.android.material:material:1.2.1'
 
+    // Flexbox
+    implementation 'com.google.android:flexbox:2.0.1'
+
     // Lint check
     implementation 'com.github.Innovattic:multiple-synthetic-import-lint:1.0.1'
 

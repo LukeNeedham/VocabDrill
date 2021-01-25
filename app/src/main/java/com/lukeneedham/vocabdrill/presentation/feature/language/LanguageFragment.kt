@@ -126,9 +126,9 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
             val showSuggestions = !name.isBlank()
             tagSuggestionsView.visibility = if (showSuggestions) View.VISIBLE else View.GONE
             val inputBackgroundRes = if (showSuggestions) {
-                R.drawable.background_tag_create_expanded
+                R.drawable.background_tag_create_selected
             } else {
-                R.drawable.background_tag_create_collapsed
+                R.drawable.background_tag_create_unselected
             }
             nameInputView.background =
                 ContextCompat.getDrawable(requireContext(), inputBackgroundRes)

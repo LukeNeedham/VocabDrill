@@ -5,10 +5,14 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.util.AttributeSet
 import android.view.View
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.EditText
 import android.widget.FrameLayout
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.updateLayoutParams
+import com.google.android.flexbox.FlexDirection
+import com.google.android.flexbox.FlexWrap
+import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.material.textfield.setHintEnabledMaintainMargin
 import com.lukeneedham.flowerpotrecycler.adapter.RecyclerItemView
 import com.lukeneedham.vocabdrill.R
@@ -23,32 +27,48 @@ import com.lukeneedham.vocabdrill.presentation.util.TextSelection
 import com.lukeneedham.vocabdrill.presentation.util.extension.getSelection
 import com.lukeneedham.vocabdrill.presentation.util.extension.inflateFrom
 import com.lukeneedham.vocabdrill.presentation.util.extension.setSelection
-import kotlinx.android.synthetic.main.view_item_vocab_entry.view.*
+import com.lukeneedham.vocabdrill.presentation.util.recyclerview.RecyclerViewClickInterceptor
+import kotlinx.android.synthetic.main.view_item_vocab_entry_existing.view.*
+
 
 class VocabEntryExistingItemView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr),
     RecyclerItemView<VocabEntryEditItem.Existing> {
 
+    private val tagsLayoutManager = FlexboxLayoutManager(context, FlexDirection.ROW, FlexWrap.WRAP)
     private val tagsAdapter = TagsAdapter(context, ::onExistingTagClick, ::onCreateTagNameChanged)
 
     private var wordATextWatcher: TextWatcher? = null
     private var wordBTextWatcher: TextWatcher? = null
     private var entryItem: VocabEntryEditItem.Existing? = null
+    private var viewMode: ViewMode? = null
 
     var vocabEntryExistingCallback: VocabEntryExistingCallback? = null
     var tagCreateCallback: TagCreateCallback? = null
     var tagExistingClickListener: (VocabEntryEditItem, TagItem.Existing) -> Unit = { _, _ -> }
 
     init {
-        inflateFrom(R.layout.view_item_vocab_entry)
-        tagsRecycler.layoutManager = LinearLayoutManager(context).apply {
-            orientation = RecyclerView.HORIZONTAL
-        }
+        inflateFrom(R.layout.view_item_vocab_entry_existing)
+        tagsRecycler.layoutManager = tagsLayoutManager
         wordAInputViewLayout.setHintEnabledMaintainMargin(false)
         wordBInputViewLayout.setHintEnabledMaintainMargin(false)
 
         tagsRecycler.adapter = tagsAdapter
+
+        deleteButton.setOnClickListener {
+            requireEntryCallback().onDelete(requireEntryItem())
+        }
+
+        tagsRecycler.setOnTouchListener(RecyclerViewClickInterceptor())
+        tagsRecycler.setOnClickListener {
+            flipMode()
+        }
+        tagsRecyclerOverlay.setOnClickListener {
+            flipMode()
+        }
+        backgroundView.setOnClickListener { flipMode() }
+        chevronIconView.setOnClickListener { flipMode() }
     }
 
     override fun setItem(position: Int, item: VocabEntryEditItem.Existing) {
@@ -58,13 +78,6 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
         setupTextFocus(item)
 
         tagsAdapter.submitList(item.tagItems)
-
-        deleteButton.setOnClickListener {
-            requireEntryCallback().onDelete(item)
-        }
-
-        backgroundView.setOnClickListener { flipMode(item) }
-        chevronIconView.setOnClickListener { flipMode(item) }
     }
 
     private fun setupTextWatchers(item: VocabEntryEditItem.Existing) {
@@ -101,7 +114,7 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
         wordBInputView.setOnFocusChangeListener { _, _ -> }
 
         val viewMode = item.viewMode
-        setMode(viewMode)
+        setViewMode(viewMode)
         if (viewMode is ViewMode.Active) {
             val focus = viewMode.focusItem
             when (focus) {
@@ -132,7 +145,8 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
         }
     }
 
-    private fun flipMode(item: VocabEntryEditItem.Existing) {
+    private fun flipMode() {
+        val item = requireEntryItem()
         val viewMode = item.viewMode
         val newMode = getFlippedMode(viewMode)
         requireEntryCallback().onViewModeChanged(item, newMode)
@@ -150,11 +164,33 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
         }
     }
 
-    private fun setMode(mode: ViewMode) {
+    private fun setViewMode(mode: ViewMode) {
+        this.viewMode = mode
+
         val isExpanded = mode is ViewMode.Active
         deleteButton.visibility = if (isExpanded) View.VISIBLE else View.GONE
         val chevronResId = if (isExpanded) R.drawable.ic_chevron_up else R.drawable.ic_chevron_down
         chevronIconView.setImageResource(chevronResId)
+
+        val tagCollapsedItemHeight =
+            context.resources.getDimensionPixelSize(R.dimen.tag_item_height_collapsed)
+        val tagExpandedItemHeight =
+            context.resources.getDimensionPixelSize(R.dimen.tag_item_height_expanded)
+        val tagItemHeight = if (isExpanded) tagExpandedItemHeight else tagCollapsedItemHeight
+        tagsAdapter.setItemHeight(tagItemHeight)
+
+        // Tags overlay intercepts click events in collapsed mode only
+        tagsRecyclerOverlay.isClickable = !isExpanded
+
+        tagsRecycler.updateLayoutParams<ConstraintLayout.LayoutParams> {
+            height = if (isExpanded) {
+                WRAP_CONTENT
+            } else {
+                // When in collapsed view, the height of the recyclerview is the height of an item
+                // This will therefore show only a single row of items
+                tagCollapsedItemHeight
+            }
+        }
     }
 
     private fun onExistingTagClick(tag: TagItem.Existing) {

@@ -23,7 +23,7 @@ class TagExistingView @JvmOverloads constructor(
     override fun setItem(position: Int, item: TagItem.Existing) {
         val data = item.data
         background.setColor(data.color)
-        setBackground(background)
+        bubble.background = background
         nameView.text = data.name
     }
 }

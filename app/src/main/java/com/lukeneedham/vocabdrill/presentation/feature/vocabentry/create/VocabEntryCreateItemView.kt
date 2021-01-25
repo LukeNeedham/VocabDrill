@@ -7,8 +7,9 @@ import android.util.AttributeSet
 import android.view.View
 import android.widget.EditText
 import android.widget.FrameLayout
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import com.google.android.flexbox.FlexDirection
+import com.google.android.flexbox.FlexWrap
+import com.google.android.flexbox.FlexboxLayoutManager
 import com.lukeneedham.flowerpotrecycler.adapter.RecyclerItemView
 import com.lukeneedham.vocabdrill.R
 import com.lukeneedham.vocabdrill.domain.model.VocabEntryProto
@@ -20,7 +21,7 @@ import com.lukeneedham.vocabdrill.presentation.util.TextSelection
 import com.lukeneedham.vocabdrill.presentation.util.extension.getSelection
 import com.lukeneedham.vocabdrill.presentation.util.extension.inflateFrom
 import com.lukeneedham.vocabdrill.presentation.util.extension.setSelection
-import kotlinx.android.synthetic.main.view_item_create_vocab_entry.view.*
+import kotlinx.android.synthetic.main.view_item_vocab_entry_create.view.*
 import org.koin.core.KoinComponent
 
 class VocabEntryCreateItemView @JvmOverloads constructor(
@@ -40,11 +41,9 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
     var tagExistingClickListener: (VocabEntryEditItem, TagItem.Existing) -> Unit = { _, _ -> }
 
     init {
-        inflateFrom(R.layout.view_item_create_vocab_entry)
+        inflateFrom(R.layout.view_item_vocab_entry_create)
 
-        tagsRecycler.layoutManager = LinearLayoutManager(context).apply {
-            orientation = RecyclerView.HORIZONTAL
-        }
+        tagsRecycler.layoutManager = FlexboxLayoutManager(context, FlexDirection.ROW, FlexWrap.WRAP)
         tagsRecycler.adapter = tagsAdapter
     }
 
