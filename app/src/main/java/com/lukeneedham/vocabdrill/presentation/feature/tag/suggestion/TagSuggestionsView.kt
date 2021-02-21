@@ -1,7 +1,8 @@
-package com.lukeneedham.vocabdrill.presentation.feature.tag
+package com.lukeneedham.vocabdrill.presentation.feature.tag.suggestion
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.FrameLayout
@@ -12,7 +13,6 @@ import com.lukeneedham.flowerpotrecycler.adapter.config.SingleTypeAdapterConfig
 import com.lukeneedham.flowerpotrecycler.util.extensions.addItemLayoutParams
 import com.lukeneedham.flowerpotrecycler.util.extensions.addOnItemClickListener
 import com.lukeneedham.vocabdrill.R
-import com.lukeneedham.vocabdrill.domain.model.Tag
 import com.lukeneedham.vocabdrill.presentation.util.extension.inflateFrom
 import kotlinx.android.synthetic.main.view_tag_suggestions_pop_up.view.*
 
@@ -20,16 +20,17 @@ class TagSuggestionsView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr) {
 
-    private val adapter = SingleTypeRecyclerAdapterCreator.fromRecyclerItemView<TagSuggestionItem, TagSuggestionView>(
-        SingleTypeAdapterConfig<TagSuggestionItem, TagSuggestionView>().apply {
-            addItemLayoutParams(RecyclerView.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
-            addOnItemClickListener { item, _, _ ->
-                onSuggestionClickListener(item)
+    private val adapter =
+        SingleTypeRecyclerAdapterCreator.fromRecyclerItemView<TagSuggestion, TagSuggestionItemView>(
+            SingleTypeAdapterConfig<TagSuggestion, TagSuggestionItemView>().apply {
+                addItemLayoutParams(RecyclerView.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
+                addOnItemClickListener { item, _, _ ->
+                    onSuggestionClickListener(item)
+                }
             }
-        }
-    )
+        )
 
-    lateinit var onSuggestionClickListener: (TagSuggestionItem) -> Unit
+    lateinit var onSuggestionClickListener: (TagSuggestion) -> Unit
 
     init {
         inflateFrom(R.layout.view_tag_suggestions_pop_up)
@@ -39,7 +40,8 @@ class TagSuggestionsView @JvmOverloads constructor(
         }
     }
 
-    fun setTags(tags: List<TagSuggestionItem>) {
+    fun setSuggestions(tags: List<TagSuggestion>) {
         adapter.submitList(tags)
+        noSuggestionsText.visibility = if (tags.isEmpty()) View.VISIBLE else View.GONE
     }
 }

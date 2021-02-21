@@ -2,16 +2,18 @@ package com.lukeneedham.vocabdrill.presentation.feature.language
 
 import com.lukeneedham.vocabdrill.domain.model.Tag
 import com.lukeneedham.vocabdrill.domain.model.VocabEntryAndTags
-import com.lukeneedham.vocabdrill.presentation.feature.tag.TagItem
+import com.lukeneedham.vocabdrill.presentation.feature.tag.TagPresentItem
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.FocusItem
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.InteractionSection
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.ViewMode
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryEditItem
 import com.lukeneedham.vocabdrill.presentation.util.TextSelection
+import com.lukeneedham.vocabdrill.usecase.ChooseTextColourForBackground
 
-/** Responsible for providing the [VocabEntryEditItem]s to be shown */
+/** Responsible for providing the [VocabEntryEditItem]s to be shown, and managing their state */
 class VocabEntryEditItemsHandler(
     private val languageId: Long,
+    private val chooseTextColourForBackground: ChooseTextColourForBackground,
     private val onItemsChangeListener: (items: List<VocabEntryEditItem>) -> Unit
 ) {
     private val existingItems: MutableList<VocabEntryEditPartialItem.Existing> = mutableListOf()
@@ -49,8 +51,8 @@ class VocabEntryEditItemsHandler(
         val focus = when (section) {
             InteractionSection.WordAInput -> FocusItem.WordA(selectionOrDefault)
             InteractionSection.WordBInput -> FocusItem.WordB(selectionOrDefault)
-            // TODO: We need a section for tag name input
-            InteractionSection.Other -> FocusItem.WordA(TextSelection.End)
+            // TODO: We need a section for tag name input? Maybe?
+            InteractionSection.Other -> FocusItem.None
         }
         selectedItem = SelectedVocabEntry.Create(focus)
         notifyNewItems()
@@ -65,6 +67,11 @@ class VocabEntryEditItemsHandler(
     fun focusCreateItem() {
         val focus = FocusItem.WordA(TextSelection.End)
         selectedItem = SelectedVocabEntry.Create(focus)
+        notifyNewItems()
+    }
+
+    fun focusExistingItem(entryId: Long) {
+        selectedItem = SelectedVocabEntry.Existing(entryId, FocusItem.None)
         notifyNewItems()
     }
 
@@ -128,11 +135,11 @@ class VocabEntryEditItemsHandler(
             ViewMode.Inactive
         }
 
-        val existingTagItems = it.entryAndTags.tags.map { TagItem.Existing(it) }
+        val existingTagItems = it.entryAndTags.tags.map { createExistingTagItem(it) }
         val allTagItems = if (viewMode is ViewMode.Inactive) {
             existingTagItems
         } else {
-            existingTagItems + TagItem.Create
+            existingTagItems + TagPresentItem.Create
         }
 
         VocabEntryEditItem.Existing(entry, allTagItems, viewMode)
@@ -147,10 +154,8 @@ class VocabEntryEditItemsHandler(
             ViewMode.Inactive
         }
 
-        val existingTagItems = createItem.tags.map {
-            TagItem.Existing(it)
-        }
-        val allTagItems = existingTagItems + TagItem.Create
+        val existingTagItems = createItem.tags.map { createExistingTagItem(it) }
+        val allTagItems = existingTagItems + TagPresentItem.Create
 
         return VocabEntryEditItem.Create(
             createItem.languageId,
@@ -212,6 +217,11 @@ class VocabEntryEditItemsHandler(
 
     private fun createVocabEntryOrCreateFromEntry(entryAndTags: VocabEntryAndTags) =
         VocabEntryEditPartialItem.Existing(entryAndTags)
+
+    private fun createExistingTagItem(tag: Tag): TagPresentItem.Existing {
+        val textColor = chooseTextColourForBackground(tag.color)
+        return TagPresentItem.Existing(tag, textColor)
+    }
 
     private fun getViewModeForEntryId(id: Long): ViewMode {
         val selectedItem = selectedItem

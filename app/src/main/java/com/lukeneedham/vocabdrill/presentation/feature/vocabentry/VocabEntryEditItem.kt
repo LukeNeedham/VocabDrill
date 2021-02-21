@@ -1,19 +1,20 @@
 package com.lukeneedham.vocabdrill.presentation.feature.vocabentry
 
 import com.lukeneedham.vocabdrill.domain.model.VocabEntry
-import com.lukeneedham.vocabdrill.domain.model.VocabEntryAndTags
-import com.lukeneedham.vocabdrill.presentation.feature.tag.TagItem
+import com.lukeneedham.vocabdrill.presentation.feature.tag.TagPresentItem
 
 sealed class VocabEntryEditItem {
+    abstract val tagItems: List<TagPresentItem>
+
     data class Existing(
         val entry: VocabEntry,
-        val tagItems: List<TagItem>,
+        override val tagItems: List<TagPresentItem>,
         val viewMode: ViewMode
     ) : VocabEntryEditItem()
 
     data class Create(
         val languageId: Long,
-        val tags: List<TagItem>,
+        override val tagItems: List<TagPresentItem>,
         val wordA: String?,
         val wordB: String?,
         val viewMode: ViewMode

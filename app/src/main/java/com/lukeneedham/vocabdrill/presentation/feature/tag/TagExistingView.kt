@@ -11,7 +11,7 @@ import kotlinx.android.synthetic.main.view_tag_existing.view.*
 
 class TagExistingView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : FrameLayout(context, attrs, defStyleAttr), RecyclerItemView<TagItem.Existing> {
+) : FrameLayout(context, attrs, defStyleAttr), RecyclerItemView<TagPresentItem.Existing> {
     private val background = shapeDrawable {
         cornerRadius = context.resources.getDimension(R.dimen.tag_item_corner_radius)
     }
@@ -20,10 +20,11 @@ class TagExistingView @JvmOverloads constructor(
         inflateFrom(R.layout.view_tag_existing)
     }
 
-    override fun setItem(position: Int, item: TagItem.Existing) {
+    override fun setItem(position: Int, item: TagPresentItem.Existing) {
         val data = item.data
         background.setColor(data.color)
         bubble.background = background
         nameView.text = data.name
+        nameView.setTextColor(item.textColor)
     }
 }

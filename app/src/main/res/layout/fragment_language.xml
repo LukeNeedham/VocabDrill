@@ -35,6 +35,7 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
+        android:descendantFocusability="beforeDescendants"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="20dp"
@@ -72,7 +73,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:tint="@android:color/white" />
 
-    <com.lukeneedham.vocabdrill.presentation.feature.tag.TagSuggestionsView
+    <com.lukeneedham.vocabdrill.presentation.feature.tag.suggestion.TagSuggestionsView
         android:id="@+id/tagSuggestionsView"
         android:layout_width="@dimen/tag_suggestions_view_width"
         android:layout_height="wrap_content"

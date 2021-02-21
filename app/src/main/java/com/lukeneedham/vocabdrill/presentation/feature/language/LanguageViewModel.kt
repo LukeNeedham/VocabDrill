@@ -2,8 +2,8 @@ package com.lukeneedham.vocabdrill.presentation.feature.language
 
 import androidx.lifecycle.MutableLiveData
 import com.lukeneedham.vocabdrill.domain.model.*
-import com.lukeneedham.vocabdrill.presentation.feature.tag.TagItem
-import com.lukeneedham.vocabdrill.presentation.feature.tag.TagSuggestionItem
+import com.lukeneedham.vocabdrill.presentation.feature.tag.TagPresentItem
+import com.lukeneedham.vocabdrill.presentation.feature.tag.suggestion.TagSuggestion
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.InteractionSection
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.ViewMode
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryEditItem
@@ -11,6 +11,7 @@ import com.lukeneedham.vocabdrill.presentation.util.DisposingViewModel
 import com.lukeneedham.vocabdrill.presentation.util.TextSelection
 import com.lukeneedham.vocabdrill.presentation.util.extension.toLiveData
 import com.lukeneedham.vocabdrill.usecase.*
+import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.plusAssign
 
 class LanguageViewModel(
@@ -25,8 +26,11 @@ class LanguageViewModel(
     private val calculateColorForNewTag: CalculateColorForNewTag,
     private val findTagNameMatches: FindTagNameMatches,
     private val deleteTagFromVocabEntry: DeleteTagFromVocabEntry,
-    private val deleteUnusedTags: DeleteUnusedTags
+    private val deleteUnusedTags: DeleteUnusedTags,
+    private val chooseTextColourForBackground: ChooseTextColourForBackground
 ) : DisposingViewModel() {
+
+    private var findTagNameMatchesDisposable: Disposable? = null
 
     private val languageNameMutableLiveData = MutableLiveData<String>()
     val languageNameLiveData = languageNameMutableLiveData.toLiveData()
@@ -37,12 +41,13 @@ class LanguageViewModel(
     private val vocabEntriesOrCreateMutableLiveData = MutableLiveData<List<VocabEntryEditItem>>()
     val vocabEntriesOrCreateLiveData = vocabEntriesOrCreateMutableLiveData.toLiveData()
 
-    private val tagSuggestionsMutableLiveData = MutableLiveData<List<TagSuggestionItem>>()
+    private val tagSuggestionsMutableLiveData = MutableLiveData<List<TagSuggestion>>()
     val tagSuggestionsLiveData = tagSuggestionsMutableLiveData.toLiveData()
 
-    private val itemStateHandler = VocabEntryEditItemsHandler(languageId) {
-        vocabEntriesOrCreateMutableLiveData.value = it
-    }
+    private val itemStateHandler =
+        VocabEntryEditItemsHandler(languageId, chooseTextColourForBackground) {
+            vocabEntriesOrCreateMutableLiveData.value = it
+        }
 
     init {
         /*
@@ -109,7 +114,7 @@ class LanguageViewModel(
         itemStateHandler.onViewModeChanged(item, viewMode)
     }
 
-    fun addTagToVocabEntry(entryItem: VocabEntryEditItem, tagItem: TagSuggestionItem) {
+    fun addTagToVocabEntry(entryItem: VocabEntryEditItem, tagItem: TagSuggestion) {
 
         fun addExistingTag(tag: Tag) {
             when (entryItem) {
@@ -122,11 +127,20 @@ class LanguageViewModel(
             }
         }
 
+        val exhaustive = when(entryItem) {
+            is VocabEntryEditItem.Existing -> {
+                itemStateHandler.focusExistingItem(entryItem.entry.id)
+            }
+            is VocabEntryEditItem.Create -> {
+                itemStateHandler.focusCreateItem()
+            }
+        }
+
         when (tagItem) {
-            is TagSuggestionItem.Existing -> {
+            is TagSuggestion.Existing -> {
                 addExistingTag(tagItem.data)
             }
-            is TagSuggestionItem.Create -> {
+            is TagSuggestion.Create -> {
                 val proto = TagProto(tagItem.name, tagItem.color, languageId)
                 addNewTag(proto).subscribe { tag ->
                     addExistingTag(tag)
@@ -135,7 +149,7 @@ class LanguageViewModel(
         }
     }
 
-    fun deleteTagFromVocabEntry(entryItem: VocabEntryEditItem, tagItem: TagItem.Existing) {
+    fun deleteTagFromVocabEntry(entryItem: VocabEntryEditItem, tagItem: TagPresentItem.Existing) {
         when (entryItem) {
             is VocabEntryEditItem.Create -> {
                 itemStateHandler.onCreateItemTagRemoved(tagItem.data)
@@ -151,18 +165,36 @@ class LanguageViewModel(
     }
 
     fun requestTagMatches(entryItem: VocabEntryEditItem, tagName: String) {
-        disposables += findTagNameMatches(languageId, tagName).subscribe { tags ->
-            val existingTagItems = tags.map { TagSuggestionItem.Existing(entryItem, it) }
-            if (tags.any { it.name == tagName }) {
-                tagSuggestionsMutableLiveData.value = existingTagItems
-            } else {
-                disposables += calculateColorForNewTag(languageId).subscribe { color ->
-                    val newTag = TagSuggestionItem.Create(entryItem, tagName, color)
-                    val allTags = listOf(newTag) + existingTagItems
-                    tagSuggestionsMutableLiveData.value = allTags
+        // TODO: Filter out duplicates
+        findTagNameMatchesDisposable?.dispose()
+        val tagIdsAlreadyPresent =
+            entryItem.tagItems.filterIsInstance<TagPresentItem.Existing>().map { it.data.id }
+        val findTagNameMatchesDisposable =
+            findTagNameMatches(languageId, tagName).subscribe { tags ->
+                val tagItems = tags.map {
+                    TagSuggestion.Existing(it, chooseTextColourForBackground(it.color))
+                }
+                val nonDuplicateTagItems = tagItems.toMutableList().apply {
+                    removeAll { it.data.id in tagIdsAlreadyPresent }
+                }.toList()
+                val showNewTag = tagName.isNotBlank() && tags.none { it.name == tagName }
+                if (!showNewTag) {
+                    tagSuggestionsMutableLiveData.value = nonDuplicateTagItems
+                } else {
+                    // Current tag name doesn't currently exist - show it as a new suggestion
+                    disposables += calculateColorForNewTag(languageId).subscribe { color ->
+                        val newTag = TagSuggestion.Create(
+                            tagName,
+                            color,
+                            chooseTextColourForBackground(color)
+                        )
+                        val allTags = listOf(newTag) + nonDuplicateTagItems
+                        tagSuggestionsMutableLiveData.value = allTags
+                    }
                 }
             }
-        }
+        this.findTagNameMatchesDisposable = findTagNameMatchesDisposable
+        disposables += findTagNameMatchesDisposable
     }
 
     /** Perform the batched saves of changes to existing items */
@@ -173,8 +205,8 @@ class LanguageViewModel(
         }
     }
 
-    private fun getCreateItemTagIds(): List<Long> = itemStateHandler.getCreateEditItem().tags
-        .filterIsInstance<TagItem.Existing>()
+    private fun getCreateItemTagIds(): List<Long> = itemStateHandler.getCreateEditItem().tagItems
+        .filterIsInstance<TagPresentItem.Existing>()
         .map { it.data.id }
 
     /** Delete all unused tags, except the ones referenced by the create item */

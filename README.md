@@ -1,3 +1,6 @@
+#TODO
+There is a bug with adding tags - sometimes they are added to the wrong item
+
 # Architecture
 
 This project follows MVVM with Android Jetpack.

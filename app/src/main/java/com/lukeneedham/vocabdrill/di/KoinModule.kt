@@ -19,6 +19,7 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
+import org.koin.core.scope.Scope
 import org.koin.dsl.module
 
 object KoinModule {
@@ -73,7 +74,6 @@ object KoinModule {
         single { ChooseTextColourForBackground() }
         single { CalculateRelatedColours() }
         single { EstimateColourDistance() }
-        single { CalculateColourScheme(get()) }
 
         /* Tag */
         single { AddTagToVocabEntry(get()) }
@@ -95,6 +95,7 @@ object KoinModule {
         viewModel { (languageId: Long) ->
             LanguageViewModel(
                 languageId,
+                get(),
                 get(),
                 get(),
                 get(),

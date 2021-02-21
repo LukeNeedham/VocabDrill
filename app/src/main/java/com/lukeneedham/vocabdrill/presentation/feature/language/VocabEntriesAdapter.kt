@@ -13,7 +13,7 @@ import com.lukeneedham.flowerpotrecycler.adapter.itemtype.config.ItemTypeConfigL
 import com.lukeneedham.flowerpotrecycler.util.ItemTypeConfigCreator
 import com.lukeneedham.flowerpotrecycler.util.extensions.addItemLayoutParams
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagCreateCallback
-import com.lukeneedham.vocabdrill.presentation.feature.tag.TagItem
+import com.lukeneedham.vocabdrill.presentation.feature.tag.TagPresentItem
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryEditItem
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.create.VocabEntryCreateCallback
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.create.VocabEntryCreateItemView
@@ -24,7 +24,7 @@ class VocabEntriesAdapter(
     vocabEntryExistingCallback: VocabEntryExistingCallback,
     vocabEntryCreateCallback: VocabEntryCreateCallback,
     tagCreateCallback: TagCreateCallback,
-    tagExistingClickListener: (entryItem: VocabEntryEditItem, tag: TagItem.Existing) -> Unit
+    tagExistingClickListener: (entryItem: VocabEntryEditItem, tag: TagPresentItem.Existing) -> Unit
 ) : DelegatedRecyclerAdapter<VocabEntryEditItem, View>() {
 
     override val positionDelegate = LinearPositionDelegate(this, diffCallback)

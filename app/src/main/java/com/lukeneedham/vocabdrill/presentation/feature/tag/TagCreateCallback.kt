@@ -4,10 +4,18 @@ import android.view.View
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryEditItem
 
 interface TagCreateCallback {
+    fun onFocusChange(
+        entry: VocabEntryEditItem,
+        name: String,
+        nameInputView: View,
+        hasFocus: Boolean
+    )
+
     fun onNameChanged(
         entry: VocabEntryEditItem,
-        tag: TagItem.Create,
         name: String,
         nameInputView: View
     )
+
+    fun onBound(entry: VocabEntryEditItem)
 }

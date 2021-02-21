@@ -11,29 +11,30 @@ import com.lukeneedham.flowerpotrecycler.adapter.itemtype.config.ItemTypeConfigL
 import com.lukeneedham.flowerpotrecycler.util.ItemTypeConfigCreator
 import com.lukeneedham.flowerpotrecycler.util.extensions.addOnItemClickListener
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagCreateView
+import com.lukeneedham.vocabdrill.presentation.feature.tag.TagCreateViewCallback
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagExistingView
-import com.lukeneedham.vocabdrill.presentation.feature.tag.TagItem
+import com.lukeneedham.vocabdrill.presentation.feature.tag.TagPresentItem
 import com.lukeneedham.vocabdrill.util.extension.TAG
 
 /** Requires use of flexbox layout manager */
 class TagsAdapter(
     context: Context,
-    onExistingTagClick: (TagItem.Existing) -> Unit,
-    onCreateTagNameChanged: ((tag: TagItem.Create, name: String, nameInputView: View) -> Unit),
-) : DefaultDelegatedRecyclerAdapter<TagItem, View>() {
+    onExistingTagClick: (TagPresentItem.Existing) -> Unit,
+    tagCreateViewCallback: TagCreateViewCallback,
+) : DefaultDelegatedRecyclerAdapter<TagPresentItem, View>() {
 
     private var itemHeight: Int = 0
 
-    override val itemTypeConfigRegistry = ItemTypeConfigListRegistry<TagItem, View>(
+    override val itemTypeConfigRegistry = ItemTypeConfigListRegistry<TagPresentItem, View>(
         listOf(
             ItemTypeConfigCreator.fromBuilderBinder(
                 RecyclerItemViewBuilderBinder.newInstance {
                     TagCreateView(context).apply {
-                        this.onNameChanged = onCreateTagNameChanged
+                        this.callback = tagCreateViewCallback
                     }
                 }
             ),
-            ItemTypeConfigCreator.fromRecyclerItemView<TagItem.Existing, TagExistingView> {
+            ItemTypeConfigCreator.fromRecyclerItemView<TagPresentItem.Existing, TagExistingView> {
                 addOnItemClickListener { tag, _, _ -> onExistingTagClick(tag) }
             }
         )
