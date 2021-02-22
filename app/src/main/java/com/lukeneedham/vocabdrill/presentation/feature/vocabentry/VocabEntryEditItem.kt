@@ -6,23 +6,25 @@ import com.lukeneedham.vocabdrill.presentation.feature.tag.TagPresentItem
 sealed class VocabEntryEditItem {
     abstract val tagItems: List<TagPresentItem>
 
+    /** @return whether [other] represents the same item as this */
+    abstract fun isSameItem(other: VocabEntryEditItem): Boolean
+
     data class Existing(
         val entry: VocabEntry,
-        override val tagItems: List<TagPresentItem>,
-        val viewMode: ViewMode
-    ) : VocabEntryEditItem()
+        override val tagItems: List<TagPresentItem>
+    ) : VocabEntryEditItem() {
+
+        override fun isSameItem(other: VocabEntryEditItem) =
+            other is Existing && this.entry.id == other.entry.id
+    }
 
     data class Create(
         val languageId: Long,
         override val tagItems: List<TagPresentItem>,
         val wordA: String?,
-        val wordB: String?,
-        val viewMode: ViewMode
+        val wordB: String?
     ) : VocabEntryEditItem() {
 
-        companion object {
-            fun newInstance(languageId: Long) =
-                Create(languageId, emptyList(), null, null, ViewMode.Inactive)
-        }
+        override fun isSameItem(other: VocabEntryEditItem) = other is Create
     }
 }

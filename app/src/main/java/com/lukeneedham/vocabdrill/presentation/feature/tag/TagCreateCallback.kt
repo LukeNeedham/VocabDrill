@@ -16,6 +16,4 @@ interface TagCreateCallback {
         name: String,
         nameInputView: View
     )
-
-    fun onBound(entry: VocabEntryEditItem)
 }

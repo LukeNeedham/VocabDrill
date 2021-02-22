@@ -7,6 +7,7 @@ import com.lukeneedham.vocabdrill.presentation.feature.tag.suggestion.TagSuggest
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.InteractionSection
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.ViewMode
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryEditItem
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryViewProps
 import com.lukeneedham.vocabdrill.presentation.util.DisposingViewModel
 import com.lukeneedham.vocabdrill.presentation.util.TextSelection
 import com.lukeneedham.vocabdrill.presentation.util.extension.toLiveData
@@ -38,16 +39,12 @@ class LanguageViewModel(
     private val countryMutableLiveData = MutableLiveData<Country>()
     val countryLiveData = countryMutableLiveData.toLiveData()
 
-    private val vocabEntriesOrCreateMutableLiveData = MutableLiveData<List<VocabEntryEditItem>>()
+    private val vocabEntriesOrCreateMutableLiveData = MutableLiveData<List<VocabEntryViewProps>>()
     val vocabEntriesOrCreateLiveData = vocabEntriesOrCreateMutableLiveData.toLiveData()
 
-    private val tagSuggestionsMutableLiveData = MutableLiveData<List<TagSuggestion>>()
-    val tagSuggestionsLiveData = tagSuggestionsMutableLiveData.toLiveData()
-
-    private val itemStateHandler =
-        VocabEntryEditItemsHandler(languageId, chooseTextColourForBackground) {
-            vocabEntriesOrCreateMutableLiveData.value = it
-        }
+    private val entryReduxer = VocabEntryReduxer(languageId, chooseTextColourForBackground) {
+        vocabEntriesOrCreateMutableLiveData.value = it
+    }
 
     init {
         /*
@@ -63,25 +60,25 @@ class LanguageViewModel(
         }
 
         disposables += observeAllVocabEntryAndTagsForLanguage(languageId).subscribe {
-            itemStateHandler.submitExistingItems(it)
+            entryReduxer.submitExistingItems(it)
         }
     }
 
     fun onCreateItemWordAChanged(newWordA: String, selection: TextSelection) {
-        itemStateHandler.onCreateItemWordAChanged(newWordA, selection)
+        entryReduxer.onCreateItemWordAChanged(newWordA, selection)
     }
 
     fun onCreateItemWordBChanged(newWordB: String, selection: TextSelection) {
-        itemStateHandler.onCreateItemWordBChanged(newWordB, selection)
+        entryReduxer.onCreateItemWordBChanged(newWordB, selection)
     }
 
     fun onCreateItemInteraction(section: InteractionSection, selection: TextSelection?) {
-        itemStateHandler.selectCreateItem(section, selection)
+        entryReduxer.selectCreateItem(section, selection)
     }
 
     fun addEntry(proto: VocabEntryProto) {
         val ignored = addVocabEntry(proto).subscribe {
-            itemStateHandler.onCreateItemSaved()
+            entryReduxer.onCreateItemSaved()
         }
     }
 
@@ -92,11 +89,11 @@ class LanguageViewModel(
     }
 
     fun onExistingItemWordAChanged(entryId: Long, newWordA: String, selection: TextSelection) {
-        itemStateHandler.onExistingItemWordAChanged(entryId, newWordA, selection)
+        entryReduxer.onExistingItemWordAChanged(entryId, newWordA, selection)
     }
 
     fun onExistingItemWordBChanged(entryId: Long, newWordB: String, selection: TextSelection) {
-        itemStateHandler.onExistingItemWordBChanged(entryId, newWordB, selection)
+        entryReduxer.onExistingItemWordBChanged(entryId, newWordB, selection)
     }
 
     fun getLearnSet(): LearnSet {
@@ -107,11 +104,11 @@ class LanguageViewModel(
     }
 
     fun focusCreateItem() {
-        itemStateHandler.focusCreateItem()
+        entryReduxer.focusCreateItem()
     }
 
     fun onViewModeChanged(item: VocabEntryEditItem, viewMode: ViewMode) {
-        itemStateHandler.onViewModeChanged(item, viewMode)
+        entryReduxer.onViewModeChanged(item, viewMode)
     }
 
     fun addTagToVocabEntry(entryItem: VocabEntryEditItem, tagItem: TagSuggestion) {
@@ -119,7 +116,7 @@ class LanguageViewModel(
         fun addExistingTag(tag: Tag) {
             when (entryItem) {
                 is VocabEntryEditItem.Create -> {
-                    itemStateHandler.onCreateItemTagAdded(tag)
+                    entryReduxer.onCreateItemTagAdded(tag)
                 }
                 is VocabEntryEditItem.Existing -> {
                     val ignored = addTagToVocabEntry(entryItem.entry.id, tag.id).subscribe()
@@ -127,12 +124,12 @@ class LanguageViewModel(
             }
         }
 
-        val exhaustive = when(entryItem) {
+        val exhaustive = when (entryItem) {
             is VocabEntryEditItem.Existing -> {
-                itemStateHandler.focusExistingItem(entryItem.entry.id)
+                entryReduxer.focusExistingItem(entryItem.entry.id)
             }
             is VocabEntryEditItem.Create -> {
-                itemStateHandler.focusCreateItem()
+                entryReduxer.focusCreateItem()
             }
         }
 
@@ -152,7 +149,7 @@ class LanguageViewModel(
     fun deleteTagFromVocabEntry(entryItem: VocabEntryEditItem, tagItem: TagPresentItem.Existing) {
         when (entryItem) {
             is VocabEntryEditItem.Create -> {
-                itemStateHandler.onCreateItemTagRemoved(tagItem.data)
+                entryReduxer.onCreateItemTagRemoved(tagItem.data)
                 deleteUnusedTagsExceptCreate()
             }
             is VocabEntryEditItem.Existing -> {
@@ -165,7 +162,10 @@ class LanguageViewModel(
     }
 
     fun requestTagMatches(entryItem: VocabEntryEditItem, tagName: String) {
-        // TODO: Filter out duplicates
+        fun updateTagSuggestionResult(suggestions: List<TagSuggestion>) {
+            entryReduxer.setTagSuggestionsResult(TagSuggestionResult(entryItem, suggestions))
+        }
+
         findTagNameMatchesDisposable?.dispose()
         val tagIdsAlreadyPresent =
             entryItem.tagItems.filterIsInstance<TagPresentItem.Existing>().map { it.data.id }
@@ -179,7 +179,7 @@ class LanguageViewModel(
                 }.toList()
                 val showNewTag = tagName.isNotBlank() && tags.none { it.name == tagName }
                 if (!showNewTag) {
-                    tagSuggestionsMutableLiveData.value = nonDuplicateTagItems
+                    updateTagSuggestionResult(nonDuplicateTagItems)
                 } else {
                     // Current tag name doesn't currently exist - show it as a new suggestion
                     disposables += calculateColorForNewTag(languageId).subscribe { color ->
@@ -189,7 +189,7 @@ class LanguageViewModel(
                             chooseTextColourForBackground(color)
                         )
                         val allTags = listOf(newTag) + nonDuplicateTagItems
-                        tagSuggestionsMutableLiveData.value = allTags
+                        updateTagSuggestionResult(allTags)
                     }
                 }
             }
@@ -199,13 +199,13 @@ class LanguageViewModel(
 
     /** Perform the batched saves of changes to existing items */
     fun saveDataChanges() {
-        val existingItems = itemStateHandler.getExistingEditItems()
+        val existingItems = entryReduxer.getExistingEditItems()
         existingItems.forEach {
             val ignored = updateVocabEntry(it.entry).subscribe()
         }
     }
 
-    private fun getCreateItemTagIds(): List<Long> = itemStateHandler.getCreateEditItem().tagItems
+    private fun getCreateItemTagIds(): List<Long> = entryReduxer.getCreateEditItem().tagItems
         .filterIsInstance<TagPresentItem.Existing>()
         .map { it.data.id }
 

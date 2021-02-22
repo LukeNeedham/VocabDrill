@@ -106,19 +106,6 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
      */
     private var focusCreateItemQueued: Boolean = false
 
-    /**
-     * Has value true when the suggestions view is awaiting to be hidden.
-     * It will be hidden as soon as it is 'safe' to do so -
-     * if this view is hidden, and focus lost,
-     * the OS may try to give focus to a view in a different item.
-     * So the view can only be hidden after the new focus is manually handled,
-     * and then this flag is considered resolved
-     */
-    // TODO: maybe remove
-    private var hideSuggestionsViewQueued: Boolean = false
-
-    private var createTagNameInputViewLayoutListener: () -> Unit = {}
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupView()
@@ -127,23 +114,13 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         viewModel.vocabEntriesOrCreateLiveData.observe(viewLifecycleOwner) {
-            vocabEntriesAdapter.submitList(it) {
-//                recyclerView.post {
-//                    if (hideSuggestionsViewQueued) {
-//                        hideSuggestionsViewQueued = false
-//                        tagSuggestionsView.visibility = View.GONE
-//                    }
-//                }
-            }
+            vocabEntriesAdapter.submitList(it)
         }
         viewModel.languageNameLiveData.observe(viewLifecycleOwner) {
             titleView.text = it
         }
         viewModel.countryLiveData.observe(viewLifecycleOwner) {
             settingsButton.setImageDrawable(it.getFlagDrawable(requireContext()))
-        }
-        viewModel.tagSuggestionsLiveData.observe(viewLifecycleOwner) {
-            tagSuggestionsView?.setSuggestions(it)
         }
     }
 
@@ -173,9 +150,6 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
                         viewModel.focusCreateItem()
                     }
                 }
-
-                // Update tag name suggestions view
-                createTagNameInputViewLayoutListener()
 
                 // Button scale
                 val fabScale = if (scrollPercent < MIN_SCROLL_PERCENT_TO_HIDE_ADD_BUTTON) {
@@ -238,12 +212,6 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
     }
 
     private fun newTagCreateCallback() = object : TagCreateCallback {
-        override fun onBound(entry: VocabEntryEditItem) {
-            tagSuggestionsView.onSuggestionClickListener = { suggestion ->
-                hideSuggestionsViewQueued = true
-                viewModel.addTagToVocabEntry(entry, suggestion)
-            }
-        }
 
         override fun onFocusChange(
             entry: VocabEntryEditItem,
@@ -252,12 +220,15 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
             hasFocus: Boolean
         ) {
             if (hasFocus) {
+//                tagSuggestionsView.onSuggestionClickListener = { suggestion ->
+//                    viewModel.addTagToVocabEntry(entry, suggestion)
+//                    tagSuggestionsView.visibility = View.GONE
+//                }
+
                 viewModel.requestTagMatches(entry, name)
-                updateSuggestionsViewPosition(nameInputView)
-                tagSuggestionsView.visibility = View.VISIBLE
+                //tagSuggestionsView.visibility = View.VISIBLE
             } else {
-                // TODO: Give focus to a view in the same item view
-                tagSuggestionsView.visibility = View.GONE
+                //tagSuggestionsView.visibility = View.GONE
             }
         }
 
@@ -267,26 +238,6 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
             nameInputView: View
         ) {
             viewModel.requestTagMatches(entry, name)
-
-            nameInputView.doOnNextLayout {
-                updateSuggestionsViewPosition(nameInputView)
-            }
-            createTagNameInputViewLayoutListener = { updateSuggestionsViewPosition(nameInputView) }
-        }
-    }
-
-    private fun updateSuggestionsViewPosition(nameInputView: View) {
-        tagSuggestionsView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-            val nameInputViewPosition =
-                nameInputView.getLocationInDisplayFrame(requireActivity())
-            val nameInputWidth = nameInputView.width
-            val popupSideMargin =
-                resources.getDimensionPixelSize(R.dimen.tag_suggestions_view_input_margin)
-            val popupWidth = nameInputWidth + (2 * popupSideMargin)
-
-            width = popupWidth
-            leftMargin = max(0, nameInputViewPosition.x - popupSideMargin)
-            topMargin = nameInputViewPosition.y + nameInputView.height
         }
     }
 

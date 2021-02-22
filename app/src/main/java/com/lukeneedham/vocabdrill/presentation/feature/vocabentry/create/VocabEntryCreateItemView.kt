@@ -26,13 +26,12 @@ import kotlinx.android.synthetic.main.view_item_vocab_entry_create.view.*
 import kotlinx.android.synthetic.main.view_item_vocab_entry_create.view.tagsRecycler
 import kotlinx.android.synthetic.main.view_item_vocab_entry_create.view.wordAInputView
 import kotlinx.android.synthetic.main.view_item_vocab_entry_create.view.wordBInputView
-import kotlinx.android.synthetic.main.view_item_vocab_entry_existing.view.*
 import org.koin.core.KoinComponent
 
 class VocabEntryCreateItemView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr),
-    RecyclerItemView<VocabEntryEditItem.Create>,
+    RecyclerItemView<VocabEntryCreateProps>,
     KoinComponent {
 
     private val tagCreateViewCallback = object : TagCreateViewCallback {
@@ -63,10 +62,10 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
         tagsRecycler.adapter = tagsAdapter
     }
 
-    override fun setItem(position: Int, item: VocabEntryEditItem.Create) {
-        requireTagCreateCallback().onBound(item)
-        this.entryItem = item
-        setupTextWatchers(item)
+    override fun setItem(position: Int, item: VocabEntryCreateProps) {
+        val entryItem = item.entryItem
+        this.entryItem = entryItem
+        setupTextWatchers(entryItem)
         setupTextFocus(item)
         refreshSaveButtonEnabled()
 
@@ -76,11 +75,11 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
             val tags = tagsAdapter.positionDelegate.getItems()
                 .filterIsInstance<TagPresentItem.Existing>()
                 .map { it.data }
-            val proto = VocabEntryProto(wordA, wordB, item.languageId, tags)
+            val proto = VocabEntryProto(wordA, wordB, entryItem.languageId, tags)
             requireEntryCallback().save(proto)
         }
 
-        tagsAdapter.submitList(item.tagItems)
+        tagsAdapter.submitList(entryItem.tagItems)
     }
 
     private fun setupTextWatchers(item: VocabEntryEditItem.Create) {
@@ -104,11 +103,11 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
         wordBInputView.addTextChangedListener(wordBTextWatcher)
     }
 
-    private fun setupTextFocus(item: VocabEntryEditItem.Create) {
+    private fun setupTextFocus(props: VocabEntryCreateProps) {
         wordAInputView.setOnFocusChangeListener { _, _ -> }
         wordBInputView.setOnFocusChangeListener { _, _ -> }
 
-        val viewMode = item.viewMode
+        val viewMode = props.viewMode
         if (viewMode is ViewMode.Active) {
             val focus = viewMode.focusItem
             when (focus) {

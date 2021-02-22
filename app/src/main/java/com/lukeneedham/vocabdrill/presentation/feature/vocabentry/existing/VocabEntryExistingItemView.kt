@@ -19,10 +19,7 @@ import com.lukeneedham.vocabdrill.R
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagCreateCallback
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagCreateViewCallback
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagPresentItem
-import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.FocusItem
-import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.TagsAdapter
-import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.ViewMode
-import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryEditItem
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.*
 import com.lukeneedham.vocabdrill.presentation.util.BaseTextWatcher
 import com.lukeneedham.vocabdrill.presentation.util.TextSelection
 import com.lukeneedham.vocabdrill.presentation.util.extension.getSelection
@@ -35,12 +32,12 @@ import kotlinx.android.synthetic.main.view_item_vocab_entry_existing.view.*
 class VocabEntryExistingItemView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr),
-    RecyclerItemView<VocabEntryEditItem.Existing> {
+    RecyclerItemView<VocabEntryExistingProps> {
 
     private val tagCreateViewCallback = object : TagCreateViewCallback {
         override fun onFocused(name: String, nameInputView: View, hasFocus: Boolean) {
             requireTagCreateCallback().onFocusChange(
-                requireEntryItem(),
+                requireProps().entryItem,
                 name,
                 nameInputView,
                 hasFocus
@@ -48,7 +45,7 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
         }
 
         override fun onNameChanged(name: String, nameInputView: View) {
-            requireTagCreateCallback().onNameChanged(requireEntryItem(), name, nameInputView)
+            requireTagCreateCallback().onNameChanged(requireProps().entryItem, name, nameInputView)
         }
     }
 
@@ -57,7 +54,7 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
 
     private var wordATextWatcher: TextWatcher? = null
     private var wordBTextWatcher: TextWatcher? = null
-    private var entryItem: VocabEntryEditItem.Existing? = null
+    private var props: VocabEntryExistingProps? = null
     private var viewMode: ViewMode? = null
 
     var vocabEntryExistingCallback: VocabEntryExistingCallback? = null
@@ -67,14 +64,14 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
 
     init {
         inflateFrom(R.layout.view_item_vocab_entry_existing)
-        tagsRecycler.layoutManager = tagsLayoutManager
         wordAInputViewLayout.setHintEnabledMaintainMargin(false)
         wordBInputViewLayout.setHintEnabledMaintainMargin(false)
 
+        tagsRecycler.layoutManager = tagsLayoutManager
         tagsRecycler.adapter = tagsAdapter
 
         deleteButton.setOnClickListener {
-            requireEntryCallback().onDelete(requireEntryItem())
+            requireEntryCallback().onDelete(requireProps().entryItem)
         }
 
         tagsRecycler.setOnTouchListener(RecyclerViewClickInterceptor())
@@ -88,14 +85,20 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
         chevronIconView.setOnClickListener { flipMode() }
     }
 
-    override fun setItem(position: Int, item: VocabEntryEditItem.Existing) {
-        requireTagCreateCallback().onBound(item)
-        this.entryItem = item
+    override fun setItem(position: Int, item: VocabEntryExistingProps) {
+        val editItem = item.entryItem
+        this.props = item
 
-        setupTextWatchers(item)
+        setupTextWatchers(editItem)
         setupTextFocus(item)
 
-        tagsAdapter.submitList(item.tagItems)
+        tagsAdapter.submitList(editItem.tagItems)
+        val addTagState = item.addTagState
+        val suggestions =
+            if (addTagState is AddTagState.InProgress) addTagState.tagSuggestions else emptyList()
+        tagSuggestionsView.setSuggestions(suggestions)
+        tagSuggestionsView.visibility =
+            if (addTagState is AddTagState.InProgress) View.VISIBLE else View.GONE
     }
 
     private fun setupTextWatchers(item: VocabEntryEditItem.Existing) {
@@ -132,7 +135,7 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
         wordBInputView.clearFocus()
     }
 
-    private fun setupTextFocus(item: VocabEntryEditItem.Existing) {
+    private fun setupTextFocus(item: VocabEntryExistingProps) {
         wordAInputView.setOnFocusChangeListener { _, _ -> }
         wordBInputView.setOnFocusChangeListener { _, _ -> }
 
@@ -149,11 +152,13 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
             clearAllFocus()
         }
 
+        val entry = item.entryItem
+
         wordAInputView.setOnFocusChangeListener { _, hasFocus ->
             if (hasFocus) {
                 wordAInputView.post {
                     requireEntryCallback().onViewModeChanged(
-                        item,
+                        entry,
                         ViewMode.Active(FocusItem.WordA(wordAInputView.getSelection()))
                     )
                 }
@@ -163,7 +168,7 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
             if (hasFocus) {
                 wordBInputView.post {
                     requireEntryCallback().onViewModeChanged(
-                        item,
+                        entry,
                         ViewMode.Active(FocusItem.WordB(wordBInputView.getSelection()))
                     )
                 }
@@ -172,10 +177,10 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
     }
 
     private fun flipMode() {
-        val item = requireEntryItem()
-        val viewMode = item.viewMode
+        val props = requireProps()
+        val viewMode = props.viewMode
         val newMode = getFlippedMode(viewMode)
-        requireEntryCallback().onViewModeChanged(item, newMode)
+        requireEntryCallback().onViewModeChanged(props.entryItem, newMode)
     }
 
     private fun setFocus(focusView: EditText, selection: TextSelection) {
@@ -220,14 +225,15 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
     }
 
     private fun onExistingTagClick(tag: TagPresentItem.Existing) {
-        tagExistingClickListener(requireEntryItem(), tag)
+        tagExistingClickListener(requireProps().entryItem, tag)
     }
 
-    private fun requireEntryItem() = entryItem ?: error("entryItem must be set")
+    private fun requireProps() = props ?: error("entryItem must be set")
 
     private fun requireEntryCallback() =
         vocabEntryExistingCallback ?: error("Existing entry callback must be set")
 
     private fun requireTagCreateCallback() =
         tagCreateCallback ?: error("Tag create callback must be set")
+
 }

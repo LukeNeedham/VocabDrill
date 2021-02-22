@@ -3,25 +3,30 @@ package com.lukeneedham.vocabdrill.presentation.feature.language
 import com.lukeneedham.vocabdrill.domain.model.Tag
 import com.lukeneedham.vocabdrill.domain.model.VocabEntryAndTags
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagPresentItem
-import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.FocusItem
-import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.InteractionSection
-import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.ViewMode
-import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryEditItem
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.*
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.create.VocabEntryCreateProps
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.existing.VocabEntryExistingProps
 import com.lukeneedham.vocabdrill.presentation.util.TextSelection
 import com.lukeneedham.vocabdrill.usecase.ChooseTextColourForBackground
 
 /** Responsible for providing the [VocabEntryEditItem]s to be shown, and managing their state */
-class VocabEntryEditItemsHandler(
+class VocabEntryReduxer(
     private val languageId: Long,
     private val chooseTextColourForBackground: ChooseTextColourForBackground,
-    private val onItemsChangeListener: (items: List<VocabEntryEditItem>) -> Unit
+    private val onItemsChangeListener: (items: List<VocabEntryViewProps>) -> Unit
 ) {
     private val existingItems: MutableList<VocabEntryEditPartialItem.Existing> = mutableListOf()
     private var createItem: VocabEntryEditPartialItem.Create = newCreateItem()
 
     private var selectedItem: SelectedVocabEntry = SelectedVocabEntry.None
+    private var tagSuggestionsResult: TagSuggestionResult? = null
 
     init {
+        notifyNewItems()
+    }
+
+    fun setTagSuggestionsResult(result: TagSuggestionResult) {
+        tagSuggestionsResult = result
         notifyNewItems()
     }
 
@@ -122,6 +127,8 @@ class VocabEntryEditItemsHandler(
         return existingEditItems + createEditItem
     }
 
+    fun getAllProps() = convertEditItemsToProps(getAllItems())
+
     fun getExistingEditItems(): List<VocabEntryEditItem.Existing> = existingItems.map {
         val entry = it.entryAndTags.entry
         val selectedItem = selectedItem
@@ -211,8 +218,9 @@ class VocabEntryEditItemsHandler(
         existingItems[index] = newItem
     }
 
+    /** Fire this to kick off a recalculation of items */
     private fun notifyNewItems() {
-        onItemsChangeListener(getAllItems())
+        onItemsChangeListener(getAllProps())
     }
 
     private fun createVocabEntryOrCreateFromEntry(entryAndTags: VocabEntryAndTags) =
@@ -223,12 +231,26 @@ class VocabEntryEditItemsHandler(
         return TagPresentItem.Existing(tag, textColor)
     }
 
-    private fun getViewModeForEntryId(id: Long): ViewMode {
-        val selectedItem = selectedItem
-        return if (selectedItem is SelectedVocabEntry.Existing && selectedItem.id == id) {
-            ViewMode.Active(selectedItem.focusItem)
-        } else {
-            ViewMode.Inactive
+    private fun convertEditItemsToProps(allItems: List<VocabEntryEditItem>): List<VocabEntryViewProps> {
+        return allItems.map { entry ->
+            val tagSuggestionsResult = tagSuggestionsResult
+            val resultItem = tagSuggestionsResult?.item
+            val isSameItem = resultItem != null && resultItem.isSameItem(entry)
+            val suggestions = if (!isSameItem) null else tagSuggestionsResult?.suggestions
+
+            val viewMode = if (
+                selectedItem is SelectedVocabEntry.Existing &&
+                selectedItem.id == entry
+            ) {
+                ViewMode.Active(selectedItem.focusItem)
+            } else {
+                ViewMode.Inactive
+            }
+
+            when (entry) {
+                is VocabEntryEditItem.Existing -> VocabEntryExistingProps(entry, suggestions)
+                is VocabEntryEditItem.Create -> VocabEntryCreateProps(entry, suggestions)
+            }
         }
     }
 

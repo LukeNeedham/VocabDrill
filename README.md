@@ -1,5 +1,5 @@
 #TODO
-There is a bug with adding tags - sometimes they are added to the wrong item
+I am in the middle of refactoring to use props, and holding viewmode elsewhere
 
 # Architecture
 
