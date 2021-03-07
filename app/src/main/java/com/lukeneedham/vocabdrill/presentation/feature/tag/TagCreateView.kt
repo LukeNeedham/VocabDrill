@@ -7,6 +7,7 @@ import android.util.AttributeSet
 import android.view.View
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
+import androidx.core.view.updateLayoutParams
 import com.lukeneedham.flowerpotrecycler.adapter.RecyclerItemView
 import com.lukeneedham.vocabdrill.R
 import com.lukeneedham.vocabdrill.presentation.util.BaseTextWatcher
@@ -14,12 +15,10 @@ import com.lukeneedham.vocabdrill.presentation.util.extension.inflateFrom
 import com.lukeneedham.vocabdrill.presentation.util.extension.setSelection
 import com.lukeneedham.vocabdrill.presentation.util.extension.showKeyboard
 import kotlinx.android.synthetic.main.view_tag_create.view.*
-import org.koin.core.KoinComponent
 
 class TagCreateView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : FrameLayout(context, attrs, defStyleAttr), RecyclerItemView<TagPresentItem.Create>,
-    KoinComponent {
+) : FrameLayout(context, attrs, defStyleAttr), RecyclerItemView<TagPresentItem.Create> {
 
     private var item: TagPresentItem.Create? = null
 
@@ -58,6 +57,13 @@ class TagCreateView @JvmOverloads constructor(
             R.drawable.background_tag_create_unselected
         }
         bubble.background = ContextCompat.getDrawable(context, inputBackgroundRes)
+
+        // Creates a seamless margin effect into the tag suggestion view below
+        val bubbleBottomMargin =
+            if (isInInputMode) 0 else context.resources.getDimensionPixelSize(R.dimen.tag_item_margin_bottom)
+        bubble.updateLayoutParams<MarginLayoutParams> {
+            bottomMargin = bubbleBottomMargin
+        }
 
         tagNameInput.removeTextChangedListener(tagNameTextWatcher)
         tagNameInput.setText(item.text)

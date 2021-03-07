@@ -6,6 +6,7 @@ import com.lukeneedham.vocabdrill.repository.TagRepository
 import com.lukeneedham.vocabdrill.util.RxSchedulers
 import io.reactivex.Single
 
+// TODO: Limit to a min and max color - so not too close to black and not too close to white
 class CalculateColorForNewTag(
     private val tagRepository: TagRepository,
     private val extractFlagColoursFromLanguageId: ExtractFlagColoursFromLanguageId

@@ -125,7 +125,7 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
 
     override fun onPause() {
         super.onPause()
-        viewModel.saveDataChanges()
+        viewModel.saveChanges()
     }
 
     private fun setupView() {
@@ -134,12 +134,9 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
             orientation = RecyclerView.VERTICAL
         }
         recyclerView.layoutManager = layoutManager
-        recyclerView.itemAnimator = object : DefaultItemAnimator() {
-            override fun canReuseUpdatedViewHolder(viewHolder: RecyclerView.ViewHolder) = true
+        recyclerView.itemAnimator = DefaultItemAnimator().apply {
+            supportsChangeAnimations = false
         }
-//        recyclerView.itemAnimator = DefaultItemAnimator().apply {
-//            supportsChangeAnimations = false
-//        }
         recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
@@ -214,7 +211,7 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
     }
 
     private fun onTagSuggestionClick(entryItem: VocabEntryEditItem, suggestion: TagSuggestion) {
-        viewModel.addTagToVocabEntry(entryItem, suggestion)
+        viewModel.addTagSuggestionToVocabEntry(entryItem, suggestion)
     }
 
     private fun newTagCreateCallback() = object : TagCreateCallback {

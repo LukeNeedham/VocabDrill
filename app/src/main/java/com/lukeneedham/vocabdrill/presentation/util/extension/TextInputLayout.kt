@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.view.ViewGroup
 import androidx.core.view.updateLayoutParams
 
+/** Set hint enabled, but preserve the margins so the view doesn't jump around */
 fun TextInputLayout.setHintEnabledMaintainMargin(enabled: Boolean) {
     isHintEnabled = enabled
     updateLayoutParams<ViewGroup.MarginLayoutParams> {

@@ -53,5 +53,6 @@
     <string name="learn_button">Learn!</string>
 
     <string name="vocab_entry_add">ADD NEW ENTRY</string>
+    <string name="tag_suggestions_none">No tag suggestions - type to create one!</string>
 
 </resources>

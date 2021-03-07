@@ -9,9 +9,9 @@ import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.EditText
 import android.widget.FrameLayout
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.setPadding
 import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.DefaultItemAnimator
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
@@ -70,12 +70,9 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
 
         tagsRecycler.layoutManager = tagsLayoutManager
         tagsRecycler.adapter = tagsAdapter
-        tagsRecycler.itemAnimator = object : DefaultItemAnimator() {
-            override fun canReuseUpdatedViewHolder(viewHolder: RecyclerView.ViewHolder) = true
+        tagsRecycler.itemAnimator = DefaultItemAnimator().apply {
+            supportsChangeAnimations = false
         }
-//        tagsRecycler.itemAnimator = DefaultItemAnimator().apply {
-//            supportsChangeAnimations = false
-//        }
 
         tagsRecycler.setOnTouchListener(RecyclerViewClickInterceptor())
         tagsRecycler.setOnClickListener {
@@ -95,7 +92,7 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
     }
 
     override fun setItem(position: Int, item: VocabEntryExistingProps) {
-        if(item == this.props) {
+        if (item == this.props) {
             // The recyclerview may rebind the same item multiple times.
             // We want to ignore repeat binds, as they will override state internal to this view.
             // So internal state wins over input state in this case
@@ -246,6 +243,16 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
                 tagCollapsedItemHeight
             }
         }
+
+        val wordInputHeightRes = if (isExpanded) {
+            R.dimen.vocab_entry_word_input_height_expanded
+        } else {
+            R.dimen.vocab_entry_word_input_height_collapsed
+        }
+        val wordInputHeight = context.resources.getDimensionPixelSize(wordInputHeightRes)
+
+        wordAInputViewLayout.updateLayoutParams { height = wordInputHeight }
+        wordBInputViewLayout.updateLayoutParams { height = wordInputHeight }
     }
 
     private fun onExistingTagClick(tag: TagPresentItem.Existing) {

@@ -54,9 +54,11 @@
         <item name="android:padding">4dp</item>
     </style>
 
-    <style name="TextInput" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
+    <style name="TextInput" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="android:paddingTop">0dp</item>
+        <item name="android:paddingBottom">0dp</item>
         <item name="hintTextColor">@color/dark_grey</item>
-        <item name="boxStrokeColor">@color/dark_grey</item>
+        <item name="boxStrokeColor">@color/vocab_entry_word</item>
     </style>
 
 </resources>

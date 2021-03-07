@@ -6,10 +6,13 @@
     <dimen name="language_bottom_item_vertical_margin">10dp</dimen>
 
     <dimen name="vocab_entry_item_elevation">2dp</dimen>
-    <dimen name="vocab_entry_between_item_margin">3dp</dimen>
+    <dimen name="vocab_entry_between_item_margin">2dp</dimen>
     <dimen name="vocab_entry_bottom_item_margin">40dp</dimen>
 
     <dimen name="vocab_entry_vertical_margin">4dp</dimen>
+
+    <dimen name="vocab_entry_word_input_height_collapsed">30dp</dimen>
+    <dimen name="vocab_entry_word_input_height_expanded">50dp</dimen>
 
     <dimen name="vocab_group_description_border_radius">6dp</dimen>
     <dimen name="vocab_group_description_border_width">1dp</dimen>
@@ -18,13 +21,15 @@
     <dimen name="learn_book_border_width">1dp</dimen>
 
     <dimen name="tag_item_corner_radius">10dp</dimen>
-    <dimen name="tag_item_suggestion_corner_radius">15dp</dimen>
-    <dimen name="tag_item_suggestion_between_margin">5dp</dimen>
+    <dimen name="tag_item_margin_bottom">4dp</dimen>
+
+    <dimen name="tag_item_height_collapsed">25dp</dimen>
+    <dimen name="tag_item_height_expanded">48dp</dimen>
 
     <dimen name="tag_suggestions_view_width">80dp</dimen>
     <dimen name="tag_suggestions_view_input_margin">20dp</dimen>
 
-    <dimen name="tag_item_height_collapsed">20dp</dimen>
-    <dimen name="tag_item_height_expanded">48dp</dimen>
+    <dimen name="tag_item_suggestion_corner_radius">15dp</dimen>
+    <dimen name="tag_item_suggestion_between_margin">5dp</dimen>
 
 </resources>

@@ -7,14 +7,14 @@
 
     <!--
     Item margin is done with this wrapper,
-    as the FlexBox item decorator is broken
+    as the FlexBox item decorator is broken.
     -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/bubble"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_marginTop="2dp"
         android:layout_marginEnd="2dp"
+        android:layout_marginBottom="@dimen/tag_item_margin_bottom"
         android:background="@drawable/background_tag_create_unselected"
         android:minWidth="50dp">
 

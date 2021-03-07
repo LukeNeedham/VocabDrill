@@ -12,21 +12,24 @@ import com.lukeneedham.vocabdrill.presentation.util.DisposingViewModel
 import com.lukeneedham.vocabdrill.presentation.util.TextSelection
 import com.lukeneedham.vocabdrill.presentation.util.extension.toLiveData
 import com.lukeneedham.vocabdrill.usecase.*
+import io.reactivex.Completable
 import io.reactivex.disposables.Disposable
 import io.reactivex.rxkotlin.plusAssign
 
 class LanguageViewModel(
     val languageId: Long,
-    private val observeAllVocabEntryAndTagsForLanguage: ObserveAllVocabEntryAndTagsForLanguage,
-    private val observeLanguage: ObserveLanguage,
+    /* Vocab entry update usecases - unsaved changes must be committed before invoking these */
     private val addVocabEntry: AddVocabEntry,
     private val deleteVocabEntry: DeleteVocabEntry,
-    private val updateVocabEntry: UpdateVocabEntry,
     private val addTagToVocabEntry: AddTagToVocabEntry,
+    private val deleteTagFromVocabEntry: DeleteTagFromVocabEntry,
+    private val updateVocabEntry: UpdateVocabEntry,
+    /* Misc usecases */
+    private val observeAllVocabEntryAndTagsForLanguage: ObserveAllVocabEntryAndTagsForLanguage,
+    private val observeLanguage: ObserveLanguage,
     private val addNewTag: AddNewTag,
     private val calculateColorForNewTag: CalculateColorForNewTag,
     private val findTagNameMatches: FindTagNameMatches,
-    private val deleteTagFromVocabEntry: DeleteTagFromVocabEntry,
     private val deleteUnusedTags: DeleteUnusedTags,
     private val chooseTextColourForBackground: ChooseTextColourForBackground
 ) : DisposingViewModel() {
@@ -52,7 +55,7 @@ class LanguageViewModel(
         and then create item resets (for example, by killing the Fragment).
         So we need to clean up tags in init.
         */
-        deleteUnusedTagsExceptCreate()
+        runDeleteUnusedTagsExceptCreate()
 
         disposables += observeLanguage(languageId).subscribe { language ->
             languageNameMutableLiveData.value = language.name
@@ -77,15 +80,16 @@ class LanguageViewModel(
     }
 
     fun addEntry(proto: VocabEntryProto) {
-        val ignored = addVocabEntry(proto).subscribe {
-            entryReduxer.onCreateItemSaved()
-        }
+        val ignored = saveEntryUpdates()
+            .andThen(addVocabEntry(proto))
+            .subscribe { entryReduxer.onCreateItemSaved() }
     }
 
     fun deleteEntry(entryId: Long) {
-        val ignored = deleteVocabEntry(entryId).subscribe {
-            deleteUnusedTagsExceptCreate()
-        }
+        val ignored = saveEntryUpdates()
+            .andThen(deleteVocabEntry(entryId))
+            .andThen(deleteUnusedTagsExceptCreate())
+            .subscribe()
     }
 
     fun onExistingItemWordAChanged(entryId: Long, newWordA: String, selection: TextSelection) {
@@ -120,7 +124,7 @@ class LanguageViewModel(
         entryReduxer.onAddTagUpdate(editItem, text, selection)
     }
 
-    fun addTagToVocabEntry(entryItem: VocabEntryEditItem, tagItem: TagSuggestion) {
+    fun addTagSuggestionToVocabEntry(entryItem: VocabEntryEditItem, tagItem: TagSuggestion) {
 
         fun addExistingTag(tag: Tag) {
             when (entryItem) {
@@ -128,7 +132,9 @@ class LanguageViewModel(
                     entryReduxer.onCreateItemTagAdded(tag)
                 }
                 is VocabEntryEditItem.Existing -> {
-                    val ignored = addTagToVocabEntry(entryItem.entry.id, tag.id).subscribe()
+                    val ignored = saveEntryUpdates()
+                        .andThen(addTagToVocabEntry(entryItem.entry.id, tag.id))
+                        .subscribe()
                 }
             }
         }
@@ -159,15 +165,18 @@ class LanguageViewModel(
         when (entryItem) {
             is VocabEntryEditItem.Create -> {
                 entryReduxer.onCreateItemTagRemoved(tagItem.data)
-                deleteUnusedTagsExceptCreate()
+                runDeleteUnusedTagsExceptCreate()
             }
             is VocabEntryEditItem.Existing -> {
-                val ignored =
-                    deleteTagFromVocabEntry(entryItem.entry.id, tagItem.data.id).subscribe {
-                        deleteUnusedTagsExceptCreate()
-                    }
+                val ignored = saveEntryUpdates()
+                    .andThen(deleteTagFromVocabEntry(entryItem.entry.id, tagItem.data.id))
+                    .subscribe { runDeleteUnusedTagsExceptCreate() }
             }
         }
+    }
+
+    fun saveChanges() {
+        val ignored = saveEntryUpdates().subscribe()
     }
 
     private fun requestTagMatches(entryItem: VocabEntryEditItem, tagName: String) {
@@ -206,12 +215,20 @@ class LanguageViewModel(
         disposables += findTagNameMatchesDisposable
     }
 
-    /** Perform the batched saves of changes to existing items */
-    fun saveDataChanges() {
+    /**
+     * Perform the batched saves of changes to existing items.
+     * We do these changes in batches to avoid doing IO work on every event,
+     * which leads to horrible performance.
+     *
+     * It is important to run this to completion before making other changes to the entry DB,
+     * otherwise unsaved changes will be lost.
+     */
+    private fun saveEntryUpdates(): Completable {
         val existingItems = entryReduxer.getExistingEditItems()
-        existingItems.forEach {
-            val ignored = updateVocabEntry(it.entry).subscribe()
+        val completableList = existingItems.map {
+            updateVocabEntry(it.entry)
         }
+        return Completable.merge(completableList)
     }
 
     private fun getCreateItemTagIds(): List<Long> = entryReduxer.getCreateEditItem().tagItems
@@ -219,7 +236,16 @@ class LanguageViewModel(
         .map { it.data.id }
 
     /** Delete all unused tags, except the ones referenced by the create item */
-    private fun deleteUnusedTagsExceptCreate() {
-        val ignored = deleteUnusedTags(getCreateItemTagIds()).subscribe()
+    private fun runDeleteUnusedTagsExceptCreate() {
+        val ignored = deleteUnusedTagsExceptCreate().subscribe()
+    }
+
+    /**
+     * This will delete all unused tags, according to the data in the DB.
+     * It will exclude tags used in the create item, which may be be persisted,
+     * but are still 'in use'.
+     */
+    private fun deleteUnusedTagsExceptCreate(): Completable {
+        return deleteUnusedTags(getCreateItemTagIds())
     }
 }
