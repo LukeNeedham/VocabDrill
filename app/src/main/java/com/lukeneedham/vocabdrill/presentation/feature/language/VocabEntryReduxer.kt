@@ -1,6 +1,7 @@
 package com.lukeneedham.vocabdrill.presentation.feature.language
 
 import com.lukeneedham.vocabdrill.domain.model.Tag
+import com.lukeneedham.vocabdrill.domain.model.VocabEntry
 import com.lukeneedham.vocabdrill.domain.model.VocabEntryAndTags
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagPresentItem
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.*
@@ -26,7 +27,33 @@ class VocabEntryReduxer(
     }
 
     fun setTagSuggestionsResult(result: TagSuggestionResult) {
+        val selectedItem = selectedItem
+        val selectedFocusItem = selectedItem.getFocusItem()
+        if (selectedFocusItem !is FocusItem.AddTag) {
+            return
+        }
+
         tagSuggestionsResult = result
+
+        //selectedFocusItem.tagSuggestions
+
+        val newFocusItem = selectedFocusItem.copy(tagSuggestions = result.suggestions)
+
+        when (selectedItem) {
+            is SelectedVocabEntry.None -> {
+            }
+            is SelectedVocabEntry.Create -> {
+                this.selectedItem = selectedItem.copy(focusItem = newFocusItem)
+            }
+            is SelectedVocabEntry.Existing -> {
+                this.selectedItem = selectedItem.copy(focusItem = newFocusItem)
+            }
+        }
+
+//        val focusItem = FocusItem.AddTag(selection, text, tagSuggestions)
+//        val viewMode = ViewMode.Active(focusItem)
+//        onViewModeChanged(editItem, viewMode)
+
         notifyNewItems()
     }
 
@@ -131,46 +158,53 @@ class VocabEntryReduxer(
 
     fun getExistingEditItems(): List<VocabEntryEditItem.Existing> = existingItems.map {
         val entry = it.entryAndTags.entry
-        val selectedItem = selectedItem
 
-        val viewMode = if (
-            selectedItem is SelectedVocabEntry.Existing &&
-            selectedItem.id == entry.id
-        ) {
-            ViewMode.Active(selectedItem.focusItem)
-        } else {
-            ViewMode.Inactive
-        }
+        val viewMode = getViewMode(entry)
 
         val existingTagItems = it.entryAndTags.tags.map { createExistingTagItem(it) }
         val allTagItems = if (viewMode is ViewMode.Inactive) {
             existingTagItems
         } else {
-            existingTagItems + TagPresentItem.Create
+
+            val addTagFocus = (viewMode as? ViewMode.Active)?.focusItem as? FocusItem.AddTag
+            val createTagText = addTagFocus?.text ?: ""
+            val createTagSelection = addTagFocus?.selection
+            existingTagItems + TagPresentItem.Create(createTagText, createTagSelection)
         }
 
-        VocabEntryEditItem.Existing(entry, allTagItems, viewMode)
+        VocabEntryEditItem.Existing(entry, allTagItems)
     }
 
     fun getCreateEditItem(): VocabEntryEditItem.Create {
         val createItem = createItem
         val selectedItem = selectedItem
-        val mode = if (selectedItem is SelectedVocabEntry.Create) {
-            ViewMode.Active(selectedItem.focusItem)
-        } else {
-            ViewMode.Inactive
-        }
 
         val existingTagItems = createItem.tags.map { createExistingTagItem(it) }
-        val allTagItems = existingTagItems + TagPresentItem.Create
+        // TODO: update create item to use whether it is actually focus in create
+        val allTagItems = existingTagItems + TagPresentItem.Create("", null)
 
         return VocabEntryEditItem.Create(
             createItem.languageId,
             allTagItems,
             createItem.wordA,
-            createItem.wordB,
-            mode
+            createItem.wordB
         )
+    }
+
+    fun onAddTagUpdate(
+        editItem: VocabEntryEditItem,
+        text: String,
+        selection: TextSelection
+    ) {
+        val tagSuggestionsResult = tagSuggestionsResult
+        val resultItem = tagSuggestionsResult?.item
+        val isSameItem = resultItem != null && resultItem.isSameItem(editItem)
+        val tagSuggestions =
+            (if (!isSameItem) null else tagSuggestionsResult?.suggestions) ?: emptyList()
+
+        val focusItem = FocusItem.AddTag(selection, text, tagSuggestions)
+        val viewMode = ViewMode.Active(focusItem)
+        onViewModeChanged(editItem, viewMode)
     }
 
     fun onViewModeChanged(
@@ -232,27 +266,42 @@ class VocabEntryReduxer(
     }
 
     private fun convertEditItemsToProps(allItems: List<VocabEntryEditItem>): List<VocabEntryViewProps> {
-        return allItems.map { entry ->
-            val tagSuggestionsResult = tagSuggestionsResult
-            val resultItem = tagSuggestionsResult?.item
-            val isSameItem = resultItem != null && resultItem.isSameItem(entry)
-            val suggestions = if (!isSameItem) null else tagSuggestionsResult?.suggestions
+        return allItems.map { editItem ->
+            val viewMode = getViewMode(editItem)
 
-            val viewMode = if (
-                selectedItem is SelectedVocabEntry.Existing &&
-                selectedItem.id == entry
-            ) {
-                ViewMode.Active(selectedItem.focusItem)
-            } else {
-                ViewMode.Inactive
-            }
-
-            when (entry) {
-                is VocabEntryEditItem.Existing -> VocabEntryExistingProps(entry, suggestions)
-                is VocabEntryEditItem.Create -> VocabEntryCreateProps(entry, suggestions)
+            when (editItem) {
+                is VocabEntryEditItem.Existing -> VocabEntryExistingProps(editItem, viewMode)
+                is VocabEntryEditItem.Create -> VocabEntryCreateProps(editItem, viewMode)
             }
         }
     }
+
+    private fun getViewMode(entry: VocabEntry): ViewMode {
+        val selectedItem = selectedItem
+
+        return if (
+            selectedItem is SelectedVocabEntry.Existing &&
+            selectedItem.id == entry.id
+        ) {
+            ViewMode.Active(selectedItem.focusItem)
+        } else {
+            ViewMode.Inactive
+        }
+    }
+
+    private fun getViewMode(editItem: VocabEntryEditItem): ViewMode {
+        val selectedItem = selectedItem
+
+        return when {
+            editItem is VocabEntryEditItem.Existing -> getViewMode(editItem.entry)
+
+            editItem is VocabEntryEditItem.Create && selectedItem is SelectedVocabEntry.Create ->
+                ViewMode.Active(selectedItem.focusItem)
+
+            else -> ViewMode.Inactive
+        }
+    }
+
 
     private sealed class VocabEntryEditPartialItem {
         data class Existing(val entryAndTags: VocabEntryAndTags) : VocabEntryEditPartialItem()

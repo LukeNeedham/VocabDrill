@@ -1,19 +1,12 @@
 package com.lukeneedham.vocabdrill.presentation.feature.tag
 
-import android.view.View
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryEditItem
+import com.lukeneedham.vocabdrill.presentation.util.TextSelection
 
 interface TagCreateCallback {
-    fun onFocusChange(
-        entry: VocabEntryEditItem,
-        name: String,
-        nameInputView: View,
-        hasFocus: Boolean
-    )
-
-    fun onNameChanged(
-        entry: VocabEntryEditItem,
-        name: String,
-        nameInputView: View
+    fun onUpdateName(
+        editItem: VocabEntryEditItem,
+        text: String,
+        selection: TextSelection,
     )
 }

@@ -14,6 +14,7 @@ import com.lukeneedham.flowerpotrecycler.util.ItemTypeConfigCreator
 import com.lukeneedham.flowerpotrecycler.util.extensions.addItemLayoutParams
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagCreateCallback
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagPresentItem
+import com.lukeneedham.vocabdrill.presentation.feature.tag.suggestion.TagSuggestion
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryEditItem
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryViewProps
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.create.VocabEntryCreateCallback
@@ -27,7 +28,8 @@ class VocabEntriesAdapter(
     vocabEntryExistingCallback: VocabEntryExistingCallback,
     vocabEntryCreateCallback: VocabEntryCreateCallback,
     tagCreateCallback: TagCreateCallback,
-    tagExistingClickListener: (entryItem: VocabEntryEditItem, tag: TagPresentItem.Existing) -> Unit
+    tagExistingClickListener: (entryItem: VocabEntryEditItem, tag: TagPresentItem.Existing) -> Unit,
+    tagSuggestionClickListener: (entryItem: VocabEntryEditItem, suggestion: TagSuggestion) -> Unit
 ) : DelegatedRecyclerAdapter<VocabEntryViewProps, View>() {
 
     override val positionDelegate = LinearPositionDelegate(this, diffCallback)
@@ -40,6 +42,7 @@ class VocabEntriesAdapter(
                         this.vocabEntryExistingCallback = vocabEntryExistingCallback
                         this.tagCreateCallback = tagCreateCallback
                         this.tagExistingClickListener = tagExistingClickListener
+                        this.tagSuggestionClickListener = tagSuggestionClickListener
                     }
                 },
                 FeatureConfig<VocabEntryExistingProps, VocabEntryExistingItemView>().apply {
@@ -69,7 +72,7 @@ class VocabEntriesAdapter(
         val entryOrCreate = positionDelegate.getItemAt(position)
         return when (entryOrCreate) {
             is VocabEntryExistingProps -> entryOrCreate.entryItem.entry.id
-            is VocabEntryCreateProps -> -1
+            is VocabEntryCreateProps -> Long.MAX_VALUE
             else -> error("Unexpected item type: $entryOrCreate")
         }
     }

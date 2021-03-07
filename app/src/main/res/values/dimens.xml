@@ -19,6 +19,7 @@
 
     <dimen name="tag_item_corner_radius">10dp</dimen>
     <dimen name="tag_item_suggestion_corner_radius">15dp</dimen>
+    <dimen name="tag_item_suggestion_between_margin">5dp</dimen>
 
     <dimen name="tag_suggestions_view_width">80dp</dimen>
     <dimen name="tag_suggestions_view_input_margin">20dp</dimen>

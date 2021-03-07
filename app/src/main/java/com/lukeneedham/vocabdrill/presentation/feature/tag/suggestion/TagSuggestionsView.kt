@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.FrameLayout
+import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.lukeneedham.flowerpotrecycler.SingleTypeRecyclerAdapterCreator
@@ -14,7 +15,9 @@ import com.lukeneedham.flowerpotrecycler.util.extensions.addItemLayoutParams
 import com.lukeneedham.flowerpotrecycler.util.extensions.addOnItemClickListener
 import com.lukeneedham.vocabdrill.R
 import com.lukeneedham.vocabdrill.presentation.util.extension.inflateFrom
-import kotlinx.android.synthetic.main.view_tag_suggestions_pop_up.view.*
+import com.lukeneedham.vocabdrill.presentation.util.recyclerview.decoration.LinearMarginItemDecorationCreator
+import kotlinx.android.synthetic.main.fragment_language.*
+import kotlinx.android.synthetic.main.view_tag_suggestions.view.*
 
 class TagSuggestionsView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -23,7 +26,7 @@ class TagSuggestionsView @JvmOverloads constructor(
     private val adapter =
         SingleTypeRecyclerAdapterCreator.fromRecyclerItemView<TagSuggestion, TagSuggestionItemView>(
             SingleTypeAdapterConfig<TagSuggestion, TagSuggestionItemView>().apply {
-                addItemLayoutParams(RecyclerView.LayoutParams(MATCH_PARENT, WRAP_CONTENT))
+                addItemLayoutParams(RecyclerView.LayoutParams(WRAP_CONTENT, MATCH_PARENT))
                 addOnItemClickListener { item, _, _ ->
                     onSuggestionClickListener(item)
                 }
@@ -33,10 +36,13 @@ class TagSuggestionsView @JvmOverloads constructor(
     lateinit var onSuggestionClickListener: (TagSuggestion) -> Unit
 
     init {
-        inflateFrom(R.layout.view_tag_suggestions_pop_up)
+        inflateFrom(R.layout.view_tag_suggestions)
         recyclerView.adapter = adapter
         recyclerView.layoutManager = LinearLayoutManager(context).apply {
-            orientation = LinearLayoutManager.VERTICAL
+            orientation = LinearLayoutManager.HORIZONTAL
+        }
+        recyclerView.itemAnimator = DefaultItemAnimator().apply {
+            supportsChangeAnimations = false
         }
     }
 

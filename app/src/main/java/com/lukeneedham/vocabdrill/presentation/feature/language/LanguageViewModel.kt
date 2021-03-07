@@ -111,6 +111,15 @@ class LanguageViewModel(
         entryReduxer.onViewModeChanged(item, viewMode)
     }
 
+    fun onAddTagUpdate(
+        editItem: VocabEntryEditItem,
+        text: String,
+        selection: TextSelection
+    ) {
+        requestTagMatches(editItem, text)
+        entryReduxer.onAddTagUpdate(editItem, text, selection)
+    }
+
     fun addTagToVocabEntry(entryItem: VocabEntryEditItem, tagItem: TagSuggestion) {
 
         fun addExistingTag(tag: Tag) {
@@ -161,7 +170,7 @@ class LanguageViewModel(
         }
     }
 
-    fun requestTagMatches(entryItem: VocabEntryEditItem, tagName: String) {
+    private fun requestTagMatches(entryItem: VocabEntryEditItem, tagName: String) {
         fun updateTagSuggestionResult(suggestions: List<TagSuggestion>) {
             entryReduxer.setTagSuggestionsResult(TagSuggestionResult(entryItem, suggestions))
         }

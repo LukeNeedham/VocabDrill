@@ -37,7 +37,7 @@
             android:gravity="center"
             android:inputType="textNoSuggestions"
             android:paddingTop="0dp"
-            android:textSize="12sp"
+            android:textSize="14sp"
             android:translationY="1dp"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"

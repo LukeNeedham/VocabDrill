@@ -10,6 +10,8 @@ import android.widget.EditText
 import android.widget.FrameLayout
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.updateLayoutParams
+import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
@@ -19,7 +21,11 @@ import com.lukeneedham.vocabdrill.R
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagCreateCallback
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagCreateViewCallback
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagPresentItem
-import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.*
+import com.lukeneedham.vocabdrill.presentation.feature.tag.suggestion.TagSuggestion
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.FocusItem
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.TagsAdapter
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.ViewMode
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryEditItem
 import com.lukeneedham.vocabdrill.presentation.util.BaseTextWatcher
 import com.lukeneedham.vocabdrill.presentation.util.TextSelection
 import com.lukeneedham.vocabdrill.presentation.util.extension.getSelection
@@ -28,24 +34,18 @@ import com.lukeneedham.vocabdrill.presentation.util.extension.setSelection
 import com.lukeneedham.vocabdrill.presentation.util.recyclerview.RecyclerViewClickInterceptor
 import kotlinx.android.synthetic.main.view_item_vocab_entry_existing.view.*
 
-
 class VocabEntryExistingItemView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr),
     RecyclerItemView<VocabEntryExistingProps> {
 
     private val tagCreateViewCallback = object : TagCreateViewCallback {
-        override fun onFocused(name: String, nameInputView: View, hasFocus: Boolean) {
-            requireTagCreateCallback().onFocusChange(
-                requireProps().entryItem,
-                name,
-                nameInputView,
-                hasFocus
+        override fun onUpdateName(tagNameInput: EditText) {
+            requireTagCreateCallback().onUpdateName(
+                requireEntryItem(),
+                tagNameInput.text.toString(),
+                tagNameInput.getSelection()
             )
-        }
-
-        override fun onNameChanged(name: String, nameInputView: View) {
-            requireTagCreateCallback().onNameChanged(requireProps().entryItem, name, nameInputView)
         }
     }
 
@@ -61,6 +61,7 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
     var tagCreateCallback: TagCreateCallback? = null
     var tagExistingClickListener: (VocabEntryEditItem, TagPresentItem.Existing) -> Unit =
         { _, _ -> }
+    var tagSuggestionClickListener: (VocabEntryEditItem, TagSuggestion) -> Unit = { _, _ -> }
 
     init {
         inflateFrom(R.layout.view_item_vocab_entry_existing)
@@ -69,10 +70,12 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
 
         tagsRecycler.layoutManager = tagsLayoutManager
         tagsRecycler.adapter = tagsAdapter
-
-        deleteButton.setOnClickListener {
-            requireEntryCallback().onDelete(requireProps().entryItem)
+        tagsRecycler.itemAnimator = object : DefaultItemAnimator() {
+            override fun canReuseUpdatedViewHolder(viewHolder: RecyclerView.ViewHolder) = true
         }
+//        tagsRecycler.itemAnimator = DefaultItemAnimator().apply {
+//            supportsChangeAnimations = false
+//        }
 
         tagsRecycler.setOnTouchListener(RecyclerViewClickInterceptor())
         tagsRecycler.setOnClickListener {
@@ -81,24 +84,43 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
         tagsRecyclerOverlay.setOnClickListener {
             flipMode()
         }
+        deleteButton.setOnClickListener {
+            requireEntryCallback().onDelete(requireProps().entryItem)
+        }
         backgroundView.setOnClickListener { flipMode() }
         chevronIconView.setOnClickListener { flipMode() }
+        tagSuggestionsView.onSuggestionClickListener = {
+            tagSuggestionClickListener(requireEntryItem(), it)
+        }
     }
 
     override fun setItem(position: Int, item: VocabEntryExistingProps) {
-        val editItem = item.entryItem
+        if(item == this.props) {
+            // The recyclerview may rebind the same item multiple times.
+            // We want to ignore repeat binds, as they will override state internal to this view.
+            // So internal state wins over input state in this case
+            return
+        }
         this.props = item
+
+        val editItem = item.entryItem
+        val viewMode = item.viewMode
 
         setupTextWatchers(editItem)
         setupTextFocus(item)
 
         tagsAdapter.submitList(editItem.tagItems)
-        val addTagState = item.addTagState
-        val suggestions =
-            if (addTagState is AddTagState.InProgress) addTagState.tagSuggestions else emptyList()
+
+        val tagSuggestions =
+            if (viewMode is ViewMode.Active && viewMode.focusItem is FocusItem.AddTag) {
+                viewMode.focusItem.tagSuggestions
+            } else {
+                null
+            }
+        val isAddingTag = tagSuggestions != null
+        val suggestions = tagSuggestions ?: emptyList()
         tagSuggestionsView.setSuggestions(suggestions)
-        tagSuggestionsView.visibility =
-            if (addTagState is AddTagState.InProgress) View.VISIBLE else View.GONE
+        tagSuggestionsView.visibility = if (isAddingTag) View.VISIBLE else View.GONE
     }
 
     private fun setupTextWatchers(item: VocabEntryEditItem.Existing) {
@@ -143,9 +165,11 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
         setViewMode(viewMode)
         if (viewMode is ViewMode.Active) {
             val focus = viewMode.focusItem
-            when (focus) {
+            val exhaustive = when (focus) {
                 is FocusItem.WordA -> setFocus(wordAInputView, focus.selection)
                 is FocusItem.WordB -> setFocus(wordBInputView, focus.selection)
+                // For AddTag, the tags adapter takes care of focus
+                is FocusItem.AddTag,
                 is FocusItem.None -> clearAllFocus()
             }
         } else {
@@ -229,6 +253,8 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
     }
 
     private fun requireProps() = props ?: error("entryItem must be set")
+
+    private fun requireEntryItem() = requireProps().entryItem
 
     private fun requireEntryCallback() =
         vocabEntryExistingCallback ?: error("Existing entry callback must be set")

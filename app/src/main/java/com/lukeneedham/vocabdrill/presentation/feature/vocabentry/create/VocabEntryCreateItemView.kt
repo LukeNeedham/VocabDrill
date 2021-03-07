@@ -4,7 +4,6 @@ import android.content.Context
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.AttributeSet
-import android.view.View
 import android.widget.EditText
 import android.widget.FrameLayout
 import com.google.android.flexbox.FlexDirection
@@ -23,24 +22,18 @@ import com.lukeneedham.vocabdrill.presentation.util.extension.getSelection
 import com.lukeneedham.vocabdrill.presentation.util.extension.inflateFrom
 import com.lukeneedham.vocabdrill.presentation.util.extension.setSelection
 import kotlinx.android.synthetic.main.view_item_vocab_entry_create.view.*
-import kotlinx.android.synthetic.main.view_item_vocab_entry_create.view.tagsRecycler
-import kotlinx.android.synthetic.main.view_item_vocab_entry_create.view.wordAInputView
-import kotlinx.android.synthetic.main.view_item_vocab_entry_create.view.wordBInputView
-import org.koin.core.KoinComponent
 
 class VocabEntryCreateItemView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : FrameLayout(context, attrs, defStyleAttr),
-    RecyclerItemView<VocabEntryCreateProps>,
-    KoinComponent {
+) : FrameLayout(context, attrs, defStyleAttr), RecyclerItemView<VocabEntryCreateProps> {
 
     private val tagCreateViewCallback = object : TagCreateViewCallback {
-        override fun onFocused(name: String, nameInputView: View, hasFocus: Boolean) {
-            requireTagCreateCallback().onFocusChange(requireEntryItem(), name, nameInputView, hasFocus)
-        }
-
-        override fun onNameChanged(name: String, nameInputView: View) {
-            requireTagCreateCallback().onNameChanged(requireEntryItem(), name, nameInputView)
+        override fun onUpdateName(tagNameInput: EditText) {
+            requireTagCreateCallback().onUpdateName(
+                requireEntryItem(),
+                tagNameInput.text.toString(),
+                tagNameInput.getSelection()
+            )
         }
     }
 

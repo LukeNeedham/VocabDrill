@@ -11,6 +11,7 @@ import com.lukeneedham.flowerpotrecycler.adapter.RecyclerItemView
 import com.lukeneedham.vocabdrill.R
 import com.lukeneedham.vocabdrill.presentation.util.BaseTextWatcher
 import com.lukeneedham.vocabdrill.presentation.util.extension.inflateFrom
+import com.lukeneedham.vocabdrill.presentation.util.extension.setSelection
 import com.lukeneedham.vocabdrill.presentation.util.extension.showKeyboard
 import kotlinx.android.synthetic.main.view_tag_create.view.*
 import org.koin.core.KoinComponent
@@ -20,9 +21,11 @@ class TagCreateView @JvmOverloads constructor(
 ) : FrameLayout(context, attrs, defStyleAttr), RecyclerItemView<TagPresentItem.Create>,
     KoinComponent {
 
+    private var item: TagPresentItem.Create? = null
+
     private val tagNameTextWatcher: TextWatcher = object : BaseTextWatcher() {
         override fun afterTextChanged(s: Editable?) {
-            requireCallback().onNameChanged(s.toString(), this@TagCreateView)
+            requireCallback().onUpdateName(tagNameInput)
         }
     }
 
@@ -30,33 +33,44 @@ class TagCreateView @JvmOverloads constructor(
 
     init {
         inflateFrom(R.layout.view_tag_create)
-        tagNameInput.setOnFocusChangeListener { _, hasFocus ->
-            requireCallback().onFocused(tagNameInput.text.toString(), this, hasFocus)
-            if (!hasFocus) {
-                tagNameInput.setText("")
-                tagNameInput.visibility = View.GONE
-                addIconView.visibility = View.VISIBLE
-            }
-
-            val inputBackgroundRes = if (hasFocus) {
-                R.drawable.background_tag_create_selected
-            } else {
-                R.drawable.background_tag_create_unselected
-            }
-            bubble.background = ContextCompat.getDrawable(context, inputBackgroundRes)
-        }
         addIconView.setOnClickListener {
-            addIconView.visibility = View.GONE
-            tagNameInput.visibility = View.VISIBLE
-            tagNameInput.requestFocus()
-            context.showKeyboard()
+            requireCallback().onUpdateName(tagNameInput)
         }
     }
 
     override fun setItem(position: Int, item: TagPresentItem.Create) {
+        if (item == this.item) {
+            // The recyclerview may rebind the same item multiple times.
+            // We want to ignore repeat binds, as they will override state internal to this view.
+            // So internal state wins over input state in this case
+            return
+        }
+        this.item = item
+
+        val isInInputMode = item.selection != null
+
+        addIconView.visibility = if (isInInputMode) View.GONE else View.VISIBLE
+        tagNameInput.visibility = if (isInInputMode) View.VISIBLE else View.GONE
+
+        val inputBackgroundRes = if (isInInputMode) {
+            R.drawable.background_tag_create_selected
+        } else {
+            R.drawable.background_tag_create_unselected
+        }
+        bubble.background = ContextCompat.getDrawable(context, inputBackgroundRes)
+
         tagNameInput.removeTextChangedListener(tagNameTextWatcher)
-        tagNameInput.setText("")
+        tagNameInput.setText(item.text)
         tagNameInput.addTextChangedListener(tagNameTextWatcher)
+
+        if (item.selection != null) {
+            tagNameInput.requestFocus()
+            tagNameInput.setSelection(item.selection)
+            context.showKeyboard()
+        } else {
+            tagNameInput.clearFocus()
+        }
+
     }
 
     private fun requireCallback() = callback ?: error("Callback must be set")

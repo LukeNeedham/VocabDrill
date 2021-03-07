@@ -6,4 +6,4 @@ import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryEdit
 data class TagSuggestionResult(
     val item: VocabEntryEditItem,
     val suggestions: List<TagSuggestion>
-    )
+)

@@ -7,3 +7,9 @@ sealed class SelectedVocabEntry {
     data class Create(val focusItem: FocusItem) : SelectedVocabEntry()
     data class Existing(val id: Long, val focusItem: FocusItem) : SelectedVocabEntry()
 }
+
+fun SelectedVocabEntry.getFocusItem() = when(this) {
+    is SelectedVocabEntry.None -> null
+    is SelectedVocabEntry.Create -> focusItem
+    is SelectedVocabEntry.Existing -> focusItem
+}

@@ -2,9 +2,7 @@ package com.lukeneedham.vocabdrill.presentation.feature.language
 
 import android.os.Bundle
 import android.view.View
-import android.view.ViewGroup
 import androidx.core.view.doOnNextLayout
-import androidx.core.view.updateLayoutParams
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DefaultItemAnimator
@@ -14,6 +12,7 @@ import com.lukeneedham.vocabdrill.R
 import com.lukeneedham.vocabdrill.domain.model.VocabEntryProto
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagCreateCallback
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagPresentItem
+import com.lukeneedham.vocabdrill.presentation.feature.tag.suggestion.TagSuggestion
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.InteractionSection
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.ViewMode
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryEditItem
@@ -25,7 +24,6 @@ import com.lukeneedham.vocabdrill.presentation.util.recyclerview.decoration.Line
 import kotlinx.android.synthetic.main.fragment_language.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
-import kotlin.math.max
 
 class LanguageFragment : Fragment(R.layout.fragment_language) {
     private val navArgs: LanguageFragmentArgs by navArgs()
@@ -96,7 +94,8 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
         vocabEntryExistingCallback,
         vocabEntryCreateCallback,
         tagCreateCallback,
-        ::onTagExistingClick
+        ::onTagExistingClick,
+        ::onTagSuggestionClick
     )
 
     /**
@@ -135,9 +134,12 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
             orientation = RecyclerView.VERTICAL
         }
         recyclerView.layoutManager = layoutManager
-        recyclerView.itemAnimator = DefaultItemAnimator().apply {
-            supportsChangeAnimations = false
+        recyclerView.itemAnimator = object : DefaultItemAnimator() {
+            override fun canReuseUpdatedViewHolder(viewHolder: RecyclerView.ViewHolder) = true
         }
+//        recyclerView.itemAnimator = DefaultItemAnimator().apply {
+//            supportsChangeAnimations = false
+//        }
         recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
@@ -211,33 +213,17 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
         viewModel.deleteTagFromVocabEntry(entryItem, tag)
     }
 
+    private fun onTagSuggestionClick(entryItem: VocabEntryEditItem, suggestion: TagSuggestion) {
+        viewModel.addTagToVocabEntry(entryItem, suggestion)
+    }
+
     private fun newTagCreateCallback() = object : TagCreateCallback {
-
-        override fun onFocusChange(
-            entry: VocabEntryEditItem,
-            name: String,
-            nameInputView: View,
-            hasFocus: Boolean
+        override fun onUpdateName(
+            editItem: VocabEntryEditItem,
+            text: String,
+            selection: TextSelection
         ) {
-            if (hasFocus) {
-//                tagSuggestionsView.onSuggestionClickListener = { suggestion ->
-//                    viewModel.addTagToVocabEntry(entry, suggestion)
-//                    tagSuggestionsView.visibility = View.GONE
-//                }
-
-                viewModel.requestTagMatches(entry, name)
-                //tagSuggestionsView.visibility = View.VISIBLE
-            } else {
-                //tagSuggestionsView.visibility = View.GONE
-            }
-        }
-
-        override fun onNameChanged(
-            entry: VocabEntryEditItem,
-            name: String,
-            nameInputView: View
-        ) {
-            viewModel.requestTagMatches(entry, name)
+            viewModel.onAddTagUpdate(editItem, text, selection)
         }
     }
 

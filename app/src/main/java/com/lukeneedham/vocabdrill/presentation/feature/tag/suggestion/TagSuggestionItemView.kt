@@ -25,7 +25,7 @@ class TagSuggestionItemView @JvmOverloads constructor(
 
     override fun setItem(position: Int, item: TagSuggestion) {
         background.solidColor = item.color
-        setBackground(background)
+        backgroundView.setBackground(background)
         textView.text = item.name
         textView.setTextColor(item.textColor)
     }
