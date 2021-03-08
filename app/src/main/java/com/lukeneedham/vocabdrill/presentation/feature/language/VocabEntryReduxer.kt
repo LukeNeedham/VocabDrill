@@ -83,7 +83,6 @@ class VocabEntryReduxer(
         val focus = when (section) {
             InteractionSection.WordAInput -> FocusItem.WordA(selectionOrDefault)
             InteractionSection.WordBInput -> FocusItem.WordB(selectionOrDefault)
-            // TODO: We need a section for tag name input? Maybe?
             InteractionSection.Other -> FocusItem.None
         }
         selectedItem = SelectedVocabEntry.Create(focus)
@@ -165,7 +164,6 @@ class VocabEntryReduxer(
         val allTagItems = if (viewMode is ViewMode.Inactive) {
             existingTagItems
         } else {
-
             val addTagFocus = (viewMode as? ViewMode.Active)?.focusItem as? FocusItem.AddTag
             val createTagText = addTagFocus?.text ?: ""
             val createTagSelection = addTagFocus?.selection
@@ -180,8 +178,18 @@ class VocabEntryReduxer(
         val selectedItem = selectedItem
 
         val existingTagItems = createItem.tags.map { createExistingTagItem(it) }
-        // TODO: update create item to use whether it is actually focus in create
-        val allTagItems = existingTagItems + TagPresentItem.Create("", null)
+
+        val addTagFocus = if (selectedItem is SelectedVocabEntry.Create
+            && selectedItem.focusItem is FocusItem.AddTag
+        ) {
+            selectedItem.focusItem
+        } else {
+            null
+        }
+
+        val focusText = addTagFocus?.text ?: ""
+        val focusSelection = addTagFocus?.selection
+        val allTagItems = existingTagItems + TagPresentItem.Create(focusText, focusSelection)
 
         return VocabEntryEditItem.Create(
             createItem.languageId,
@@ -301,7 +309,6 @@ class VocabEntryReduxer(
             else -> ViewMode.Inactive
         }
     }
-
 
     private sealed class VocabEntryEditPartialItem {
         data class Existing(val entryAndTags: VocabEntryAndTags) : VocabEntryEditPartialItem()

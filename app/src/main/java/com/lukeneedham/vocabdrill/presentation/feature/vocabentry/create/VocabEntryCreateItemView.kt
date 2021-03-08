@@ -6,11 +6,13 @@ import android.text.TextWatcher
 import android.util.AttributeSet
 import android.widget.EditText
 import android.widget.FrameLayout
+import androidx.recyclerview.widget.DefaultItemAnimator
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.lukeneedham.flowerpotrecycler.adapter.RecyclerItemView
 import com.lukeneedham.vocabdrill.R
+import com.lukeneedham.vocabdrill.domain.model.Tag
 import com.lukeneedham.vocabdrill.domain.model.VocabEntryProto
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagCreateCallback
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagCreateViewCallback
@@ -37,11 +39,12 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
         }
     }
 
+    private val tagsLayoutManager = FlexboxLayoutManager(context, FlexDirection.ROW, FlexWrap.WRAP)
     private val tagsAdapter = TagsAdapter(context, ::onExistingTagClick, tagCreateViewCallback)
 
     private var wordATextWatcher: TextWatcher? = null
     private var wordBTextWatcher: TextWatcher? = null
-    private var entryItem: VocabEntryEditItem.Create? = null
+    private var props: VocabEntryCreateProps? = null
 
     var vocabEntryCreateCallback: VocabEntryCreateCallback? = null
     var tagCreateCallback: TagCreateCallback? = null
@@ -51,13 +54,27 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
     init {
         inflateFrom(R.layout.view_item_vocab_entry_create)
 
-        tagsRecycler.layoutManager = FlexboxLayoutManager(context, FlexDirection.ROW, FlexWrap.WRAP)
+        tagsRecycler.layoutManager = tagsLayoutManager
         tagsRecycler.adapter = tagsAdapter
+        tagsRecycler.itemAnimator = DefaultItemAnimator().apply {
+            supportsChangeAnimations = false
+        }
     }
 
     override fun setItem(position: Int, item: VocabEntryCreateProps) {
+        if (item == this.props) {
+            // The recyclerview may rebind the same item multiple times.
+            // We want to ignore repeat binds, as they will override state internal to this view.
+            // So internal state wins over input state in this case
+            return
+        }
+        this.props = item
+
+        val tagItemHeight =
+            context.resources.getDimensionPixelSize(R.dimen.tag_item_height_expanded)
+        tagsAdapter.setItemHeight(tagItemHeight)
+
         val entryItem = item.entryItem
-        this.entryItem = entryItem
         setupTextWatchers(entryItem)
         setupTextFocus(item)
         refreshSaveButtonEnabled()
@@ -156,7 +173,7 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
         tagExistingClickListener(requireEntryItem(), tag)
     }
 
-    private fun requireEntryItem() = entryItem ?: error("entryItem must be set")
+    private fun requireEntryItem() = props?.entryItem ?: error("entryItem must be set")
 
     private fun requireTagCreateCallback() =
         tagCreateCallback ?: error("Tag create callback must be set")
