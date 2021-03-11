@@ -6,6 +6,9 @@ import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.FrameLayout
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintLayout.LayoutParams.MATCH_CONSTRAINT
+import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -15,8 +18,6 @@ import com.lukeneedham.flowerpotrecycler.util.extensions.addItemLayoutParams
 import com.lukeneedham.flowerpotrecycler.util.extensions.addOnItemClickListener
 import com.lukeneedham.vocabdrill.R
 import com.lukeneedham.vocabdrill.presentation.util.extension.inflateFrom
-import com.lukeneedham.vocabdrill.presentation.util.recyclerview.decoration.LinearMarginItemDecorationCreator
-import kotlinx.android.synthetic.main.fragment_language.*
 import kotlinx.android.synthetic.main.view_tag_suggestions.view.*
 
 class TagSuggestionsView @JvmOverloads constructor(
@@ -46,8 +47,53 @@ class TagSuggestionsView @JvmOverloads constructor(
         }
     }
 
-    fun setSuggestions(tags: List<TagSuggestion>) {
-        adapter.submitList(tags)
-        noSuggestionsText.visibility = if (tags.isEmpty()) View.VISIBLE else View.GONE
+    /**
+     * @param tags can be:
+     * - a list of tags to show
+     * - an empty list of tags, representing that no suggestions were found
+     * - null, representing that the suggestions are loading
+     */
+    fun setSuggestions(tags: List<TagSuggestion>?) {
+
+        /**
+         * Toggle whether [recyclerView] is visible.
+         * It does not use [View.setVisibility] or [View.setAlpha],
+         * because doing so will prevent recyclerView children from being updated,
+         * and this creates a flicker.
+         *
+         * Instead, this workaround makes the recyclerView too small to be seen,
+         * while 'tricking' the Android system into thinking the view is still visible,
+         * so allows View updates to continue as necessary.
+         */
+        fun toggleRecyclerView(shouldShow: Boolean) {
+            recyclerView.updateLayoutParams {
+                // Use 1 as the 'invisible' height - it's the smallest height available to us
+                height = if(shouldShow) MATCH_CONSTRAINT else 1
+            }
+        }
+
+        if (tags == null) {
+            // Loading - neither is visible
+            toggleRecyclerView(false)
+            noSuggestionsText.visibility = View.GONE
+            adapter.submitList(emptyList())
+            return
+        }
+
+        if (tags.isEmpty()) {
+            // Loaded, and result is that there are no suggestions
+            toggleRecyclerView(false)
+            noSuggestionsText.visibility = View.VISIBLE
+            adapter.submitList(emptyList())
+            return
+        }
+
+        // Only show recyclerview after tags are updated, to prevent flicker
+        adapter.submitList(tags) {
+            recyclerView.post {
+                toggleRecyclerView(true)
+                noSuggestionsText.visibility = View.GONE
+            }
+        }
     }
 }

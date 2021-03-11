@@ -20,6 +20,13 @@ class VocabEntryReduxer(
     private var createItem: VocabEntryEditPartialItem.Create = newCreateItem()
 
     private var selectedItem: SelectedVocabEntry = SelectedVocabEntry.None
+        set(value) {
+            field = value
+            if (value.getFocusItem() !is FocusItem.AddTag) {
+                // Reset tag suggestions - add tag has lost focus, suggestions are thus stale
+                tagSuggestionsResult = null
+            }
+        }
     private var tagSuggestionsResult: TagSuggestionResult? = null
 
     init {
@@ -35,8 +42,6 @@ class VocabEntryReduxer(
 
         tagSuggestionsResult = result
 
-        //selectedFocusItem.tagSuggestions
-
         val newFocusItem = selectedFocusItem.copy(tagSuggestions = result.suggestions)
 
         when (selectedItem) {
@@ -49,10 +54,6 @@ class VocabEntryReduxer(
                 this.selectedItem = selectedItem.copy(focusItem = newFocusItem)
             }
         }
-
-//        val focusItem = FocusItem.AddTag(selection, text, tagSuggestions)
-//        val viewMode = ViewMode.Active(focusItem)
-//        onViewModeChanged(editItem, viewMode)
 
         notifyNewItems()
     }
@@ -95,9 +96,15 @@ class VocabEntryReduxer(
         notifyNewItems()
     }
 
-    fun focusCreateItem() {
+    /** Focus the word A input of the create item. Allows users to start typing directly */
+    fun focusCreateItemWordA() {
         val focus = FocusItem.WordA(TextSelection.End)
         selectedItem = SelectedVocabEntry.Create(focus)
+        notifyNewItems()
+    }
+
+    fun focusCreateItem() {
+        selectedItem = SelectedVocabEntry.Create(FocusItem.None)
         notifyNewItems()
     }
 
@@ -208,7 +215,7 @@ class VocabEntryReduxer(
         val resultItem = tagSuggestionsResult?.item
         val isSameItem = resultItem != null && resultItem.isSameItem(editItem)
         val tagSuggestions =
-            (if (!isSameItem) null else tagSuggestionsResult?.suggestions) ?: emptyList()
+            (if (!isSameItem) null else tagSuggestionsResult?.suggestions)
 
         val focusItem = FocusItem.AddTag(selection, text, tagSuggestions)
         val viewMode = ViewMode.Active(focusItem)

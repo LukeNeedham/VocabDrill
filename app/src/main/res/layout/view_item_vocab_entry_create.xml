@@ -54,7 +54,6 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/tagsRecycler"
         android:layout_width="0dp"
-        android:background="#ff0000"
         android:layout_height="@dimen/tag_item_height_expanded"
         android:layout_marginStart="10dp"
         android:layout_marginTop="10dp"

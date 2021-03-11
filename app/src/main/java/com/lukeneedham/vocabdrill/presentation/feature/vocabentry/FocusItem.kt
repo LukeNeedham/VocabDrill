@@ -9,7 +9,7 @@ sealed class FocusItem {
     data class AddTag(
         val selection: TextSelection,
         val text: String,
-        val tagSuggestions: List<TagSuggestion>
+        val tagSuggestions: List<TagSuggestion>?
     ) : FocusItem()
 
     object None : FocusItem()

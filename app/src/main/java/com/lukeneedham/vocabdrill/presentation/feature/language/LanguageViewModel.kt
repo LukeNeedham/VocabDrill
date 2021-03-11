@@ -108,7 +108,7 @@ class LanguageViewModel(
     }
 
     fun focusCreateItem() {
-        entryReduxer.focusCreateItem()
+        entryReduxer.focusCreateItemWordA()
     }
 
     fun onViewModeChanged(item: VocabEntryEditItem, viewMode: ViewMode) {

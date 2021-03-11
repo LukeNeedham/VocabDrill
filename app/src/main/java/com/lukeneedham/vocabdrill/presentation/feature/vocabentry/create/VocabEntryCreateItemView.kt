@@ -4,6 +4,8 @@ import android.content.Context
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.AttributeSet
+import android.view.View
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.widget.EditText
 import android.widget.FrameLayout
 import androidx.recyclerview.widget.DefaultItemAnimator
@@ -12,11 +14,11 @@ import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
 import com.lukeneedham.flowerpotrecycler.adapter.RecyclerItemView
 import com.lukeneedham.vocabdrill.R
-import com.lukeneedham.vocabdrill.domain.model.Tag
 import com.lukeneedham.vocabdrill.domain.model.VocabEntryProto
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagCreateCallback
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagCreateViewCallback
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagPresentItem
+import com.lukeneedham.vocabdrill.presentation.feature.tag.suggestion.TagSuggestion
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.*
 import com.lukeneedham.vocabdrill.presentation.util.BaseTextWatcher
 import com.lukeneedham.vocabdrill.presentation.util.TextSelection
@@ -50,6 +52,7 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
     var tagCreateCallback: TagCreateCallback? = null
     var tagExistingClickListener: (VocabEntryEditItem, TagPresentItem.Existing) -> Unit =
         { _, _ -> }
+    var tagSuggestionClickListener: (VocabEntryEditItem, TagSuggestion) -> Unit = { _, _ -> }
 
     init {
         inflateFrom(R.layout.view_item_vocab_entry_create)
@@ -58,6 +61,10 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
         tagsRecycler.adapter = tagsAdapter
         tagsRecycler.itemAnimator = DefaultItemAnimator().apply {
             supportsChangeAnimations = false
+        }
+
+        tagSuggestionsView.onSuggestionClickListener = {
+            tagSuggestionClickListener(requireEntryItem(), it)
         }
     }
 
@@ -70,9 +77,9 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
         }
         this.props = item
 
-        val tagItemHeight =
-            context.resources.getDimensionPixelSize(R.dimen.tag_item_height_expanded)
-        tagsAdapter.setItemHeight(tagItemHeight)
+        val viewMode = item.viewMode
+
+        tagsAdapter.setItemHeight(MATCH_PARENT)
 
         val entryItem = item.entryItem
         setupTextWatchers(entryItem)
@@ -90,6 +97,14 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
         }
 
         tagsAdapter.submitList(entryItem.tagItems)
+
+        if (viewMode is ViewMode.Active && viewMode.focusItem is FocusItem.AddTag) {
+            val suggestions = viewMode.focusItem.tagSuggestions
+            tagSuggestionsView.visibility = View.VISIBLE
+            tagSuggestionsView.setSuggestions(suggestions)
+        } else {
+            tagSuggestionsView.visibility = View.GONE
+        }
     }
 
     private fun setupTextWatchers(item: VocabEntryEditItem.Create) {

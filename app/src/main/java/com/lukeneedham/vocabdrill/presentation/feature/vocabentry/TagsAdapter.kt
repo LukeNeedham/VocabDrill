@@ -13,8 +13,6 @@ import com.lukeneedham.flowerpotrecycler.adapter.itemtype.config.ItemTypeConfigL
 import com.lukeneedham.flowerpotrecycler.util.ItemTypeConfigCreator
 import com.lukeneedham.flowerpotrecycler.util.extensions.addOnItemClickListener
 import com.lukeneedham.vocabdrill.presentation.feature.tag.*
-import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.create.VocabEntryCreateProps
-import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.existing.VocabEntryExistingProps
 import com.lukeneedham.vocabdrill.util.extension.TAG
 
 /** Requires use of flexbox layout manager */
@@ -71,15 +69,19 @@ class TagsAdapter(
     }
 
     private fun updateItemLayoutParams(itemView: View) {
-        if (itemView.layoutParams == null) {
-            Log.i(TAG, "Layout params not yet attached - skipping")
-            return
-        }
-        itemView.updateLayoutParams {
-            if (itemHeight == 0) {
-                Log.i(TAG, "Item height is 0, view will not be visible")
+        fun doUpdate() {
+            itemView.updateLayoutParams {
+                if (itemHeight == 0) {
+                    Log.i(TAG, "Item height is 0, view will not be visible")
+                }
+                height = itemHeight
             }
-            height = itemHeight
+        }
+
+        if (itemView.layoutParams == null) {
+            itemView.post { doUpdate() }
+        } else {
+            doUpdate()
         }
     }
 

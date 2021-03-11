@@ -55,6 +55,7 @@ class VocabEntriesAdapter(
                         this.vocabEntryCreateCallback = vocabEntryCreateCallback
                         this.tagCreateCallback = tagCreateCallback
                         this.tagExistingClickListener = tagExistingClickListener
+                        this.tagSuggestionClickListener = tagSuggestionClickListener
                     }
                 },
                 FeatureConfig<VocabEntryCreateProps, VocabEntryCreateItemView>().apply {
