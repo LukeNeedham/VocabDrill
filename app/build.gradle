@@ -99,6 +99,9 @@ dependencies {
     // Flexbox
     implementation 'com.google.android:flexbox:2.0.1'
 
+    // Lottie
+    implementation 'com.airbnb.android:lottie:3.6.1'
+
     // Lint check
     implementation 'com.github.Innovattic:multiple-synthetic-import-lint:1.0.1'
 

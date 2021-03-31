@@ -9,7 +9,6 @@ import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.EditText
 import android.widget.FrameLayout
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.view.setPadding
 import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.DefaultItemAnimator
 import com.google.android.flexbox.FlexDirection
@@ -20,12 +19,9 @@ import com.lukeneedham.flowerpotrecycler.adapter.RecyclerItemView
 import com.lukeneedham.vocabdrill.R
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagCreateCallback
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagCreateViewCallback
-import com.lukeneedham.vocabdrill.presentation.feature.tag.TagPresentItem
+import com.lukeneedham.vocabdrill.presentation.feature.tag.TagItemProps
 import com.lukeneedham.vocabdrill.presentation.feature.tag.suggestion.TagSuggestion
-import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.FocusItem
-import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.TagsAdapter
-import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.ViewMode
-import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryEditItem
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.*
 import com.lukeneedham.vocabdrill.presentation.util.BaseTextWatcher
 import com.lukeneedham.vocabdrill.presentation.util.TextSelection
 import com.lukeneedham.vocabdrill.presentation.util.extension.getSelection
@@ -50,7 +46,7 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
     }
 
     private val tagsLayoutManager = FlexboxLayoutManager(context, FlexDirection.ROW, FlexWrap.WRAP)
-    private val tagsAdapter = TagsAdapter(context, ::onExistingTagClick, tagCreateViewCallback)
+    private val tagsAdapter = TagsAdapter(::onExistingTagClick, tagCreateViewCallback)
 
     private var wordATextWatcher: TextWatcher? = null
     private var wordBTextWatcher: TextWatcher? = null
@@ -59,7 +55,7 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
 
     var vocabEntryExistingCallback: VocabEntryExistingCallback? = null
     var tagCreateCallback: TagCreateCallback? = null
-    var tagExistingClickListener: (VocabEntryEditItem, TagPresentItem.Existing) -> Unit =
+    var tagExistingClickListener: (VocabEntryEditItem, TagItemProps.Existing) -> Unit =
         { _, _ -> }
     var tagSuggestionClickListener: (VocabEntryEditItem, TagSuggestion) -> Unit = { _, _ -> }
 
@@ -106,7 +102,8 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
         setupTextWatchers(editItem)
         setupTextFocus(item)
 
-        tagsAdapter.submitList(editItem.tagItems)
+        // TODO: Pass a real refresh value? Or not necessary?
+        tagsAdapter.submitList(editItem.tagItems, false)
 
         val tagSuggestions =
             if (viewMode is ViewMode.Active && viewMode.focusItem is FocusItem.AddTag) {
@@ -255,7 +252,7 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
         wordBInputViewLayout.updateLayoutParams { height = wordInputHeight }
     }
 
-    private fun onExistingTagClick(tag: TagPresentItem.Existing) {
+    private fun onExistingTagClick(tag: TagItemProps.Existing) {
         tagExistingClickListener(requireProps().entryItem, tag)
     }
 

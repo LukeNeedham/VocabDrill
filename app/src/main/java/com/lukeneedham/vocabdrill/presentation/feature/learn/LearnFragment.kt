@@ -4,18 +4,12 @@ import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.view.animation.Animation
-import android.view.animation.AnimationUtils
-import androidx.core.content.ContextCompat
-import androidx.core.view.postDelayed
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
 import com.lukeneedham.vocabdrill.R
 import com.lukeneedham.vocabdrill.presentation.util.DefaultAnimationListener
 import com.lukeneedham.vocabdrill.presentation.util.extension.hideKeyboard
 import com.lukeneedham.vocabdrill.presentation.util.extension.popBackStackSafe
-import com.lukeneedham.vocabdrill.presentation.util.extension.setEditable
-import com.lukeneedham.vocabdrill.presentation.util.extension.setOnDoneListener
-import com.lukeneedham.vocabdrill.presentation.util.extension.showKeyboard
 import kotlinx.android.synthetic.main.fragment_learn.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -41,17 +35,19 @@ class LearnFragment : Fragment(R.layout.fragment_learn) {
             }
         }
         viewModel.feedbackStateLiveData.observe(viewLifecycleOwner) {
-            textInputViewLayout.endIconDrawable =
-                ContextCompat.getDrawable(requireContext(), it.inputIconRes)
+//            textInputViewLayout.endIconDrawable =
+//                ContextCompat.getDrawable(requireContext(), it.inputIconRes)
 
-            when (it) {
-                FeedbackState.Correct -> {
-                    giveCorrectFeedback()
-                }
-                FeedbackState.Incorrect -> {
-                    giveIncorrectFeedback()
-                }
-            }
+            flipBookView.setFeedbackState(it)
+
+//            when (it) {
+//                is FeedbackState.Correct -> {
+//                    giveCorrectFeedback()
+//                }
+//                is FeedbackState.Incorrect -> {
+//                    giveIncorrectFeedback()
+//                }
+//            }
         }
     }
 
@@ -62,15 +58,16 @@ class LearnFragment : Fragment(R.layout.fragment_learn) {
             popBackStackSafe()
         }
 
-        textInputView.setOnDoneListener {
+        submitButton.setOnClickListener {
             submitInput()
         }
-        textInputViewLayout.requestFocus()
-        showKeyboard()
 
-        textInputViewLayout.setEndIconOnClickListener {
-            submitInput()
-        }
+        //textInputViewLayout.requestFocus()
+        //showKeyboard()
+
+//        textInputViewLayout.setEndIconOnClickListener {
+//            submitInput()
+//        }
 
         // TODO: Better color setup
         flipBookView.setPaperColour(Color.WHITE)
@@ -81,6 +78,9 @@ class LearnFragment : Fragment(R.layout.fragment_learn) {
                 onPageTurnAnimationCompleted()
             }
         })
+        flipBookView.setOnFeedbackCompletedListener {
+            viewModel.onFeedbackCompleted()
+        }
     }
 
     override fun onDestroyView() {
@@ -90,42 +90,42 @@ class LearnFragment : Fragment(R.layout.fragment_learn) {
 
     private fun submitInput() {
         val feedbackState = viewModel.feedbackStateLiveData.value
-        if (feedbackState != FeedbackState.Ready) {
+        if (feedbackState != FeedbackState.AcceptingInput) {
             return
         }
 
-        val input = textInputView.text.toString()
+        val input = flipBookView.getInput()
         viewModel.onInput(input)
     }
 
-    private fun giveCorrectFeedback() {
-        textInputView.setEditable(false)
-        val animation = AnimationUtils.loadAnimation(context, R.anim.pulse)
-        animation.setAnimationListener(object : DefaultAnimationListener {
-            override fun onAnimationEnd(animation: Animation?) {
-                requireView().postDelayed(CORRECT_FEEDBACK_END_WAIT) {
-                    textInputView.setText("")
-                    textInputView.setEditable(true)
-                }
-            }
-        })
-        textInputViewLayout.startAnimation(animation)
+    private fun giveCorrectFeedback(state: FeedbackState.Correct) {
+//        flipBookView.setInputEnabled(false)
+//        val animation = AnimationUtils.loadAnimation(context, R.anim.pulse)
+//        animation.setAnimationListener(object : DefaultAnimationListener {
+//            override fun onAnimationEnd(animation: Animation?) {
+//                requireView().postDelayed(CORRECT_FEEDBACK_END_WAIT) {
+//                    flipBookView.setInputText("")
+//                    flipBookView.setInputEnabled(true)
+//                }
+//            }
+//        })
+        //textInputViewLayout.startAnimation(animation)
     }
 
     private fun giveIncorrectFeedback() {
-        val animation = AnimationUtils.loadAnimation(context, R.anim.shake)
-        animation.setAnimationListener(object : DefaultAnimationListener {
-            override fun onAnimationEnd(animation: Animation?) {
-                requireView().postDelayed(INCORRECT_FEEDBACK_END_WAIT) {
-                    viewModel.onFeedbackGiven()
-                }
-            }
-        })
-        textInputViewLayout.startAnimation(animation)
+//        val animation = AnimationUtils.loadAnimation(context, R.anim.shake)
+//        animation.setAnimationListener(object : DefaultAnimationListener {
+//            override fun onAnimationEnd(animation: Animation?) {
+//                requireView().postDelayed(INCORRECT_FEEDBACK_END_WAIT) {
+//                    viewModel.onFeedbackGiven()
+//                }
+//            }
+//        })
+//        textInputViewLayout.startAnimation(animation)
     }
 
     private fun onPageTurnAnimationCompleted() {
-        viewModel.onFeedbackGiven()
+        viewModel.onCurrentPageVisible()
     }
 
     companion object {

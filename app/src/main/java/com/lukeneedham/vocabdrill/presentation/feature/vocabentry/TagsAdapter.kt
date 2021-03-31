@@ -1,64 +1,100 @@
 package com.lukeneedham.vocabdrill.presentation.feature.vocabentry
 
-import android.content.Context
 import android.util.Log
 import android.view.View
+import android.view.ViewGroup
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.DiffUtil
-import com.lukeneedham.flowerpotrecycler.adapter.DefaultDelegatedRecyclerAdapter
-import com.lukeneedham.flowerpotrecycler.adapter.ViewHolder
-import com.lukeneedham.flowerpotrecycler.adapter.delegates.position.implementation.LinearPositionDelegate
-import com.lukeneedham.flowerpotrecycler.adapter.itemtype.builderbinder.implementation.view.RecyclerItemViewBuilderBinder
-import com.lukeneedham.flowerpotrecycler.adapter.itemtype.config.ItemTypeConfigListRegistry
-import com.lukeneedham.flowerpotrecycler.util.ItemTypeConfigCreator
-import com.lukeneedham.flowerpotrecycler.util.extensions.addOnItemClickListener
+import androidx.recyclerview.widget.RecyclerView
 import com.lukeneedham.vocabdrill.presentation.feature.tag.*
+import com.lukeneedham.vocabdrill.presentation.util.recyclerview.ListDiffCallback
+import com.lukeneedham.vocabdrill.presentation.util.recyclerview.ViewHolder
 import com.lukeneedham.vocabdrill.util.extension.TAG
 
-/** Requires use of flexbox layout manager */
 class TagsAdapter(
-    context: Context,
-    onExistingTagClick: (TagPresentItem.Existing) -> Unit,
-    tagCreateViewCallback: TagCreateViewCallback,
-) : DefaultDelegatedRecyclerAdapter<TagPresentItem, View>() {
+    private val onExistingTagClick: (TagItemProps.Existing) -> Unit,
+    private val tagCreateViewCallback: TagCreateViewCallback,
+) : RecyclerView.Adapter<ViewHolder>() {
 
     private var itemHeight: Int = 0
 
-    override val itemTypeConfigRegistry = ItemTypeConfigListRegistry<TagPresentItem, View>(
-        listOf(
-            ItemTypeConfigCreator.fromBuilderBinder(
-                RecyclerItemViewBuilderBinder.newInstance {
-                    TagCreateView(context).apply {
-                        this.callback = tagCreateViewCallback
-                    }
-                }
-            ),
-            ItemTypeConfigCreator.fromRecyclerItemView<TagPresentItem.Existing, TagExistingView> {
-                addOnItemClickListener { tag, _, _ -> onExistingTagClick(tag) }
-            }
-        )
-    )
-
-    override val positionDelegate = LinearPositionDelegate(this, diffCallback)
+    private var items: List<TagItemProps> = emptyList()
 
     init {
         setHasStableIds(true)
     }
 
-    override fun getItemId(position: Int): Long {
-        val tagItem = positionDelegate.getItemAt(position)
-        return when (tagItem) {
-            is TagPresentItem.Existing -> tagItem.data.id
-            is TagPresentItem.Create -> Long.MAX_VALUE
+    fun getItems() = items
+
+    /**
+     * @param refresh controls whether to rebind for this new data, overriding item view internal state.
+     * If [refresh] is false, internal state of the item view will be preserved instead.
+     * This is an optimisation - by passing [refresh] as false when internal item view state is reliable,
+     * unnecessary rebinds can be avoided and performance improved.
+     */
+    fun submitList(items: List<TagItemProps>, refresh: Boolean) {
+        val oldItems = this.items
+        val newItems = items
+        this.items = items
+        if (refresh) {
+            val diffCallback = ListDiffCallback(oldItems, newItems, diffItemCallback)
+            val diffResult = DiffUtil.calculateDiff(diffCallback)
+            diffResult.dispatchUpdatesTo(this)
         }
     }
 
-    override fun onBindViewHolder(holder: ViewHolder<View>, position: Int) {
-        super.onBindViewHolder(holder, position)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val view = when (viewType) {
+            ViewType.Existing -> TagExistingView(parent.context)
+            ViewType.Create -> TagCreateView(parent.context).apply {
+                this.callback = tagCreateViewCallback
+            }
+            else -> error("Unhandled viewType: $viewType")
+        }
+        //view.layoutParams = RecyclerView.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
+        return ViewHolder(view)
+    }
+
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val item = getItemAt(position)
+        val itemView = holder.itemView
+        when (item) {
+            is TagItemProps.Existing -> {
+                itemView as TagExistingView
+                itemView.setItem(position, item)
+                itemView.setOnClickListener {
+                    onExistingTagClick(item)
+                }
+            }
+            is TagItemProps.Create -> {
+                itemView as TagCreateView
+                itemView.setItem(position, item)
+            }
+        }
         updateItemLayoutParams(holder.itemView)
     }
 
-    override fun onViewAttachedToWindow(holder: ViewHolder<View>) {
+    override fun getItemCount() = items.size
+
+    override fun getItemId(position: Int): Long {
+        val item = getItemAt(position)
+        return when (item) {
+            is TagItemProps.Existing -> item.data.id
+            is TagItemProps.Create -> Long.MAX_VALUE
+        }
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        val item = getItemAt(position)
+        return when (item) {
+            is TagItemProps.Existing -> ViewType.Existing
+            is TagItemProps.Create -> ViewType.Create
+        }
+    }
+
+    override fun onViewAttachedToWindow(holder: ViewHolder) {
         super.onViewAttachedToWindow(holder)
         updateItemLayoutParams(holder.itemView)
     }
@@ -67,6 +103,8 @@ class TagsAdapter(
         itemHeight = height
         notifyDataSetChanged()
     }
+
+    private fun getItemAt(position: Int) = items[position]
 
     private fun updateItemLayoutParams(itemView: View) {
         fun doUpdate() {
@@ -85,17 +123,22 @@ class TagsAdapter(
         }
     }
 
+    private object ViewType {
+        const val Existing = 0
+        const val Create = 1
+    }
+
     companion object {
-        val diffCallback = object : DiffUtil.ItemCallback<TagPresentItem>() {
+        private val diffItemCallback = object : DiffUtil.ItemCallback<TagItemProps>() {
             override fun areItemsTheSame(
-                oldItem: TagPresentItem,
-                newItem: TagPresentItem
-            ) = oldItem.isSameItem(newItem)
+                oldProps: TagItemProps,
+                newProps: TagItemProps
+            ) = oldProps.isSameItem(newProps)
 
             override fun areContentsTheSame(
-                oldItem: TagPresentItem,
-                newItem: TagPresentItem
-            ) = oldItem == newItem
+                oldEditItem: TagItemProps,
+                newEditItem: TagItemProps
+            ) = oldEditItem == newEditItem
         }
     }
 }

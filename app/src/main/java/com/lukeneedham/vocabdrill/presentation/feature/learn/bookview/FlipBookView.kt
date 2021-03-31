@@ -1,7 +1,6 @@
-package com.lukeneedham.vocabdrill.presentation.feature.learn
+package com.lukeneedham.vocabdrill.presentation.feature.learn.bookview
 
 import android.content.Context
-import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
@@ -10,12 +9,11 @@ import android.view.animation.Animation
 import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
 import com.lukeneedham.vocabdrill.R
+import com.lukeneedham.vocabdrill.presentation.feature.learn.FeedbackState
+import com.lukeneedham.vocabdrill.presentation.feature.learn.PageContents
+import com.lukeneedham.vocabdrill.presentation.feature.learn.RotateZAnimation
 import com.lukeneedham.vocabdrill.presentation.util.DefaultAnimationListener
 import com.lukeneedham.vocabdrill.presentation.util.extension.inflateFrom
-import group.infotech.drawable.dsl.corners
-import group.infotech.drawable.dsl.shapeDrawable
-import group.infotech.drawable.dsl.solidColor
-import group.infotech.drawable.dsl.stroke
 import kotlinx.android.synthetic.main.view_flip_book.view.*
 
 /**
@@ -41,40 +39,16 @@ class FlipBookView @JvmOverloads constructor(
 
     private var pageTurnAnimationListener: Animation.AnimationListener? = null
 
-    private val pageCornerRadius = resources.getDimension(R.dimen.learn_book_corner_radius)
-    private val pageBorderWidth = resources.getDimensionPixelSize(R.dimen.learn_book_border_width)
-
-    private val pageLeftBackground = shapeDrawable {
-        shape = GradientDrawable.RECTANGLE
-        corners {
-            topLeft = pageCornerRadius
-            bottomLeft = pageCornerRadius
-        }
-        stroke {
-            width = pageBorderWidth
-        }
-    }
-
-    private val pageRightBackground = shapeDrawable {
-        shape = GradientDrawable.RECTANGLE
-        corners {
-            topRight = pageCornerRadius
-            bottomRight = pageCornerRadius
-        }
-        stroke {
-            width = pageBorderWidth
-        }
-    }
-
     init {
         inflateFrom(R.layout.view_flip_book)
         clipChildren = false
         clipToPadding = false
+    }
 
-        firstPage.background = pageLeftBackground
-        firstPageMoving.background = pageLeftBackground
-        secondPage.background = pageRightBackground
-        secondPageMoving.background = pageRightBackground
+    fun getInput() = secondPage.getInput()
+
+    fun setFeedbackState(state: FeedbackState) {
+        secondPage.animateState(state)
     }
 
     /**
@@ -89,25 +63,21 @@ class FlipBookView @JvmOverloads constructor(
         pageTurnAnimationListener = listener
     }
 
+    fun setOnFeedbackCompletedListener(listener: () -> Unit) {
+        secondPage.setOnFeedbackCompletedListener(listener)
+    }
+
+    // TODO: Do we want to keep these?
+
     fun setPaperColour(colour: Int) {
-        pageLeftBackground.solidColor = colour
-        pageRightBackground.solidColor = colour
+    }
+
+    fun setBorderColour(colour: Int) {
     }
 
     fun setTextColour(colour: Int) {
         firstPage.setTextColor(colour)
         firstPageMoving.setTextColor(colour)
-        secondPage.setTextColor(colour)
-        secondPageMoving.setTextColor(colour)
-    }
-
-    fun setBorderColour(colour: Int) {
-        pageLeftBackground.stroke {
-            this.color = colour
-        }
-        pageRightBackground.stroke {
-            this.color = colour
-        }
     }
 
     /** Animates to the next page, with contents defined by [nextPage] */
@@ -117,11 +87,11 @@ class FlipBookView @JvmOverloads constructor(
         turnSecondPageAnimation?.setAnimationListener(null)
         turnSecondPageAnimation?.cancel()
 
-        secondPageMoving.text = secondPage.text
-        secondPage.text = nextPage.secondPageText
+        secondPageMoving.setStaticState(secondPage.getState())
+        secondPage.animateState(FeedbackState.Empty)
 
-        firstPage.text = currentPageContents?.firstPageText
-        firstPageMoving.text = nextPage.firstPageText
+        firstPage.setText(currentPageContents?.firstPageText)
+        firstPageMoving.setText(nextPage.firstPageText)
 
         firstPage.visibility = if (currentPageContents == null) View.INVISIBLE else View.VISIBLE
         firstPageMoving.visibility = View.INVISIBLE
@@ -144,7 +114,7 @@ class FlipBookView @JvmOverloads constructor(
                     }
 
                     override fun onAnimationEnd(animation: Animation?) {
-                        firstPage.text = nextPage.firstPageText
+                        firstPage.setText(nextPage.firstPageText)
                         firstPage.visibility = View.VISIBLE
                         firstPageMoving.visibility = View.INVISIBLE
                         pageTurnAnimationListener?.onAnimationEnd(animation)

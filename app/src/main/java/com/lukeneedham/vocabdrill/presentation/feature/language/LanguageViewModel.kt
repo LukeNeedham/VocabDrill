@@ -2,12 +2,12 @@ package com.lukeneedham.vocabdrill.presentation.feature.language
 
 import androidx.lifecycle.MutableLiveData
 import com.lukeneedham.vocabdrill.domain.model.*
-import com.lukeneedham.vocabdrill.presentation.feature.tag.TagPresentItem
+import com.lukeneedham.vocabdrill.presentation.feature.tag.TagItemProps
 import com.lukeneedham.vocabdrill.presentation.feature.tag.suggestion.TagSuggestion
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.InteractionSection
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.ViewMode
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryEditItem
-import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.VocabEntryViewProps
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.existing.VocabEntryExistingProps
 import com.lukeneedham.vocabdrill.presentation.util.DisposingViewModel
 import com.lukeneedham.vocabdrill.presentation.util.TextSelection
 import com.lukeneedham.vocabdrill.presentation.util.extension.toLiveData
@@ -42,12 +42,13 @@ class LanguageViewModel(
     private val countryMutableLiveData = MutableLiveData<Country>()
     val countryLiveData = countryMutableLiveData.toLiveData()
 
-    private val vocabEntriesOrCreateMutableLiveData = MutableLiveData<List<VocabEntryViewProps>>()
-    val vocabEntriesOrCreateLiveData = vocabEntriesOrCreateMutableLiveData.toLiveData()
+    private val vocabEntriesUpdateMutableLiveData = MutableLiveData<VocabEntriesUpdate>()
+    val vocabEntriesUpdateLiveData = vocabEntriesUpdateMutableLiveData.toLiveData()
 
-    private val entryReduxer = VocabEntryReduxer(languageId, chooseTextColourForBackground) {
-        vocabEntriesOrCreateMutableLiveData.value = it
-    }
+    private val entryReduxer =
+        VocabEntryReduxer(languageId, chooseTextColourForBackground) { items, refresh ->
+            vocabEntriesUpdateMutableLiveData.value = VocabEntriesUpdate(items, refresh)
+        }
 
     init {
         /*
@@ -101,9 +102,9 @@ class LanguageViewModel(
     }
 
     fun getLearnSet(): LearnSet {
-        val entriesOrCreate = vocabEntriesOrCreateMutableLiveData.value ?: emptyList()
-        val entries = entriesOrCreate.filterIsInstance<VocabEntryEditItem.Existing>()
-            .map { it.entry }
+        val entriesOrCreate = vocabEntriesUpdateMutableLiveData.value?.items ?: emptyList()
+        val entries = entriesOrCreate.filterIsInstance<VocabEntryExistingProps>()
+            .map { it.entryItem.entry }
         return LearnSet(entries)
     }
 
@@ -161,7 +162,7 @@ class LanguageViewModel(
         }
     }
 
-    fun deleteTagFromVocabEntry(entryItem: VocabEntryEditItem, tagItem: TagPresentItem.Existing) {
+    fun deleteTagFromVocabEntry(entryItem: VocabEntryEditItem, tagItem: TagItemProps.Existing) {
         when (entryItem) {
             is VocabEntryEditItem.Create -> {
                 entryReduxer.onCreateItemTagRemoved(tagItem.data)
@@ -186,7 +187,7 @@ class LanguageViewModel(
 
         findTagNameMatchesDisposable?.dispose()
         val tagIdsAlreadyPresent =
-            entryItem.tagItems.filterIsInstance<TagPresentItem.Existing>().map { it.data.id }
+            entryItem.tagItems.filterIsInstance<TagItemProps.Existing>().map { it.data.id }
         val findTagNameMatchesDisposable =
             findTagNameMatches(languageId, tagName).subscribe { tags ->
                 val tagItems = tags.map {
@@ -232,7 +233,7 @@ class LanguageViewModel(
     }
 
     private fun getCreateItemTagIds(): List<Long> = entryReduxer.getCreateEditItem().tagItems
-        .filterIsInstance<TagPresentItem.Existing>()
+        .filterIsInstance<TagItemProps.Existing>()
         .map { it.data.id }
 
     /** Delete all unused tags, except the ones referenced by the create item */

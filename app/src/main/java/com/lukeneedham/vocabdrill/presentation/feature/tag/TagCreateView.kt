@@ -18,9 +18,9 @@ import kotlinx.android.synthetic.main.view_tag_create.view.*
 
 class TagCreateView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : FrameLayout(context, attrs, defStyleAttr), RecyclerItemView<TagPresentItem.Create> {
+) : FrameLayout(context, attrs, defStyleAttr), RecyclerItemView<TagItemProps.Create> {
 
-    private var item: TagPresentItem.Create? = null
+    private var item: TagItemProps.Create? = null
 
     private val tagNameTextWatcher: TextWatcher = object : BaseTextWatcher() {
         override fun afterTextChanged(s: Editable?) {
@@ -37,7 +37,7 @@ class TagCreateView @JvmOverloads constructor(
         }
     }
 
-    override fun setItem(position: Int, item: TagPresentItem.Create) {
+    override fun setItem(position: Int, item: TagItemProps.Create) {
         if (item == this.item) {
             // The recyclerview may rebind the same item multiple times.
             // We want to ignore repeat binds, as they will override state internal to this view.

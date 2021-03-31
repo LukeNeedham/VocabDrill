@@ -17,7 +17,7 @@ import com.lukeneedham.vocabdrill.R
 import com.lukeneedham.vocabdrill.domain.model.VocabEntryProto
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagCreateCallback
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagCreateViewCallback
-import com.lukeneedham.vocabdrill.presentation.feature.tag.TagPresentItem
+import com.lukeneedham.vocabdrill.presentation.feature.tag.TagItemProps
 import com.lukeneedham.vocabdrill.presentation.feature.tag.suggestion.TagSuggestion
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.*
 import com.lukeneedham.vocabdrill.presentation.util.BaseTextWatcher
@@ -42,7 +42,7 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
     }
 
     private val tagsLayoutManager = FlexboxLayoutManager(context, FlexDirection.ROW, FlexWrap.WRAP)
-    private val tagsAdapter = TagsAdapter(context, ::onExistingTagClick, tagCreateViewCallback)
+    private val tagsAdapter = TagsAdapter(::onExistingTagClick, tagCreateViewCallback)
 
     private var wordATextWatcher: TextWatcher? = null
     private var wordBTextWatcher: TextWatcher? = null
@@ -50,7 +50,7 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
 
     var vocabEntryCreateCallback: VocabEntryCreateCallback? = null
     var tagCreateCallback: TagCreateCallback? = null
-    var tagExistingClickListener: (VocabEntryEditItem, TagPresentItem.Existing) -> Unit =
+    var tagExistingClickListener: (VocabEntryEditItem, TagItemProps.Existing) -> Unit =
         { _, _ -> }
     var tagSuggestionClickListener: (VocabEntryEditItem, TagSuggestion) -> Unit = { _, _ -> }
 
@@ -89,14 +89,15 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
         saveButton.setOnClickListener {
             val wordA = getWordAInput() ?: error("Word A must have input")
             val wordB = getWordBInput() ?: error("Word B must have input")
-            val tags = tagsAdapter.positionDelegate.getItems()
-                .filterIsInstance<TagPresentItem.Existing>()
+            val tags = tagsAdapter.getItems()
+                .filterIsInstance<TagItemProps.Existing>()
                 .map { it.data }
             val proto = VocabEntryProto(wordA, wordB, entryItem.languageId, tags)
             requireEntryCallback().save(proto)
         }
 
-        tagsAdapter.submitList(entryItem.tagItems)
+        // TODO: Pass a real refresh value? Or not necessary?
+        tagsAdapter.submitList(entryItem.tagItems, false)
 
         if (viewMode is ViewMode.Active && viewMode.focusItem is FocusItem.AddTag) {
             val suggestions = viewMode.focusItem.tagSuggestions
@@ -116,11 +117,13 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
 
         wordATextWatcher = object : BaseTextWatcher() {
             override fun afterTextChanged(s: Editable?) {
+                refreshSaveButtonEnabled()
                 requireEntryCallback().onWordAChanged(s.toString(), wordAInputView.getSelection())
             }
         }
         wordBTextWatcher = object : BaseTextWatcher() {
             override fun afterTextChanged(s: Editable?) {
+                refreshSaveButtonEnabled()
                 requireEntryCallback().onWordBChanged(s.toString(), wordBInputView.getSelection())
             }
         }
@@ -184,7 +187,7 @@ class VocabEntryCreateItemView @JvmOverloads constructor(
     private fun isSaveButtonEnabled(wordA: String?, wordB: String?): Boolean =
         !wordA.isNullOrBlank() && !wordB.isNullOrBlank()
 
-    private fun onExistingTagClick(tag: TagPresentItem.Existing) {
+    private fun onExistingTagClick(tag: TagItemProps.Existing) {
         tagExistingClickListener(requireEntryItem(), tag)
     }
 

@@ -3,7 +3,7 @@ package com.lukeneedham.vocabdrill.presentation.feature.language
 import com.lukeneedham.vocabdrill.domain.model.Tag
 import com.lukeneedham.vocabdrill.domain.model.VocabEntry
 import com.lukeneedham.vocabdrill.domain.model.VocabEntryAndTags
-import com.lukeneedham.vocabdrill.presentation.feature.tag.TagPresentItem
+import com.lukeneedham.vocabdrill.presentation.feature.tag.TagItemProps
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.*
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.create.VocabEntryCreateProps
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.existing.VocabEntryExistingProps
@@ -14,7 +14,7 @@ import com.lukeneedham.vocabdrill.usecase.ChooseTextColourForBackground
 class VocabEntryReduxer(
     private val languageId: Long,
     private val chooseTextColourForBackground: ChooseTextColourForBackground,
-    private val onItemsChangeListener: (items: List<VocabEntryViewProps>) -> Unit
+    private val onItemsChangeListener: (items: List<VocabEntryViewProps>, refresh: Boolean) -> Unit
 ) {
     private val existingItems: MutableList<VocabEntryEditPartialItem.Existing> = mutableListOf()
     private var createItem: VocabEntryEditPartialItem.Create = newCreateItem()
@@ -30,7 +30,7 @@ class VocabEntryReduxer(
     private var tagSuggestionsResult: TagSuggestionResult? = null
 
     init {
-        notifyNewItems()
+        notifyNewItems(true)
     }
 
     fun setTagSuggestionsResult(result: TagSuggestionResult) {
@@ -55,28 +55,28 @@ class VocabEntryReduxer(
             }
         }
 
-        notifyNewItems()
+        notifyNewItems(true)
     }
 
     fun submitExistingItems(items: List<VocabEntryAndTags>) {
         val newExistingItems = items.map { createVocabEntryOrCreateFromEntry(it) }
         existingItems.clear()
         existingItems.addAll(newExistingItems)
-        notifyNewItems()
+        notifyNewItems(true)
     }
 
     fun onCreateItemWordAChanged(newWordA: String, selection: TextSelection) {
         createItem = createItem.copy(wordA = newWordA)
         val focus = FocusItem.WordA(selection)
         selectedItem = SelectedVocabEntry.Create(focus)
-        notifyNewItems()
+        notifyNewItems(false)
     }
 
     fun onCreateItemWordBChanged(newWordB: String, selection: TextSelection) {
         createItem = createItem.copy(wordB = newWordB)
         val focus = FocusItem.WordB(selection)
         selectedItem = SelectedVocabEntry.Create(focus)
-        notifyNewItems()
+        notifyNewItems(false)
     }
 
     fun selectCreateItem(section: InteractionSection, selection: TextSelection?) {
@@ -87,30 +87,30 @@ class VocabEntryReduxer(
             InteractionSection.Other -> FocusItem.None
         }
         selectedItem = SelectedVocabEntry.Create(focus)
-        notifyNewItems()
+        notifyNewItems(true)
     }
 
     fun onCreateItemSaved() {
         createItem = newCreateItem()
         selectedItem = SelectedVocabEntry.Create(FocusItem.WordA(TextSelection.End))
-        notifyNewItems()
+        notifyNewItems(true)
     }
 
     /** Focus the word A input of the create item. Allows users to start typing directly */
     fun focusCreateItemWordA() {
         val focus = FocusItem.WordA(TextSelection.End)
         selectedItem = SelectedVocabEntry.Create(focus)
-        notifyNewItems()
+        notifyNewItems(true)
     }
 
     fun focusCreateItem() {
         selectedItem = SelectedVocabEntry.Create(FocusItem.None)
-        notifyNewItems()
+        notifyNewItems(true)
     }
 
     fun focusExistingItem(entryId: Long) {
         selectedItem = SelectedVocabEntry.Existing(entryId, FocusItem.None)
-        notifyNewItems()
+        notifyNewItems(true)
     }
 
     fun onExistingItemWordAChanged(entryId: Long, newWordA: String, selection: TextSelection) {
@@ -123,7 +123,7 @@ class VocabEntryReduxer(
         }
         val focus = FocusItem.WordA(selection)
         selectedItem = SelectedVocabEntry.Existing(entryId, focus)
-        notifyNewItems()
+        notifyNewItems(false)
     }
 
     fun onExistingItemWordBChanged(entryId: Long, newWordB: String, selection: TextSelection) {
@@ -136,21 +136,21 @@ class VocabEntryReduxer(
         }
         val focus = FocusItem.WordB(selection)
         selectedItem = SelectedVocabEntry.Existing(entryId, focus)
-        notifyNewItems()
+        notifyNewItems(false)
     }
 
     fun onCreateItemTagAdded(tag: Tag) {
         val tags = createItem.tags.toMutableList()
         tags.add(tag)
         createItem = createItem.copy(tags = tags)
-        notifyNewItems()
+        notifyNewItems(true)
     }
 
     fun onCreateItemTagRemoved(tag: Tag) {
         val tags = createItem.tags.toMutableList()
         tags.remove(tag)
         createItem = createItem.copy(tags = tags)
-        notifyNewItems()
+        notifyNewItems(true)
     }
 
     /** @return all items, after fixing the viewmode for the selected item */
@@ -174,7 +174,7 @@ class VocabEntryReduxer(
             val addTagFocus = (viewMode as? ViewMode.Active)?.focusItem as? FocusItem.AddTag
             val createTagText = addTagFocus?.text ?: ""
             val createTagSelection = addTagFocus?.selection
-            existingTagItems + TagPresentItem.Create(createTagText, createTagSelection)
+            existingTagItems + TagItemProps.Create(createTagText, createTagSelection)
         }
 
         VocabEntryEditItem.Existing(entry, allTagItems)
@@ -196,7 +196,7 @@ class VocabEntryReduxer(
 
         val focusText = addTagFocus?.text ?: ""
         val focusSelection = addTagFocus?.selection
-        val allTagItems = existingTagItems + TagPresentItem.Create(focusText, focusSelection)
+        val allTagItems = existingTagItems + TagItemProps.Create(focusText, focusSelection)
 
         return VocabEntryEditItem.Create(
             createItem.languageId,
@@ -254,7 +254,7 @@ class VocabEntryReduxer(
                 }
             }
         }
-        notifyNewItems()
+        notifyNewItems(true)
     }
 
     private fun newCreateItem() = VocabEntryEditPartialItem.Create.newInstance(languageId)
@@ -268,16 +268,16 @@ class VocabEntryReduxer(
     }
 
     /** Fire this to kick off a recalculation of items */
-    private fun notifyNewItems() {
-        onItemsChangeListener(getAllProps())
+    private fun notifyNewItems(refresh: Boolean) {
+        onItemsChangeListener(getAllProps(), refresh)
     }
 
     private fun createVocabEntryOrCreateFromEntry(entryAndTags: VocabEntryAndTags) =
         VocabEntryEditPartialItem.Existing(entryAndTags)
 
-    private fun createExistingTagItem(tag: Tag): TagPresentItem.Existing {
+    private fun createExistingTagItem(tag: Tag): TagItemProps.Existing {
         val textColor = chooseTextColourForBackground(tag.color)
-        return TagPresentItem.Existing(tag, textColor)
+        return TagItemProps.Existing(tag, textColor)
     }
 
     private fun convertEditItemsToProps(allItems: List<VocabEntryEditItem>): List<VocabEntryViewProps> {

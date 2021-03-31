@@ -16,7 +16,8 @@ class LearnViewModel(
     private val bookStateMutableLiveData = MutableLiveData<BookState>()
     val bookStateLiveData = bookStateMutableLiveData.toLiveData()
 
-    private val feedbackStateMutableLiveData = MutableLiveData<FeedbackState>(FeedbackState.Ready)
+    private val feedbackStateMutableLiveData =
+        MutableLiveData<FeedbackState>(FeedbackState.Empty)
     val feedbackStateLiveData = feedbackStateMutableLiveData.toLiveData()
 
     private var currentEntryIndex = 0
@@ -26,34 +27,35 @@ class LearnViewModel(
     }
 
     fun onInput(input: String) {
-        val isCorrect = isInputCorrect(input)
+        val currentEntry = entryList[currentEntryIndex]
+        val correctValue = currentEntry.wordB
+        val isCorrect = correctValue == input
+
         if (isCorrect) {
-            currentEntryIndex++
-            updatePage()
-            giveCorrectFeedback()
+            giveCorrectFeedback(correctValue)
         } else {
-            giveIncorrectFeedback()
+            giveIncorrectFeedback(input, correctValue)
         }
     }
 
     /** Feedback is completed */
-    fun onFeedbackGiven() {
-        feedbackStateMutableLiveData.value = FeedbackState.Ready
+    fun onCurrentPageVisible() {
+        feedbackStateMutableLiveData.value = FeedbackState.AcceptingInput
     }
 
-    private fun giveCorrectFeedback() {
-        feedbackStateMutableLiveData.value = FeedbackState.Correct
+    fun onFeedbackCompleted() {
+        currentEntryIndex++
+        updatePage()
+    }
+
+    private fun giveCorrectFeedback(correctValue: String) {
+        feedbackStateMutableLiveData.value = FeedbackState.Correct(correctValue)
         playSoundEffect(SoundEffect.Correct)
     }
 
-    private fun giveIncorrectFeedback() {
-        feedbackStateMutableLiveData.value = FeedbackState.Incorrect
+    private fun giveIncorrectFeedback(input: String, correctValue: String) {
+        feedbackStateMutableLiveData.value = FeedbackState.Incorrect(input, correctValue)
         playSoundEffect(SoundEffect.Incorrect)
-    }
-
-    private fun isInputCorrect(input: String): Boolean {
-        val currentEntry = entryList.getOrNull(currentEntryIndex) ?: return false
-        return currentEntry.wordB == input
     }
 
     private fun updatePage() {
@@ -64,7 +66,7 @@ class LearnViewModel(
             val pageNumber = (currentEntryIndex + 1).toString()
             val totalPages = entryList.size
             val progressText = "# $pageNumber / $totalPages"
-            val newContents = PageContents(progressText, newEntry.wordA)
+            val newContents = PageContents(newEntry.wordA, progressText)
             BookState.Page(newContents)
         }
     }

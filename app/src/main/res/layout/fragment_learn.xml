@@ -1,23 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background"
     android:clipChildren="false"
-    android:clipToPadding="false"
-    >
+    android:clipToPadding="false">
 
     <ImageView
         android:id="@+id/closeButton"
         style="@style/NavButton.Close"
+        android:focusableInTouchMode="false"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        />
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <com.lukeneedham.vocabdrill.presentation.feature.learn.FlipBookView
+    <com.lukeneedham.vocabdrill.presentation.feature.learn.bookview.FlipBookView
         android:id="@+id/flipBookView"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -26,38 +24,24 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHeight_percent="0.3"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/closeButton"
-        />
+        app:layout_constraintTop_toBottomOf="@+id/closeButton" />
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/textInputViewLayout"
-        style="@style/TextInput"
+    <TextView
+        android:id="@+id/submitButton"
         android:layout_width="0dp"
+        android:text="Submit"
         android:layout_height="wrap_content"
+        android:gravity="center"
         android:layout_marginStart="20dp"
+        android:layout_marginTop="10dp"
         android:layout_marginEnd="20dp"
-        android:layout_marginTop="35dp"
-        android:imeOptions="actionDone"
-        android:orientation="vertical"
-        android:singleLine="true"
-        app:endIconDrawable="@drawable/ic_submit"
-        app:endIconTint="@null"
-        app:endIconMode="custom"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        android:padding="10dp"
+        android:textColor="@android:color/white"
+        android:background="@color/dark_grey"
         app:layout_constraintTop_toBottomOf="@+id/flipBookView"
-        tools:text="Sample"
-        >
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/textInputView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:importantForAutofill="no"
-            android:inputType="textNoSuggestions"
-            />
-
-    </com.google.android.material.textfield.TextInputLayout>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

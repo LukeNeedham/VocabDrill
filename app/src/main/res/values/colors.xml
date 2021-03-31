@@ -20,4 +20,7 @@
 
     <color name="tag_create_background">#C4C4C4</color>
 
+    <color name="correct">#96CA9F</color>
+    <color name="incorrect">#C88190</color>
+
 </resources>

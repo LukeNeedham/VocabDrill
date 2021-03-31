@@ -11,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.lukeneedham.vocabdrill.R
 import com.lukeneedham.vocabdrill.domain.model.VocabEntryProto
 import com.lukeneedham.vocabdrill.presentation.feature.tag.TagCreateCallback
-import com.lukeneedham.vocabdrill.presentation.feature.tag.TagPresentItem
+import com.lukeneedham.vocabdrill.presentation.feature.tag.TagItemProps
 import com.lukeneedham.vocabdrill.presentation.feature.tag.suggestion.TagSuggestion
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.InteractionSection
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.ViewMode
@@ -112,14 +112,14 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel.vocabEntriesOrCreateLiveData.observe(viewLifecycleOwner) {
-            vocabEntriesAdapter.submitList(it)
+        viewModel.vocabEntriesUpdateLiveData.observe(viewLifecycleOwner) {
+            vocabEntriesAdapter.submitList(it.items, it.refresh)
         }
         viewModel.languageNameLiveData.observe(viewLifecycleOwner) {
             titleView.text = it
         }
         viewModel.countryLiveData.observe(viewLifecycleOwner) {
-            settingsButton.setImageDrawable(it.getFlagDrawable(requireContext()))
+            languageIcon.setImageDrawable(it.getFlagDrawable(requireContext()))
         }
     }
 
@@ -160,7 +160,6 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
                     1 - normalisedScroll
                 }
                 addButton.setScale(fabScale)
-                learnButton.setScale(fabScale)
             }
         })
 
@@ -174,7 +173,7 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
             popBackStackSafe()
         }
 
-        settingsButton.setOnClickListener {
+        titleLayout.setOnClickListener {
             navigateSafe(
                 LanguageFragmentDirections.actionLanguageFragmentToLanguageSettingsFragment(
                     viewModel.languageId
@@ -206,7 +205,7 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
         }
     }
 
-    private fun onTagExistingClick(entryItem: VocabEntryEditItem, tag: TagPresentItem.Existing) {
+    private fun onTagExistingClick(entryItem: VocabEntryEditItem, tag: TagItemProps.Existing) {
         viewModel.deleteTagFromVocabEntry(entryItem, tag)
     }
 
