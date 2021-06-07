@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.EditText
 import android.widget.FrameLayout
+import androidx.compose.ui.platform.ComposeView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.DefaultItemAnimator
@@ -45,8 +46,7 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
         }
     }
 
-    private val tagsLayoutManager = FlexboxLayoutManager(context, FlexDirection.ROW, FlexWrap.WRAP)
-    private val tagsAdapter = TagsAdapter(::onExistingTagClick, tagCreateViewCallback)
+    //private val tagsAdapter = TagsAdapter(::onExistingTagClick, tagCreateViewCallback)
 
     private var wordATextWatcher: TextWatcher? = null
     private var wordBTextWatcher: TextWatcher? = null
@@ -64,16 +64,15 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
         wordAInputViewLayout.setHintEnabledMaintainMargin(false)
         wordBInputViewLayout.setHintEnabledMaintainMargin(false)
 
-        tagsRecycler.layoutManager = tagsLayoutManager
-        tagsRecycler.adapter = tagsAdapter
-        tagsRecycler.itemAnimator = DefaultItemAnimator().apply {
-            supportsChangeAnimations = false
-        }
-
-        tagsRecycler.setOnTouchListener(RecyclerViewClickInterceptor())
-        tagsRecycler.setOnClickListener {
-            flipMode()
-        }
+//        tagsRecycler.layoutManager = tagsLayoutManager
+//        tagsRecycler.adapter = tagsAdapter
+//        tagsRecycler.itemAnimator = DefaultItemAnimator().apply {
+//            supportsChangeAnimations = false
+//        }
+//        tagsRecycler.setOnTouchListener(RecyclerViewClickInterceptor())
+//        tagsRecycler.setOnClickListener {
+//            flipMode()
+//        }
         tagsRecyclerOverlay.setOnClickListener {
             flipMode()
         }
@@ -102,8 +101,7 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
         setupTextWatchers(editItem)
         setupTextFocus(item)
 
-        // TODO: Pass a real refresh value? Or not necessary?
-        tagsAdapter.submitList(editItem.tagItems, false)
+        tagsView.setItems(editItem.tagItems)
 
         val tagSuggestions =
             if (viewMode is ViewMode.Active && viewMode.focusItem is FocusItem.AddTag) {
@@ -226,20 +224,20 @@ class VocabEntryExistingItemView @JvmOverloads constructor(
         val tagExpandedItemHeight =
             context.resources.getDimensionPixelSize(R.dimen.tag_item_height_expanded)
         val tagItemHeight = if (isExpanded) tagExpandedItemHeight else tagCollapsedItemHeight
-        tagsAdapter.setItemHeight(tagItemHeight)
+        //tagsAdapter.setItemHeight(tagItemHeight)
 
         // Tags overlay intercepts click events in collapsed mode only
         tagsRecyclerOverlay.isClickable = !isExpanded
 
-        tagsRecycler.updateLayoutParams<ConstraintLayout.LayoutParams> {
-            height = if (isExpanded) {
-                WRAP_CONTENT
-            } else {
-                // When in collapsed view, the height of the recyclerview is the height of an item
-                // This will therefore show only a single row of items
-                tagCollapsedItemHeight
-            }
-        }
+//        tagsRecycler.updateLayoutParams<ConstraintLayout.LayoutParams> {
+//            height = if (isExpanded) {
+//                WRAP_CONTENT
+//            } else {
+//                // When in collapsed view, the height of the recyclerview is the height of an item
+//                // This will therefore show only a single row of items
+//                tagCollapsedItemHeight
+//            }
+//        }
 
         val wordInputHeightRes = if (isExpanded) {
             R.dimen.vocab_entry_word_input_height_expanded

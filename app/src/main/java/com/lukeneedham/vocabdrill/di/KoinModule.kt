@@ -6,10 +6,13 @@ import com.lukeneedham.vocabdrill.domain.model.LearnSet
 import com.lukeneedham.vocabdrill.presentation.feature.home.HomeViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.language.LanguageViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.language.create.AddLanguageViewModel
+import com.lukeneedham.vocabdrill.presentation.feature.language.entries.VocabEntriesViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.language.settings.LanguageSettingsViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.language.settings.changeflag.ChangeLanguageFlagViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.language.settings.changename.ChangeLanguageNameViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.learn.LearnViewModel
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.existing.CreateEntryItemViewModel
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.existing.ExistingEntryItemViewModel
 import com.lukeneedham.vocabdrill.repository.LanguageRepository
 import com.lukeneedham.vocabdrill.repository.TagRepository
 import com.lukeneedham.vocabdrill.repository.VocabEntryRepository
@@ -19,7 +22,6 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
-import org.koin.core.scope.Scope
 import org.koin.dsl.module
 
 object KoinModule {
@@ -63,6 +65,7 @@ object KoinModule {
         single { DeleteVocabEntry(get()) }
         single { UpdateVocabEntry(get()) }
         single { AddVocabEntry(get(), get()) }
+        single { ObserveVocabEntryForId(get()) }
 
         /* Countries */
         single { ExtractFlagColoursFromLanguageId(get(), get()) }
@@ -114,6 +117,9 @@ object KoinModule {
         viewModel { (languageId: Long) -> ChangeLanguageFlagViewModel(languageId, get(), get()) }
 
         /* Vocab Entry */
+        factory { (languageId: Long) -> VocabEntriesViewModel(languageId, get()) }
+        factory { (entryId: Long) -> ExistingEntryItemViewModel(entryId, get()) }
+        factory { CreateEntryItemViewModel() }
 
         /* Learn */
         viewModel { (learnSet: LearnSet) -> LearnViewModel(learnSet, get()) }

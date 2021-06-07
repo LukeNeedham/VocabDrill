@@ -60,15 +60,14 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/tagsRecycler"
+        <com.lukeneedham.vocabdrill.presentation.feature.vocabentry.TagsView
+            android:id="@+id/tagsView"
             android:layout_width="0dp"
             android:layout_height="@dimen/tag_item_height_collapsed"
             android:layout_marginStart="15dp"
             android:layout_marginTop="5dp"
             android:layout_marginEnd="2dp"
             android:layout_marginBottom="1dp"
-            android:overScrollMode="never"
             app:layout_constraintBottom_toTopOf="@+id/tagsRecyclerBottom"
             app:layout_constraintEnd_toStartOf="@+id/chevronIconView"
             app:layout_constraintStart_toStartOf="parent"

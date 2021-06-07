@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.View
 import androidx.core.view.doOnNextLayout
 import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -26,9 +25,13 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
 class LanguageFragment : Fragment(R.layout.fragment_language) {
-    private val navArgs: LanguageFragmentArgs by navArgs()
+    //private val navArgs: LanguageFragmentArgs by navArgs()
 
-    private val viewModel: LanguageViewModel by viewModel { parametersOf(navArgs.languageId) }
+    private val viewModel: LanguageViewModel by viewModel {
+        parametersOf(
+            //navArgs.languageId
+        )
+    }
 
     private lateinit var layoutManager: LinearLayoutManager
 
@@ -174,11 +177,11 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
         }
 
         titleLayout.setOnClickListener {
-            navigateSafe(
-                LanguageFragmentDirections.actionLanguageFragmentToLanguageSettingsFragment(
-                    viewModel.languageId
-                )
-            )
+//            navigateSafe(
+//                LanguageFragmentDirections.actionLanguageFragmentToLanguageSettingsFragment(
+//                    viewModel.languageId
+//                )
+//            )
         }
 
         addButton.setOnClickListener {
@@ -199,9 +202,9 @@ class LanguageFragment : Fragment(R.layout.fragment_language) {
 
         learnButton.setOnClickListener {
             val learnSet = viewModel.getLearnSet()
-            navigateSafe(
-                LanguageFragmentDirections.actionLanguageFragmentToLearnFragment(learnSet)
-            )
+//            navigateSafe(
+//                LanguageFragmentDirections.actionLanguageFragmentToLearnFragment(learnSet)
+//            )
         }
     }
 
