@@ -3,6 +3,7 @@ package com.lukeneedham.vocabdrill.presentation.feature.language
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -20,6 +21,7 @@ import androidx.navigation.fragment.navArgs
 import com.lukeneedham.vocabdrill.R
 import com.lukeneedham.vocabdrill.presentation.feature.language.entries.VocabEntries
 import com.lukeneedham.vocabdrill.presentation.util.extension.getFlagDrawableId
+import com.lukeneedham.vocabdrill.presentation.util.extension.navigateSafe
 import com.lukeneedham.vocabdrill.presentation.util.extension.popBackStackSafe
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -30,6 +32,7 @@ class LanguageFragmentCompose : Fragment() {
 
     private val viewModel: LanguageViewModel by viewModel { parametersOf(languageId) }
 
+    @ExperimentalAnimationApi
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -73,7 +76,15 @@ class LanguageFragmentCompose : Fragment() {
                     }
                     Image(
                         painter = painterResource(id = R.drawable.ic_learn),
-                        contentDescription = "Learn button"
+                        contentDescription = "Learn button",
+                        modifier = Modifier.clickable {
+                            val learnSet = viewModel.getLearnSet()
+                            navigateSafe(
+                                LanguageFragmentComposeDirections.actionLanguageFragmentToLearnFragment(
+                                    learnSet
+                                )
+                            )
+                        }
                     )
                 }
                 VocabEntries(languageId)

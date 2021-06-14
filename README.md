@@ -1,5 +1,7 @@
 #TODO
-I am in the middle of refactoring to use props, and holding viewmode elsewhere
+I am in the middle of refactoring to Compose, to greatly simplify logic.
+
+Only test on a real device, as Compose TextFields are broken on emulator at time of writing.
 
 # Architecture
 
@@ -11,8 +13,5 @@ Activities and Fragments hold business logic in AndroidX ViewModels.
 
 # TODOs:
 
-I think the whole `VocabGroup` should be removed. Each word should belong to a language.
 Each word pair can have tags, and you can filter by tags.
-Each tag has a colour, similar to vocab group colour
-
 You can search by tags, and also group by tags. Group by uses the same UI (book items) as vocab groups do currently

@@ -52,13 +52,14 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
 
     // Compose
-    def composeVersion = "1.0.0-beta07"
+    def composeVersion = "1.0.0-beta08"
     implementation("androidx.compose.runtime:runtime:$composeVersion")
     implementation "androidx.compose.ui:ui:$composeVersion"
     implementation("androidx.compose.compiler:compiler:$composeVersion")
     implementation("androidx.compose.foundation:foundation:$composeVersion")
     implementation("androidx.compose.material:material:$composeVersion")
     implementation "androidx.compose.runtime:runtime-livedata:$composeVersion"
+    implementation "androidx.compose.ui:ui-tooling:$composeVersion"
 
     // Flowerpot
     implementation 'com.github.LukeNeedham:FlowerPotRecycler:7.0.0'

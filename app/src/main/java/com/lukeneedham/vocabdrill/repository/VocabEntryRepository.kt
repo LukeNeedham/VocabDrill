@@ -10,7 +10,7 @@ import io.reactivex.Single
 import com.lukeneedham.vocabdrill.data.persistence.db.model.VocabEntry as VocabEntryPersistence
 
 class VocabEntryRepository(private val vocabEntryDao: VocabEntryDao) {
-    /** Adds the entry, tags are added separately */
+    /** Adds the entry. Tags are added separately */
     fun addVocabEntry(wordA: String, wordB: String, languageId: Long): Single<Long> {
         val entry = VocabEntryPersistence(languageId, wordA, wordB)
         return vocabEntryDao.add(entry)
@@ -31,6 +31,11 @@ class VocabEntryRepository(private val vocabEntryDao: VocabEntryDao) {
     fun observeAllVocabEntriesForLanguage(languageId: Long): Observable<List<VocabEntry>> {
         return vocabEntryDao.observeAllForLanguage(languageId)
             .map { it.map { it.toPartialModel() } }
+    }
+
+    fun observeAllVocabEntryIdsForLanguage(languageId: Long): Observable<List<Long>> {
+        return vocabEntryDao.observeAllForLanguage(languageId)
+            .map { it.map { it.id } }
     }
 
     fun updateVocabEntry(vocabEntry: VocabEntry): Completable {

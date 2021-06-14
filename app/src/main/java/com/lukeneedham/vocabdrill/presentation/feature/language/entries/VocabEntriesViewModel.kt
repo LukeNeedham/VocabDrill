@@ -11,16 +11,28 @@ class VocabEntriesViewModel(
     private val _entryKeys = MutableStateFlow<List<EntryKey>>(emptyList())
     val entryKeys = _entryKeys.asStateFlow()
 
+    private val _selectedEntry = MutableStateFlow<EntryKey?>(null)
+    val selectedEntry = _selectedEntry.asStateFlow()
+
     init {
         observeAllVocabEntryAndTagsForLanguage(languageId).subscribe {
-            val existingIds = it.map { EntryKey.Existing(it.entry.id) }
-            val existingAndCreate = existingIds + EntryKey.Create
-            _entryKeys.value = existingAndCreate
+            val existingKeys = it.map { EntryKey.Existing(it) }
+            val allKeys = existingKeys + EntryKey.Create
+            _entryKeys.value = allKeys
         }
     }
-}
 
-sealed class EntryKey {
-    data class Existing(val id: Long) : EntryKey()
-    object Create : EntryKey()
+    fun onExistingEntrySelectedChange(key: EntryKey.Existing, isSelected: Boolean) {
+        if (isSelected) {
+            // New selection
+            _selectedEntry.value = key
+        } else if (_selectedEntry.value == key) {
+            // Remove all selection
+            _selectedEntry.value = null
+        }
+    }
+
+    fun onCreateEntrySelected() {
+        _selectedEntry.value = EntryKey.Create
+    }
 }

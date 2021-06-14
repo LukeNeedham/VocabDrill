@@ -3,6 +3,7 @@ package com.lukeneedham.vocabdrill.di
 import com.lukeneedham.vocabdrill.data.persistence.db.AppDatabase
 import com.lukeneedham.vocabdrill.data.persistence.preferences.PreferencesDao
 import com.lukeneedham.vocabdrill.domain.model.LearnSet
+import com.lukeneedham.vocabdrill.domain.model.Tag
 import com.lukeneedham.vocabdrill.presentation.feature.home.HomeViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.language.LanguageViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.language.create.AddLanguageViewModel
@@ -11,6 +12,7 @@ import com.lukeneedham.vocabdrill.presentation.feature.language.settings.Languag
 import com.lukeneedham.vocabdrill.presentation.feature.language.settings.changeflag.ChangeLanguageFlagViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.language.settings.changename.ChangeLanguageNameViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.learn.LearnViewModel
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.TagItemExistingViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.existing.CreateEntryItemViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.existing.ExistingEntryItemViewModel
 import com.lukeneedham.vocabdrill.repository.LanguageRepository
@@ -65,7 +67,8 @@ object KoinModule {
         single { DeleteVocabEntry(get()) }
         single { UpdateVocabEntry(get()) }
         single { AddVocabEntry(get(), get()) }
-        single { ObserveVocabEntryForId(get()) }
+        single { ObserveVocabEntryAndTagsForId(get(), get()) }
+        single { ObserveAllVocabEntryIdsForLanguage(get()) }
 
         /* Countries */
         single { ExtractFlagColoursFromLanguageId(get(), get()) }
@@ -118,8 +121,15 @@ object KoinModule {
 
         /* Vocab Entry */
         factory { (languageId: Long) -> VocabEntriesViewModel(languageId, get()) }
-        factory { (entryId: Long) -> ExistingEntryItemViewModel(entryId, get()) }
+        factory { (entryId: Long) ->
+            ExistingEntryItemViewModel(
+                entryId,
+                get(),
+                get(),
+            )
+        }
         factory { CreateEntryItemViewModel() }
+        factory { (tag: Tag) -> TagItemExistingViewModel(tag, get()) }
 
         /* Learn */
         viewModel { (learnSet: LearnSet) -> LearnViewModel(learnSet, get()) }

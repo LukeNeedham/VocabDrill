@@ -1,7 +1,5 @@
 package com.lukeneedham.vocabdrill.presentation.feature.vocabentry.existing
 
-import com.lukeneedham.vocabdrill.domain.model.VocabEntry
-import com.lukeneedham.vocabdrill.usecase.ObserveVocabEntryForId
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 

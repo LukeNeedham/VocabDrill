@@ -1,44 +1,58 @@
 package com.lukeneedham.vocabdrill.presentation.feature.vocabentry.existing
 
-import com.lukeneedham.vocabdrill.domain.model.VocabEntry
-import com.lukeneedham.vocabdrill.usecase.ObserveVocabEntryForId
+import com.lukeneedham.vocabdrill.domain.model.VocabEntryAndTags
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.TagItem
+import com.lukeneedham.vocabdrill.usecase.*
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 class ExistingEntryItemViewModel(
     private val entryId: Long,
-    observeVocabEntry: ObserveVocabEntryForId
+    observeVocabEntryAndTags: ObserveVocabEntryAndTagsForId,
+    private val updateVocabEntry: UpdateVocabEntry,
+//    private val deleteVocabEntry: DeleteVocabEntry,
+//    private val addTagToVocabEntry: AddTagToVocabEntry,
+//    private val deleteTagFromVocabEntry: DeleteTagFromVocabEntry,
 ) {
-    private var vocabEntry: VocabEntry? = null
+    private var entryAndTags: VocabEntryAndTags? = null
 
     private val _wordA = MutableStateFlow<String>("")
-    val wordA: StateFlow<String> = _wordA
+    val wordA = _wordA.asStateFlow()
 
     private val _wordB = MutableStateFlow<String>("")
-    val wordB: StateFlow<String> = _wordB
+    val wordB = _wordB.asStateFlow()
 
-    private val _mode = MutableStateFlow<EntryMode>(EntryMode.View)
-    val mode: StateFlow<EntryMode> = _mode
+    private val _tagItems = MutableStateFlow<List<TagItem>>(emptyList())
+    val tagItems = _tagItems.asStateFlow()
+
+    private val _isSelected = MutableStateFlow<Boolean>(false)
+    val isSelected = _isSelected.asStateFlow()
 
     init {
-        observeVocabEntry(entryId).subscribe {
+        observeVocabEntryAndTags(entryId).subscribe {
             onVocabEntryLoad(it)
         }
     }
 
-    private fun onVocabEntryLoad(entry: VocabEntry) {
-        vocabEntry = entry
+    fun setSelected(isSelected: Boolean) {
+        _isSelected.value = isSelected
+    }
+
+//    fun onWordAChange(text: String) {
+//        val entry = getEntry() ?: return
+//        val newEntry = entry.copy(wordA = text)
+//        updateVocabEntry(newEntry).subscribe()
+//        // For immediate UI update
+//        _wordA.value = text
+//    }
+
+    private fun getEntry() = entryAndTags?.entry
+
+    private fun onVocabEntryLoad(entryAndTags: VocabEntryAndTags) {
+        this.entryAndTags = entryAndTags
+        val entry = entryAndTags.entry
         _wordA.value = entry.wordA
         _wordB.value = entry.wordB
-    }
-
-    fun onWordAChange(text: String) {
-        _wordA.value = text
-        // TODO: Save update
-    }
-
-    fun onWordBChange(text: String) {
-        _wordB.value = text
-        // TODO: Save update
+        _tagItems.value = entryAndTags.tags.map { TagItem.Existing(it) }
     }
 }
