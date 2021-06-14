@@ -41,7 +41,7 @@ fun TagItem(item: Tag, modifier: Modifier = Modifier) {
     val verticalMargin = 2.dp
     Text(
         text = tag.name,
-        fontSize = 14.sp,
+        fontSize = 13.sp,
         color = textColor,
         modifier = modifier
             .background(color, RoundedCornerShape(50))

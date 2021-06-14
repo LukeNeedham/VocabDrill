@@ -9,8 +9,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
+import com.lukeneedham.vocabdrill.domain.model.VocabEntryAndTags
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.existing.CreateEntryItem
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.existing.ExistingEntryItem
 import com.lukeneedham.vocabdrill.presentation.util.composable.get
@@ -18,7 +18,7 @@ import org.koin.core.parameter.parametersOf
 
 @ExperimentalAnimationApi
 @Composable
-fun VocabEntries(languageId: Long) {
+fun VocabEntries(languageId: Long, onOpenEntry: (VocabEntryAndTags) -> Unit) {
     val viewModel = remember(languageId) { get<VocabEntriesViewModel> { parametersOf(languageId) } }
 
     val entryKeys by viewModel.entryKeys.collectAsState()
@@ -30,11 +30,12 @@ fun VocabEntries(languageId: Long) {
 
             when (key) {
                 is EntryKey.Existing -> {
+                    val entry = key.taggedEntry
                     ExistingEntryItem(
-                        key.taggedEntry,
+                        entry,
                         isSelected,
-                        { viewModel.onExistingEntrySelectedChange(key, it) },
-                        modifier = Modifier.padding(bottom = 6.dp)
+                        { viewModel.onExistingEntrySelectedChange(key, true) },
+                        { onOpenEntry(entry) }
                     )
                 }
                 EntryKey.Create -> CreateEntryItem()
