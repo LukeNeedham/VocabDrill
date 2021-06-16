@@ -14,7 +14,6 @@ import com.lukeneedham.vocabdrill.presentation.feature.language.settings.changen
 import com.lukeneedham.vocabdrill.presentation.feature.learn.LearnViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.TagItemExistingViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.existing.CreateEntryItemViewModel
-import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.existing.ExistingEntryItemViewModel
 import com.lukeneedham.vocabdrill.repository.LanguageRepository
 import com.lukeneedham.vocabdrill.repository.TagRepository
 import com.lukeneedham.vocabdrill.repository.VocabEntryRepository
@@ -120,14 +119,14 @@ object KoinModule {
         viewModel { (languageId: Long) -> ChangeLanguageFlagViewModel(languageId, get(), get()) }
 
         /* Vocab Entry */
-        factory { (languageId: Long) -> VocabEntriesViewModel(languageId, get()) }
-        factory { (entryId: Long) ->
-            ExistingEntryItemViewModel(
-                entryId,
-                get(),
-                get(),
-            )
-        }
+        factory { VocabEntriesViewModel(get()) }
+//        factory { (entryId: Long) ->
+//            ExistingEntryItemViewModel(
+//                entryId,
+//                get(),
+//                get(),
+//            )
+//        }
         factory { CreateEntryItemViewModel() }
         factory { (tag: Tag) -> TagItemExistingViewModel(tag, get()) }
 

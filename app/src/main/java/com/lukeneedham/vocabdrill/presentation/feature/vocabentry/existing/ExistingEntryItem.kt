@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -39,8 +40,13 @@ fun ExistingEntryItem(
 
     var scaleTextAnimationFinished by remember { mutableStateOf(false) }
 
+    val focusManager = LocalFocusManager.current
+
     LaunchedEffect(isSelected) {
         scaleTextAnimationFinished = false
+        if (isSelected) {
+            focusManager.clearFocus(true)
+        }
     }
 
     val textSizeAnimationDuration = 150
