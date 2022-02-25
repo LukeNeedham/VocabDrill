@@ -1,8 +1,7 @@
 package com.lukeneedham.vocabdrill.presentation.feature.vocabentry.existing
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.animateIntAsState
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lukeneedham.vocabdrill.R
 import com.lukeneedham.vocabdrill.domain.model.VocabEntryAndTags
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.Sizes
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.TagsList
 import com.lukeneedham.vocabdrill.presentation.theme.ThemeColor
 
@@ -109,12 +109,12 @@ fun ExistingEntryItem(
             )
             Box(
                 modifier = Modifier
-                    .width(30.dp)
+                    .width(Sizes.RightIconWidth)
                     .align(Alignment.CenterVertically)
                     .clipToBounds()
             ) {
                 // Full namespace is a workaround for an ambiguity issue
-                androidx.compose.animation.AnimatedVisibility(
+                AnimatedVisibility(
                     visible = showDisclosure,
                     enter = slideInHorizontally(
                         initialOffsetX = { it },
@@ -135,15 +135,15 @@ fun ExistingEntryItem(
                 }
             }
         }
-        AnimatedVisibility(
-            visible = isSelected,
-            enter = expandVertically(Alignment.Top),
-            exit = shrinkVertically(Alignment.Top)
-        ) {
-            TagsList(
-                taggedEntry.tags,
-                Modifier.padding(start = sideMargin, end = sideMargin, bottom = 5.dp)
-            )
-        }
+//        AnimatedVisibility1(
+//            visible = isSelected,
+//            enter = expandVertically(Alignment.Top),
+//            exit = shrinkVertically(Alignment.Top)
+//        ) {
+//            TagsList(
+//                taggedEntry.tags,
+//                Modifier.padding(start = sideMargin, end = sideMargin, bottom = 5.dp)
+//            )
+//        }
     }
 }

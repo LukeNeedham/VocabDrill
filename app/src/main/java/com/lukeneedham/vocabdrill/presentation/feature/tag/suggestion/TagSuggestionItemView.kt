@@ -5,7 +5,7 @@ import android.util.AttributeSet
 import android.widget.FrameLayout
 import com.lukeneedham.flowerpotrecycler.adapter.RecyclerItemView
 import com.lukeneedham.vocabdrill.R
-import com.lukeneedham.vocabdrill.presentation.feature.tag.suggestion.TagSuggestion
+import com.lukeneedham.vocabdrill.domain.model.TagSuggestion
 import com.lukeneedham.vocabdrill.presentation.util.extension.inflateFrom
 import group.infotech.drawable.dsl.shapeDrawable
 import group.infotech.drawable.dsl.solidColor

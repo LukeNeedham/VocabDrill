@@ -22,7 +22,7 @@
     </fragment>
     <fragment
         android:id="@+id/languageFragment"
-        android:name="com.lukeneedham.vocabdrill.presentation.feature.language.LanguageFragmentCompose"
+        android:name="com.lukeneedham.vocabdrill.presentation.feature.language.LanguageFragment"
         android:label="LanguageFragment"
         >
         <argument

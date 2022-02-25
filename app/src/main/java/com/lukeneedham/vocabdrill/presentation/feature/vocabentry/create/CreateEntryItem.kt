@@ -1,40 +1,37 @@
-package com.lukeneedham.vocabdrill.presentation.feature.vocabentry.existing
+package com.lukeneedham.vocabdrill.presentation.feature.vocabentry.create
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.Icon
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.*
-import androidx.compose.runtime.R
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
-import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.TagsList
+import androidx.compose.ui.unit.sp
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.Sizes
 import com.lukeneedham.vocabdrill.presentation.theme.ThemeColor
 
 @Composable
 fun CreateEntryItem(
+    wordA: String,
+    onWordAChange: (String) -> Unit,
+    wordB: String,
+    onWordBChange: (String) -> Unit,
     isSelected: Boolean,
+    onEntryAdded: () -> Unit,
     onSelected: () -> Unit,
 ) {
-    var wordA by remember { mutableStateOf("") }
-    var wordB by remember { mutableStateOf("") }
-
     val wordAFocusRequester = remember { FocusRequester() }
 
     val backgroundColor =
@@ -49,6 +46,12 @@ fun CreateEntryItem(
         }
     }
 
+    val inputTextStyle = TextStyle(fontSize = 20.sp)
+    val inputTextColor = TextFieldDefaults.outlinedTextFieldColors(
+        focusedBorderColor = ThemeColor.darkGrey,
+        cursorColor = ThemeColor.darkGrey
+    )
+
     Column(
         modifier = Modifier
             .clickable {
@@ -61,10 +64,11 @@ fun CreateEntryItem(
             )
     ) {
         Row {
-            BasicTextField(
+            OutlinedTextField(
                 value = wordA,
-                onValueChange = { wordA = it },
-                enabled = true,
+                onValueChange = { onWordAChange(it) },
+                textStyle = inputTextStyle,
+                colors = inputTextColor,
                 modifier = Modifier
                     .weight(1f)
                     .padding(top = 10.dp, bottom = 10.dp, start = 10.dp, end = 10.dp)
@@ -76,10 +80,11 @@ fun CreateEntryItem(
                     }
                     .focusRequester(wordAFocusRequester)
             )
-            BasicTextField(
+            OutlinedTextField(
                 value = wordB,
-                onValueChange = { wordB = it },
-                enabled = true,
+                onValueChange = { onWordBChange(it) },
+                textStyle = inputTextStyle,
+                colors = inputTextColor,
                 modifier = Modifier
                     .weight(1f)
                     .padding(top = 10.dp, bottom = 10.dp, end = 10.dp, start = 10.dp)
@@ -92,11 +97,20 @@ fun CreateEntryItem(
             )
             Box(
                 modifier = Modifier
-                    .width(30.dp)
+                    .padding(end = 5.dp)
+                    .width(Sizes.RightIconWidth)
+                    .background(ThemeColor.mediumGrey, CircleShape)
                     .align(Alignment.CenterVertically)
-                    .clipToBounds()
+                    .clickable {
+                        onEntryAdded()
+                    }
             ) {
-                Icon(Icons.Filled.Check, "Done")
+                Icon(
+                    Icons.Filled.Check,
+                    "Done",
+                    tint = ThemeColor.white,
+                    modifier = Modifier.aspectRatio(1f)
+                )
             }
         }
     }

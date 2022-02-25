@@ -4,7 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lukeneedham.vocabdrill.domain.model.Tag
 import com.lukeneedham.vocabdrill.presentation.util.composable.get
-import com.lukeneedham.vocabdrill.usecase.ChooseTextColourForBackground
+import com.lukeneedham.vocabdrill.usecase.ChooseContentColourForBackground
 import org.koin.core.parameter.parametersOf
 
 @Composable
@@ -35,7 +35,7 @@ fun TagItem(item: Tag, modifier: Modifier = Modifier) {
 
     val tag = viewModel.tag
     val color = Color(viewModel.backgroundColor)
-    val textColor = Color(viewModel.textColor)
+    val textColor = Color(viewModel.contentColor)
 
     val sideMargin = 7.dp
     val verticalMargin = 2.dp
@@ -44,7 +44,7 @@ fun TagItem(item: Tag, modifier: Modifier = Modifier) {
         fontSize = 13.sp,
         color = textColor,
         modifier = modifier
-            .background(color, RoundedCornerShape(50))
+            .background(color, CircleShape)
             .padding(
                 start = sideMargin,
                 end = sideMargin,
@@ -56,10 +56,10 @@ fun TagItem(item: Tag, modifier: Modifier = Modifier) {
 
 class TagItemExistingViewModel(
     val tag: Tag,
-    chooseTextColourForBackground: ChooseTextColourForBackground
+    chooseContentColourForBackground: ChooseContentColourForBackground
 ) {
     val backgroundColor = tag.color
-    val textColor = chooseTextColourForBackground(backgroundColor)
+    val contentColor = chooseContentColourForBackground(backgroundColor)
 }
 
 @Composable

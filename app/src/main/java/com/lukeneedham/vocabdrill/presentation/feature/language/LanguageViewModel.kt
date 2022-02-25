@@ -1,13 +1,19 @@
 package com.lukeneedham.vocabdrill.presentation.feature.language
 
+import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.MutableLiveData
 import com.lukeneedham.vocabdrill.domain.model.Country
 import com.lukeneedham.vocabdrill.domain.model.LearnSet
 import com.lukeneedham.vocabdrill.domain.model.VocabEntryProto
 import com.lukeneedham.vocabdrill.presentation.feature.language.entries.EntryKey
 import com.lukeneedham.vocabdrill.presentation.util.DisposingViewModel
+import com.lukeneedham.vocabdrill.presentation.util.OnceEvent
 import com.lukeneedham.vocabdrill.presentation.util.extension.toLiveData
 import com.lukeneedham.vocabdrill.usecase.*
+import com.lukeneedham.vocabdrill.util.extension.TAG
 import io.reactivex.rxkotlin.plusAssign
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,18 +22,9 @@ class LanguageViewModel(
     val languageId: Long,
     /* Vocab entry update usecases - unsaved changes must be committed before invoking these */
     private val addVocabEntry: AddVocabEntry,
-    private val deleteVocabEntry: DeleteVocabEntry,
-    private val addTagToVocabEntry: AddTagToVocabEntry,
-    private val deleteTagFromVocabEntry: DeleteTagFromVocabEntry,
-    private val updateVocabEntry: UpdateVocabEntry,
     /* Misc usecases */
     private val observeAllVocabEntryAndTagsForLanguage: ObserveAllVocabEntryAndTagsForLanguage,
     private val observeLanguage: ObserveLanguage,
-    private val addNewTag: AddNewTag,
-    private val calculateColorForNewTag: CalculateColorForNewTag,
-    private val findTagNameMatches: FindTagNameMatches,
-    private val deleteUnusedTags: DeleteUnusedTags,
-    private val chooseTextColourForBackground: ChooseTextColourForBackground
 ) : DisposingViewModel() {
 
     private val languageNameMutableLiveData = MutableLiveData<String>()
@@ -41,6 +38,14 @@ class LanguageViewModel(
 
     private val _selectedEntry = MutableStateFlow<EntryKey?>(null)
     val selectedEntry = _selectedEntry.asStateFlow()
+
+    var createWordA by mutableStateOf("")
+        private set
+    var createWordB by mutableStateOf("")
+        private set
+
+    var scrollToBottomEvent by mutableStateOf<OnceEvent?>(null)
+        private set
 
     init {
         disposables += observeLanguage(languageId).subscribe { language ->
@@ -61,48 +66,34 @@ class LanguageViewModel(
         return LearnSet(entries)
     }
 
+    fun onCreateEntrySelected() {
+        onEntrySelected(EntryKey.Create)
+        scrollToBottomEvent = OnceEvent()
+    }
+
     fun onEntrySelected(key: EntryKey) {
         _selectedEntry.value = key
     }
 
-    fun addEntry(proto: VocabEntryProto) {
-        val ignored = addVocabEntry(proto)
-            .subscribe { }
+    fun onCreateWordAChange(word: String) {
+        createWordA = word
     }
 
-//    private fun requestTagMatches(entryItem: VocabEntryEditItem, tagName: String) {
-//        fun updateTagSuggestionResult(suggestions: List<TagSuggestion>) {
-//            entryReduxer.setTagSuggestionsResult(TagSuggestionResult(entryItem, suggestions))
-//        }
-//
-//        findTagNameMatchesDisposable?.dispose()
-//        val tagIdsAlreadyPresent =
-//            entryItem.tagItems.filterIsInstance<TagItemProps.Existing>().map { it.data.id }
-//        val findTagNameMatchesDisposable =
-//            findTagNameMatches(languageId, tagName).subscribe { tags ->
-//                val tagItems = tags.map {
-//                    TagSuggestion.Existing(it, chooseTextColourForBackground(it.color))
-//                }
-//                val nonDuplicateTagItems = tagItems.toMutableList().apply {
-//                    removeAll { it.data.id in tagIdsAlreadyPresent }
-//                }.toList()
-//                val showNewTag = tagName.isNotBlank() && tags.none { it.name == tagName }
-//                if (!showNewTag) {
-//                    updateTagSuggestionResult(nonDuplicateTagItems)
-//                } else {
-//                    // Current tag name doesn't currently exist - show it as a new suggestion
-//                    disposables += calculateColorForNewTag(languageId).subscribe { color ->
-//                        val newTag = TagSuggestion.Create(
-//                            tagName,
-//                            color,
-//                            chooseTextColourForBackground(color)
-//                        )
-//                        val allTags = listOf(newTag) + nonDuplicateTagItems
-//                        updateTagSuggestionResult(allTags)
-//                    }
-//                }
-//            }
-//        this.findTagNameMatchesDisposable = findTagNameMatchesDisposable
-//        disposables += findTagNameMatchesDisposable
-//    }
+    fun onCreateWordBChange(word: String) {
+        createWordB = word
+    }
+
+    fun onEntryAdded() {
+        val newEntry = VocabEntryProto(createWordA, createWordB, languageId, emptyList())
+        val ignored = addVocabEntry(newEntry).subscribe(
+            {
+                createWordA = ""
+                createWordB = ""
+                scrollToBottomEvent = OnceEvent()
+            },
+            {
+                Log.e(TAG, "Failed to add new entry", it)
+            }
+        )
+    }
 }

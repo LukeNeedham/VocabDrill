@@ -3,17 +3,15 @@ package com.lukeneedham.vocabdrill.di
 import com.lukeneedham.vocabdrill.data.persistence.db.AppDatabase
 import com.lukeneedham.vocabdrill.data.persistence.preferences.PreferencesDao
 import com.lukeneedham.vocabdrill.domain.model.LearnSet
-import com.lukeneedham.vocabdrill.domain.model.Tag
 import com.lukeneedham.vocabdrill.presentation.feature.home.HomeViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.language.LanguageViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.language.create.AddLanguageViewModel
-import com.lukeneedham.vocabdrill.presentation.feature.language.entries.VocabEntriesViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.language.settings.LanguageSettingsViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.language.settings.changeflag.ChangeLanguageFlagViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.language.settings.changename.ChangeLanguageNameViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.learn.LearnViewModel
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.TagItemExistingViewModel
-import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.existing.CreateEntryItemViewModel
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.detail.EntryDetailPageViewModel
 import com.lukeneedham.vocabdrill.repository.LanguageRepository
 import com.lukeneedham.vocabdrill.repository.TagRepository
 import com.lukeneedham.vocabdrill.repository.VocabEntryRepository
@@ -76,7 +74,7 @@ object KoinModule {
         single { FindCountriesForLanguage() }
 
         /* Colour */
-        single { ChooseTextColourForBackground() }
+        single { ChooseContentColourForBackground() }
         single { CalculateRelatedColours() }
         single { EstimateColourDistance() }
 
@@ -103,15 +101,6 @@ object KoinModule {
                 get(),
                 get(),
                 get(),
-                get(),
-                get(),
-                get(),
-                get(),
-                get(),
-                get(),
-                get(),
-                get(),
-                get()
             )
         }
         viewModel { (languageId: Long) -> LanguageSettingsViewModel(languageId, get(), get()) }
@@ -119,16 +108,8 @@ object KoinModule {
         viewModel { (languageId: Long) -> ChangeLanguageFlagViewModel(languageId, get(), get()) }
 
         /* Vocab Entry */
-        factory { VocabEntriesViewModel(get()) }
-//        factory { (entryId: Long) ->
-//            ExistingEntryItemViewModel(
-//                entryId,
-//                get(),
-//                get(),
-//            )
-//        }
-        factory { CreateEntryItemViewModel() }
-        factory { (tag: Tag) -> TagItemExistingViewModel(tag, get()) }
+        factory { parameters -> TagItemExistingViewModel(parameters.get(), get()) }
+        viewModel { parameters -> EntryDetailPageViewModel(parameters.get(), get()) }
 
         /* Learn */
         viewModel { (learnSet: LearnSet) -> LearnViewModel(learnSet, get()) }

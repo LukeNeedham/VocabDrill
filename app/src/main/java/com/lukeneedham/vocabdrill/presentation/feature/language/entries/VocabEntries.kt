@@ -4,13 +4,13 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.lukeneedham.vocabdrill.domain.model.VocabEntryAndTags
-import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.existing.CreateEntryItem
+import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.create.CreateEntryItem
 import com.lukeneedham.vocabdrill.presentation.feature.vocabentry.existing.ExistingEntryItem
 import kotlinx.coroutines.delay
 
@@ -21,7 +21,12 @@ fun VocabEntries(
     selectedEntry: EntryKey?,
     listState: LazyListState,
     onEntrySelected: (key: EntryKey) -> Unit,
-    onOpenEntry: (VocabEntryAndTags) -> Unit
+    onOpenEntry: (VocabEntryAndTags) -> Unit,
+    createWordA: String,
+    onCreateWordAChange: (String) -> Unit,
+    createWordB: String,
+    onCreateWordBChange: (String) -> Unit,
+    onEntryAdded: () -> Unit
 ) {
 
     LaunchedEffect(selectedEntry) {
@@ -37,7 +42,7 @@ fun VocabEntries(
     }
 
     LazyColumn(state = listState, modifier = Modifier.padding(start = 10.dp, end = 10.dp)) {
-        itemsIndexed(entryKeys) { index, key ->
+        items(entryKeys) { key ->
             val isSelected = selectedEntry == key
 
             val exhaustive = when (key) {
@@ -50,7 +55,14 @@ fun VocabEntries(
                         { onOpenEntry(entry) }
                     )
                 }
-                EntryKey.Create -> CreateEntryItem(isSelected) { onEntrySelected(key) }
+                EntryKey.Create -> CreateEntryItem(
+                    createWordA,
+                    onCreateWordAChange,
+                    createWordB,
+                    onCreateWordBChange,
+                    isSelected,
+                    onEntryAdded
+                ) { onEntrySelected(key) }
             }
         }
     }

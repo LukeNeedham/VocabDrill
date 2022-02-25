@@ -5,6 +5,7 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -13,11 +14,8 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -28,6 +26,7 @@ import com.lukeneedham.vocabdrill.domain.model.LearnSet
 import com.lukeneedham.vocabdrill.domain.model.VocabEntryAndTags
 import com.lukeneedham.vocabdrill.presentation.feature.language.entries.EntryKey
 import com.lukeneedham.vocabdrill.presentation.feature.language.entries.VocabEntries
+import com.lukeneedham.vocabdrill.presentation.theme.ThemeColor
 import com.lukeneedham.vocabdrill.presentation.util.composable.getViewModel
 import com.lukeneedham.vocabdrill.presentation.util.extension.getFlagDrawableId
 import com.lukeneedham.vocabdrill.presentation.util.extension.isLastItemShowing
@@ -49,6 +48,8 @@ fun LanguageOverviewPage(
     val entryKeys by viewModel.entryKeys.collectAsState()
     val selectedEntry by viewModel.selectedEntry.collectAsState()
 
+    val scrollToBottomEvent = viewModel.scrollToBottomEvent
+
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     val isLastItemShowing = listState.isLastItemShowing()
@@ -56,12 +57,18 @@ fun LanguageOverviewPage(
 
     val context = LocalContext.current
 
-    fun addEntry() {
-        // When the create entry composable gains selected state, it will scroll the entry list to itself
-        viewModel.onEntrySelected(EntryKey.Create)
+    fun scrollToCreateItem() {
         coroutineScope.launch {
             listState.animateScrollToItem(entryKeys.indexOf(EntryKey.Create))
         }
+    }
+
+    LaunchedEffect(scrollToBottomEvent) {
+        if (scrollToBottomEvent == null || scrollToBottomEvent.isConsumed()) {
+            return@LaunchedEffect
+        }
+        scrollToBottomEvent.consume()
+        scrollToCreateItem()
     }
 
     Box {
@@ -107,23 +114,28 @@ fun LanguageOverviewPage(
                 )
             }
             VocabEntries(
-                entryKeys,
-                selectedEntry,
-                listState,
-                viewModel::onEntrySelected,
-                openEntryDetailPage
+                entryKeys = entryKeys,
+                selectedEntry = selectedEntry,
+                listState = listState,
+                onEntrySelected = viewModel::onEntrySelected,
+                onOpenEntry = openEntryDetailPage,
+                createWordA = viewModel.createWordA,
+                onCreateWordAChange = viewModel::onCreateWordAChange,
+                createWordB = viewModel.createWordB,
+                onCreateWordBChange = viewModel::onCreateWordBChange,
+                onEntryAdded = viewModel::onEntryAdded
             )
         }
 
         Box(modifier = Modifier.align(Alignment.BottomEnd)) {
             AnimatedVisibility(visible = showAddButton, enter = fadeIn(), exit = fadeOut()) {
                 FloatingActionButton(
-                    onClick = {
-                        addEntry()
-                    },
-                    modifier = Modifier.padding(end = 10.dp, bottom = 10.dp)
+                    onClick = viewModel::onCreateEntrySelected,
+                    backgroundColor = ThemeColor.darkGrey,
+                    modifier = Modifier
+                        .padding(end = 10.dp, bottom = 10.dp)
                 ) {
-                    Icon(Icons.Filled.Add, "Add entry")
+                    Icon(Icons.Filled.Add, "Add entry", tint = ThemeColor.white)
                 }
             }
         }

@@ -2,7 +2,7 @@ package com.lukeneedham.vocabdrill.usecase
 
 import android.graphics.Color
 
-class ChooseTextColourForBackground {
+class ChooseContentColourForBackground {
     /**
      * @return either [Color.BLACK] or [Color.WHITE],
      * depending on which is most legible against [backgroundColor].
