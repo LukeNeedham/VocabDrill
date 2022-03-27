@@ -1,4 +1,4 @@
-#TODO
+# TODO
 I am in the middle of refactoring to use props, and holding viewmode elsewhere
 
 # Architecture
