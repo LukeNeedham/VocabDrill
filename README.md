@@ -16,6 +16,15 @@ In order to play with these ideas, I set out to make the UI of the main page of 
 
 In the 'compose' branches, I experiment with a re-write to Jetpack Compose, to compare how data flow can potentially be simplified in a reactive UI model.
 
+# Language Flags
+
+One cool feature in the app is the automatic fuzzy recognition of language names. Based on this, the app can suggest flags to use as the icon for the language, where the flag is of a country where that language is widely spoken or recognised. When a language may be associated with multiple countries, the app aims to suggest the flags of all the possible countries.
+
+In order to make this feature work, I wrote a script to scrape and clean up data about languages and countries, and then associate them with flag icons. The results of this work were published in separate libraries:
+
+- Associations of language and countries: https://github.com/LukeNeedham/language-countries
+- Flag icons: https://github.com/LukeNeedham/circle-flags-android (an Android port of [exisiting resources](https://github.com/HatScripts/circle-flags))
+
 # TODOs:
 
 I am in the middle of refactoring to use props, and holding viewmode elsewhere
